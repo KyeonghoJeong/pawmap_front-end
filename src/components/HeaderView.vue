@@ -1,7 +1,10 @@
 <template>
   <nav class="navbar navbar-expand-sm navbar-dark custom-navbar">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#" style="font-size: 25px; font-weight: bold; margin-bottom: 6px">pawmap</a>
+    <a class="navbar-brand" href="#" style="font-size: 25px; font-weight: bold; margin-bottom: 6px">
+        <img src="../assets/images/map.png" alt="icon" width="35" height="35" class="d-inline-block align-text-top">
+        pawmap
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
