@@ -4,8 +4,8 @@
   <nav class="navbar navbar-expand-sm navbar-dark custom-navbar">
     <div class="container-fluid">
 
-      <router-link to="/" class="navbar-brand custom-brand" style="font-size:35px">
-        <img src="../assets/images/map.png" alt="icon" width="35" height="35" class="d-inline-block align-text-top">
+      <router-link to="/" class="navbar-brand custom-brand">
+        <!-- <img src="../assets/images/map.png" alt="icon" width="35px" class="d-inline-block align-text-top"> -->
         pawmap
       </router-link>
 
@@ -54,11 +54,11 @@
   background-color: #fd7e14;
 }
 .custom-brand{
-  font-size: 25px !important;
+  font-size: 1.9rem !important;
   font-weight: bold;
 }
 .navbar-collapse{
-  font-size: 14px;
+  font-size: 0.9rem;
 }
 .navbar-link:hover{
   font-weight: bold;
@@ -66,6 +66,9 @@
 @media screen and (max-width: 576px){
   .custom-navbar-nav{
     align-items: center;
+  }
+  .custom-brand{
+    font-size: 1.5rem !important;
   }
 }
 </style>
