@@ -33,8 +33,6 @@
 @media (max-width: 576px) {
     .custom-footer {
         flex-direction: column;
-        justify-content: center;
-        align-items: center;
     }
 }
 </style>

@@ -16,28 +16,23 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto custom-navbar-nav">
           <li class="nav-item">
-            <router-link to="/test" class="nav-link active navbar-link">
+            <router-link to="/map" class="nav-link active navbar-link">
               지도
             </router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/test" class="nav-link active navbar-link">
+            <router-link to="/board" class="nav-link active navbar-link">
               게시판
             </router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/test" class="nav-link active navbar-link">
-              갤러리
+            <router-link to="/signin" class="nav-link active navbar-link">
+              로그인
             </router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/test" class="nav-link active navbar-link">
-              로그아웃
-            </router-link>
-          </li>
-          <li class="nav-item">
-            <router-link to="/test" class="nav-link active navbar-link">
-              마이페이지
+            <router-link to="/signup" class="nav-link active navbar-link">
+              가입
             </router-link>
           </li>
         </ul>

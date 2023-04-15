@@ -124,7 +124,7 @@
     padding-bottom: 55px;
 }
 .custom-card-title{
-    font-size: 110%;
+    font-size: 1.1rem;
     text-align: center;
     font-weight: bold !important;
 }
@@ -146,7 +146,7 @@
         padding-bottom: 5px;
     }
     .custom-card-title{
-        font-size: 100%;
+        font-size: 1rem;
     }
     .custom-card-row{
         margin-top: 1%;
