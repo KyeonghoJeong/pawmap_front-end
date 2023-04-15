@@ -129,7 +129,7 @@
     font-weight: bold !important;
 }
 .custom-card-row{
-    margin-top: 3.5%;
+    margin-top: 2.5%;
     margin-left: 23%;
     margin-right: 23%;
     margin-bottom: 4%;
@@ -149,7 +149,7 @@
         font-size: 100%;
     }
     .custom-card-row{
-        margin-top: 2%;
+        margin-top: 1%;
         margin-left: 22%;
         margin-right: 22%;
     }
