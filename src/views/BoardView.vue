@@ -1,17 +1,19 @@
 <template>
-    <div class="custom-writing">
-        <div class="div-writing-title">
-            <figure>
-                <blockquote class="blockquote">
-                    <p>게시판</p>
-                </blockquote>
-                <figcaption class="blockquote-footer">
-                    게시판을 통해 다른 회원들과 정보를 나누어보세요.
-                </figcaption>
-            </figure>
+    <div class="div-board">
+        <div class="div-board-top">
+            <div class="div-board-top-message">
+                <figure>
+                    <blockquote class="blockquote">
+                        <p>게시판</p>
+                    </blockquote>
+                    <figcaption class="blockquote-footer">
+                        게시판에서 다른 회원들과 정보를 나누어보세요.
+                    </figcaption>
+                </figure>
+            </div>
         </div>
-        <div class="div-table">
-            <table class="table table-hover table-bordered table-sm custom-table">
+        <div class="div-board-table">
+            <table class="table table-hover table-bordered table-sm div-board-table-table">
             <thead class="table-secondary">
                 <tr>
                     <th scope="col" class="writing-num">번호</th>
@@ -84,31 +86,33 @@
             </tbody>
             </table>
         </div>
-        <div class="div-board-bottom">
-            <div class="div-board-bottom-search">
-                <form>
-                    <div class="input-group">
-                        <input type="text" class="form-control" aria-label="keyword" aria-describedby="basic-addon1">
-                        <span class="input-group-text" id="basic-addon1"  style="background-color:white">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                            </svg>
-                        </span>
-                    </div>
-                </form>
-            </div>
-            <div class="div-board-bottom-category">
-                <select class="form-select" aria-label="Default select example">
-                    <option value="1">제목</option>
-                    <option value="2">내용</option>
-                    <option value="3">닉네임</option>
-                </select>
+        <div class="div-board-bottom-set">
+            <div class="div-board-bottom-scset">
+                <div class="div-board-bottom-search">
+                    <form>
+                        <div class="input-group">
+                            <input type="text" class="form-control" aria-label="keyword" aria-describedby="basic-addon1">
+                            <span class="input-group-text" id="basic-addon1"  style="background-color:white">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                <div class="div-board-bottom-category">
+                    <select class="form-select" aria-label="Default select example">
+                        <option value="1">제목</option>
+                        <option value="2">내용</option>
+                        <option value="3">닉네임</option>
+                    </select>
+                </div>
             </div>
             <div class="div-board-bottom-btn">
-                <button type="button" class="btn btn-writing">글쓰기</button>
+                <button type="button" class="btn btn-writing" @click="goToWriting">글쓰기</button>
             </div>
         </div>
-        <div class="writing-paging">
+        <div class="div-board-paging">
             <nav aria-label="Page navigation example">
             <ul class="pagination">
                 <li class="page-item">
@@ -134,47 +138,66 @@
 
 <script>
 export default {
-
+    methods:{
+        goToWriting(){
+            this.$router.push('/writing');
+        }
+    }
 }
 </script>
 
-
 <style>
-    .custom-writing{
+    .div-board{
         padding-top: 7%;
         padding-left: 10%;
         padding-right: 10%;
         padding-bottom: 2%;
         display: flex;
         flex-direction: column;
+        align-items: center;
     }
-    .div-table{
-        width: 100%;
+
+    .div-board-top{
+        width: 60%;
+        display: flex;
+    }
+    .div-board-table{
+        width: 60%;
         display: flex;
         flex-direction: column;
         align-items: center;
     }
-    .custom-table{
+    .div-board-bottom-set{
         width: 60%;
-    }
-    .div-writing-title{
-        padding-left: 20%;
-    }
-    .div-board-bottom{
         display:flex;
-        padding-left: 20%;
-        margin-bottom: 2%;
+        margin-bottom: 1.5%;
+    }
+    .div-board-paging{
+        width: 60%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .div-board-top-message{
+        width: 100%;
+    }
+    .div-board-table-table{
+        width: 100%;
+    }
+    .div-board-bottom-scset{
+        width: 50%;
+        display:flex;
     }
     .div-board-bottom-search{
-        width: 20%;
-        margin-right: 1%;
+        width: 70%;
+        margin-right: 2%;
     }
     .div-board-bottom-category{
-        width: 10%;
+        width: 30%;
     }
     .div-board-bottom-btn{
-        width: 70%;
-        padding-right: 25%;
+        width: 50%;
         display: flex;
         flex-direction: row-reverse;
     }
@@ -207,16 +230,48 @@ export default {
     .nickname-in-board{
         text-align: center;
     }
-    .writing-paging{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
     .page-link{
         color: black;
     }
     .pagination .page-item.active .page-link {
         background-color: #fd7e14;
         border-color: rgb(225, 228, 232);
+    }
+
+    @media screen and (max-width: 992px){
+        .div-board-top{
+            width: 100%;
+            flex-direction: column;
+        }
+        .div-board-table{
+            width: 100%;
+        }
+        .div-board-bottom-set{
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 3%;
+        }
+    
+        .div-board-top-message{
+            width: 100%;
+        }
+        .div-board-bottom-scset{
+            width: 100%;
+            margin-bottom: 3%;
+        }
+        .div-board-bottom-btn{
+            width: 100%;
+        }
+        .div-board-bottom-search{
+            width: 70%;
+        }
+        .div-board-bottom-category{
+            width: 30%;
+            margin-top: 0%;
+        }
+        .div-board-table-table{
+            width: 100%;
+        }
     }
 </style>
