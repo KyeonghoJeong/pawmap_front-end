@@ -31,7 +31,7 @@
             </router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/signup" class="nav-link active navbar-link">
+            <router-link to="/mypage" class="nav-link active navbar-link">
               가입
             </router-link>
           </li>

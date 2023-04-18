@@ -1,5 +1,5 @@
 <template>
-    <body>
+    <div>
         <form class="form-signin custom-signin">
             <div class="container-signin">
                 <h1 class="h3 mb-3 font-weight-normal">회원정보 입력</h1><br>
@@ -14,5 +14,5 @@
                 <button class="btn btn-lg btn-primary btn-block" type="submit" style="width:100%">확인</button>
             </div>
         </form>
-  </body>
+  </div>
 </template>

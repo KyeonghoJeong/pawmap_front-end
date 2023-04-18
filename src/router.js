@@ -8,6 +8,7 @@ import SignInView from './views/SignInView.vue'
 import SignUpView from './views/SignUpView.vue'
 import WritingView from './views/WritingView.vue'
 import PostingView from './views/PostingView.vue'
+import MyPageView from './components/MyPageView.vue'
 
 Vue.use(VueRouter)
 
@@ -46,6 +47,11 @@ const routes = [
         path: '/posting',
         name: 'posting',
         component: PostingView
+    },
+    {
+        path: '/mypage',
+        name: 'mypage',
+        component: MyPageView
     }
 ]
 
