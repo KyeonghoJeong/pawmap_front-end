@@ -1,3 +1,3 @@
 <template>
-    <h1>hi</h1>
+    <h1>WritingView</h1>
 </template>

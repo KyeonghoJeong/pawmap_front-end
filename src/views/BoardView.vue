@@ -16,7 +16,7 @@
             <table class="table table-hover table-bordered table-sm div-board-table-table">
             <thead class="table-secondary">
                 <tr>
-                    <th scope="col" class="writing-num">번호</th>
+                    <th scope="col" class="writing-num">#</th>
                     <th scope="col" class="writing-title">제목</th>
                     <th scope="col" class="writing-nickname">닉네임</th>
                     <th scope="col" class="writing-date">날짜</th>
@@ -25,61 +25,61 @@
             <tbody>
                 <tr>
                     <th scope="row" class="num-in-board">10</th>
-                    <td>Mark</td>
+                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
                     <td class="nickname-in-board">Otto</td>
                     <td class="date-in-board">@mdo</td>
                 </tr>
                 <tr>
                     <th scope="row" class="num-in-board">9</th>
-                    <td>Jacob</td>
+                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
                     <td class="nickname-in-board">Thornton</td>
                     <td class="date-in-board">@fat</td>
                 </tr>
                 <tr>
                     <th scope="row" class="num-in-board">8</th>
-                    <td>Jacob</td>
+                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
                     <td class="nickname-in-board">Thornton</td>
                     <td class="date-in-board">@fat</td>
                 </tr>
                 <tr>
                     <th scope="row" class="num-in-board">7</th>
-                    <td>Jacob</td>
+                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
                     <td class="nickname-in-board">Thornton</td>
                     <td class="date-in-board">@fat</td>
                 </tr>
                 <tr>
                     <th scope="row" class="num-in-board">6</th>
-                    <td>Jacob</td>
+                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
                     <td class="nickname-in-board">Thornton</td>
                     <td class="date-in-board">@fat</td>
                 </tr>
                 <tr>
                     <th scope="row" class="num-in-board">5</th>
-                    <td>Jacob</td>
+                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
                     <td class="nickname-in-board">Thornton</td>
                     <td class="date-in-board">@fat</td>
                 </tr>
                 <tr>
                     <th scope="row" class="num-in-board">4</th>
-                    <td>Jacob</td>
+                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
                     <td class="nickname-in-board">Thornton</td>
                     <td class="date-in-board">@fat</td>
                 </tr>
                 <tr>
                     <th scope="row" class="num-in-board">3</th>
-                    <td>Jacob</td>
+                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
                     <td class="nickname-in-board">Thornton</td>
                     <td class="date-in-board">@fat</td>
                 </tr>
                 <tr>
                     <th scope="row" class="num-in-board">2</th>
-                    <td>Jacob</td>
+                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
                     <td class="nickname-in-board">Thornton</td>
                     <td class="date-in-board">@fat</td>
                 </tr>
                 <tr>
                     <th scope="row" class="num-in-board">1</th>
-                    <td>Jacob</td>
+                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
                     <td class="nickname-in-board">Thornton</td>
                     <td class="date-in-board">@fat</td>
                 </tr>
@@ -141,6 +141,9 @@ export default {
     methods:{
         goToWriting(){
             this.$router.push('/writing');
+        },
+        goToPosting(){
+            this.$router.push('/posting');
         }
     }
 }
@@ -236,6 +239,10 @@ export default {
     .pagination .page-item.active .page-link {
         background-color: #fd7e14;
         border-color: rgb(225, 228, 232);
+    }
+    td .board-title:hover{
+        text-decoration: underline;
+        cursor: pointer;
     }
 
     @media screen and (max-width: 992px){

@@ -7,6 +7,7 @@ import BoardView from './views/BoardView.vue'
 import SignInView from './views/SignInView.vue'
 import SignUpView from './views/SignUpView.vue'
 import WritingView from './views/WritingView.vue'
+import PostingView from './views/PostingView.vue'
 
 Vue.use(VueRouter)
 
@@ -38,8 +39,13 @@ const routes = [
     },
     {
         path: '/writing',
-        name: WritingView,
+        name: 'WritingView',
         component: WritingView
+    },
+    {
+        path: '/posting',
+        name: 'posting',
+        component: PostingView
     }
 ]
 
