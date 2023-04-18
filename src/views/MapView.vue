@@ -2,7 +2,7 @@
 <div>
     <div class="div-search-and-select">
         <div class="div-search-in-map">
-            <form class="container search-in-map">
+            <form class="search-in-map">
                 <div class="input-group">
                     <span class="input-group-text" id="basic-addon1"  style="background-color:white">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
@@ -48,6 +48,7 @@
                     <h6 class="card-subtitle mb-2 text-muted">카테고리</h6>
                     <p class="card-text">주소</p>
                     <a href="#" class="card-link">자세히보기</a>
+                    <a href="#" class="card-link">관심목록 추가</a>
                 </div>
             </div>
         </div>
@@ -109,6 +110,8 @@ export default {
     .search-in-map{
         margin-top: 3%;
         margin-bottom: 3%;
+        margin-left: 3%;
+        margin-right: 3%;
     }
     .div-select-in-map{
         border-style: solid;
@@ -151,5 +154,74 @@ export default {
     #map{
         width: 100%;
         height: 100%;
+    }
+    @media screen and (max-width: 992px){
+        .div-search-and-select{
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .div-search-in-map{
+            border-style: solid;
+            border-width: 1px;
+            border-color: rgb(219, 219, 219);
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .search-in-map{
+            width: 100%;
+            margin-top: 2%;
+            margin-bottom: 2%;
+            margin-left: 1.5%;
+            margin-right: 1.5%;
+        }
+        .div-select-in-map{
+            border-style: solid;
+            border-width: 1px;
+            border-color: rgb(219, 219, 219);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 2%;
+            padding-left: 2%;
+            padding-right: 1%;
+        }
+        .select-in-map{
+            height: 50%;
+            width: 100%;
+            margin-bottom: 2%;
+        }
+        .div-list-and-map{
+            display: flex;
+            flex-direction: column;
+            height: 65vh;
+        }
+        .div-list{
+            border-style: solid;
+            border-width: 1px;
+            border-color: rgb(219, 219, 219);
+            width: 100%;
+            height: 50vh;
+        }
+        .card-in-list{
+            width: 100%;
+            border-width: 1px;
+            border-color: rgb(219, 219, 219);
+            border-top-color: white;
+            border-right-color: white;
+        }
+        .div-map{
+            border-style: solid;
+            border-width: 1px;
+            border-color: rgb(219, 219, 219);
+            width: 100%;
+            height: 100%;
+        }
+        #map{
+            width: 100%;
+            height: 100%;
+        }
     }
 </style>
