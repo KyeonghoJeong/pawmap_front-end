@@ -1,17 +1,7 @@
 <template>
     <div class="div-posting">
-        <div class="div-board-top">
-            <div class="div-board-top-message">
-                <figure>
-                    <blockquote class="blockquote">
-                        <p>게시판</p>
-                    </blockquote>
-                    <figcaption class="blockquote-footer">
-                        게시판에서 다른 회원들과 정보를 나누어보세요.
-                    </figcaption>
-                </figure>
-            </div>
-        </div>
+        <BoardTitleView></BoardTitleView>
+        
         <div class="div-posting-group">
             <div class="div-posting-title">
                 <div class="div-posting-title-first">
@@ -47,9 +37,9 @@
                 </div>
             </div>
             <div class="div-posting-btns">
-                <button type="button" class="btn btn-writing">이전</button>
-                <button type="button" class="btn btn-writing">목록</button>
-                <button type="button" class="btn btn-writing">다음</button>
+                <button type="button" class="btn div-posting-btns-btn">이전</button>
+                <button type="button" class="btn div-posting-btns-btn">목록</button>
+                <button type="button" class="btn div-posting-btns-btn">다음</button>
             </div>
             <div class="div-posting-inc">
                 <div class="div-posting-inc-cmt">
@@ -68,12 +58,22 @@
                     <label for="floatingTextarea2">댓글을 남겨보세요.</label>
                 </div>
                 <div class="div-posting-cmtbox-btn">
-                    <button type="button" class="btn btn-writing">등록</button>
+                    <button type="button" class="btn div-posting-cmtbox-btn-btn">등록</button>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
+<script>
+    import BoardTitleView from '../components/BoardTitleView.vue'
+
+    export default {
+        components:{
+            BoardTitleView
+        }
+    }
+</script>
 
 <style>
     .div-posting{
@@ -169,7 +169,9 @@
         border-color: rgb(203, 204, 206);
     }
     .div-posting-btns button{
-        width: 15%;
+        background-color: #fd7e14;
+        color: white;
+        width: 80px;
     }
 
     .div-posting-inc{
@@ -220,21 +222,15 @@
         display: flex;
         flex-direction: row-reverse;
     }
+    .div-posting-cmtbox-btn-btn{
+        background-color: #fd7e14;
+        color: white;
+        width: 80px;
+    }
 
     @media screen and (max-width: 992px){
         .div-posting-group{
             width: 100%;
-        }
-        .div-posting-btns button{
-            width: 20%;
-        }
-    }
-    @media screen and (max-width: 576px){
-        .div-posting-group{
-            width: 100%;
-        }
-        .div-posting-btns button{
-            width: 20%;
         }
     }
 </style>

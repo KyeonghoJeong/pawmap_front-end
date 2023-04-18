@@ -1,17 +1,7 @@
 <template>
     <div class="div-board">
-        <div class="div-board-top">
-            <div class="div-board-top-message">
-                <figure>
-                    <blockquote class="blockquote">
-                        <p>게시판</p>
-                    </blockquote>
-                    <figcaption class="blockquote-footer">
-                        게시판에서 다른 회원들과 정보를 나누어보세요.
-                    </figcaption>
-                </figure>
-            </div>
-        </div>
+        <BoardTitleView></BoardTitleView>
+
         <div class="div-board-table">
             <table class="table table-hover table-bordered table-sm div-board-table-table">
             <thead class="table-secondary">
@@ -109,7 +99,7 @@
                 </div>
             </div>
             <div class="div-board-bottom-btn">
-                <button type="button" class="btn btn-writing" @click="goToWriting">글쓰기</button>
+                <button type="button" class="btn div-board-bottom-btn-btn" @click="goToWriting">글쓰기</button>
             </div>
         </div>
         <div class="div-board-paging">
@@ -137,16 +127,21 @@
 </template>
 
 <script>
-export default {
-    methods:{
-        goToWriting(){
-            this.$router.push('/writing');
+    import BoardTitleView from '../components/BoardTitleView.vue'
+
+    export default {
+        components:{
+            BoardTitleView
         },
-        goToPosting(){
-            this.$router.push('/posting');
+        methods:{
+            goToWriting(){
+                this.$router.push('/writing');
+            },
+            goToPosting(){
+                this.$router.push('/posting');
+            }
         }
     }
-}
 </script>
 
 <style>
@@ -160,10 +155,6 @@ export default {
         align-items: center;
     }
 
-    .div-board-top{
-        width: 60%;
-        display: flex;
-    }
     .div-board-table{
         width: 60%;
         display: flex;
@@ -182,9 +173,6 @@ export default {
         align-items: center;
     }
 
-    .div-board-top-message{
-        width: 100%;
-    }
     .div-board-table-table{
         width: 100%;
     }
@@ -204,9 +192,10 @@ export default {
         display: flex;
         flex-direction: row-reverse;
     }
-    .btn-writing{
+    .div-board-bottom-btn-btn{
         background-color: #fd7e14;
         color: white;
+        width: 80px;
     }
     .writing-num{
         width: 15;
@@ -246,10 +235,6 @@ export default {
     }
 
     @media screen and (max-width: 992px){
-        .div-board-top{
-            width: 100%;
-            flex-direction: column;
-        }
         .div-board-table{
             width: 100%;
         }
@@ -259,10 +244,7 @@ export default {
             flex-direction: column;
             margin-bottom: 3%;
         }
-    
-        .div-board-top-message{
-            width: 100%;
-        }
+
         .div-board-bottom-scset{
             width: 100%;
             margin-bottom: 3%;
