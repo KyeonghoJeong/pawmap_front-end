@@ -8,7 +8,7 @@ import SignInView from './views/SignInView.vue'
 import SignUpView from './views/SignUpView.vue'
 import WritingView from './views/WritingView.vue'
 import PostingView from './views/PostingView.vue'
-import MyPageView from './components/MyPageView.vue'
+import MyPageView from './views/MyPageView.vue'
 
 Vue.use(VueRouter)
 

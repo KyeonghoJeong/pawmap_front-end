@@ -1,7 +1,5 @@
 <template>
-    <div class="div-board">
-        <BoardTitleView></BoardTitleView>
-
+    <div class="div-board-mine">
         <div class="div-board-table">
             <table class="table table-hover table-bordered table-sm div-board-table-table">
             <thead class="table-secondary">
@@ -76,9 +74,9 @@
             </tbody>
             </table>
         </div>
-        <div class="div-board-bottom-set">
-            <div class="div-board-bottom-scset">
-                <div class="div-board-bottom-search">
+        <div class="div-board-bottom-set-mywriting">
+            <div class="div-board-bottom-scset-mywriting">
+                <div class="div-board-bottom-search-mywriting">
                     <form>
                         <div class="input-group">
                             <input type="text" class="form-control" aria-label="keyword" aria-describedby="basic-addon1">
@@ -90,16 +88,13 @@
                         </div>
                     </form>
                 </div>
-                <div class="div-board-bottom-category">
+                <div class="div-board-bottom-category-mywriting">
                     <select class="form-select" aria-label="Default select example">
                         <option value="1">제목</option>
                         <option value="2">내용</option>
                         <option value="3">닉네임</option>
                     </select>
                 </div>
-            </div>
-            <div class="div-board-bottom-btn">
-                <button type="button" class="btn div-board-bottom-btn-btn" @click="goToWriting">글쓰기</button>
             </div>
         </div>
         <div class="div-board-paging">
@@ -127,16 +122,8 @@
 </template>
 
 <script>
-    import BoardTitleView from '../components/BoardTitleView.vue'
-
     export default {
-        components:{
-            BoardTitleView
-        },
         methods:{
-            goToWriting(){
-                this.$router.push('/writing');
-            },
             goToPosting(){
                 this.$router.push('/posting');
             }
@@ -145,8 +132,8 @@
 </script>
 
 <style>
-    .div-board{
-        padding-top: 7%;
+    .div-board-mine{
+        padding-top: 4.3%;
         padding-left: 10%;
         padding-right: 10%;
         padding-bottom: 2%;
@@ -155,112 +142,42 @@
         align-items: center;
     }
 
-    .div-board-table{
-        width: 60%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    .div-board-bottom-set{
+    .div-board-bottom-set-mywriting{
         width: 60%;
         display:flex;
+        flex-direction: row-reverse;
         margin-bottom: 1.5%;
     }
-    .div-board-paging{
-        width: 60%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .div-board-table-table{
-        width: 100%;
-    }
-    .div-board-bottom-scset{
+    .div-board-bottom-scset-mywriting{
         width: 50%;
         display:flex;
     }
-    .div-board-bottom-search{
+    .div-board-bottom-search-mywriting{
         width: 70%;
         margin-right: 2%;
     }
-    .div-board-bottom-category{
+    .div-board-bottom-category-mywriting{
         width: 30%;
-    }
-    .div-board-bottom-btn{
-        width: 50%;
-        display: flex;
-        flex-direction: row-reverse;
-    }
-    .div-board-bottom-btn-btn{
-        background-color: #fd7e14;
-        color: white;
-        width: 80px;
-    }
-    .writing-num{
-        width: 15%;
-        text-align: center;
-    }
-    .writing-title{
-        width: 55%;
-        text-align: center;
-    }
-    .writing-nickname{
-        width: 15%;
-        text-align: center;
-    }
-    .writing-date{
-        width: 15%;
-        text-align: center;
-    }
-    .num-in-board{
-        text-align: center;
-    }
-    .date-in-board{
-        text-align: center;
-    }
-    .nickname-in-board{
-        text-align: center;
-    }
-    .page-link{
-        color: black;
-    }
-    .pagination .page-item.active .page-link {
-        background-color: #fd7e14;
-        border-color: rgb(225, 228, 232);
-    }
-    td .board-title:hover{
-        text-decoration: underline;
-        cursor: pointer;
     }
 
     @media screen and (max-width: 992px){
-        .div-board-table{
-            width: 100%;
-        }
-        .div-board-bottom-set{
+        .div-board-bottom-set-mywriting{
             width: 100%;
             display: flex;
             flex-direction: column;
             margin-bottom: 3%;
         }
 
-        .div-board-bottom-scset{
+        .div-board-bottom-scset-mywriting{
             width: 100%;
             margin-bottom: 3%;
         }
-        .div-board-bottom-btn{
-            width: 100%;
-        }
-        .div-board-bottom-search{
+        .div-board-bottom-search-mywriting{
             width: 70%;
         }
-        .div-board-bottom-category{
+        .div-board-bottom-category-mywriting{
             width: 30%;
             margin-top: 0%;
-        }
-        .div-board-table-table{
-            width: 100%;
         }
     }
 </style>
