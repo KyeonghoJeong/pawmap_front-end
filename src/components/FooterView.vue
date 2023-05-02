@@ -1,5 +1,7 @@
 <template>
+<!-- footer를 담을 div -->
 <div class="container-fluid">
+    <!-- 아이콘 -->
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
         <symbol id="facebook" viewBox="0 0 16 16">
             <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/>
@@ -11,25 +13,44 @@
             <path d="M12 3c5.799 0 10.5 3.664 10.5 8.185 0 4.52-4.701 8.184-10.5 8.184a13.5 13.5 0 0 1-1.727-.11l-4.408 2.883c-.501.265-.678.236-.472-.413l.892-3.678c-2.88-1.46-4.785-3.99-4.785-6.866C1.5 6.665 6.201 3 12 3zm5.907 8.06l1.47-1.424a.472.472 0 0 0-.656-.678l-1.928 1.866V9.282a.472.472 0 0 0-.944 0v2.557a.471.471 0 0 0 0 .222V13.5a.472.472 0 0 0 .944 0v-1.363l.427-.413 1.428 2.033a.472.472 0 1 0 .773-.543l-1.514-2.155zm-2.958 1.924h-1.46V9.297a.472.472 0 0 0-.943 0v4.159c0 .26.21.472.471.472h1.932a.472.472 0 1 0 0-.944zm-5.857-1.092l.696-1.707.638 1.707H9.092zm2.523.488l.002-.016a.469.469 0 0 0-.127-.32l-1.046-2.8a.69.69 0 0 0-.627-.474.696.696 0 0 0-.653.447l-1.661 4.075a.472.472 0 0 0 .874.357l.33-.813h2.07l.299.8a.472.472 0 1 0 .884-.33l-.345-.926zM8.293 9.302a.472.472 0 0 0-.471-.472H4.577a.472.472 0 1 0 0 .944h1.16v3.736a.472.472 0 0 0 .944 0V9.774h1.14c.261 0 .472-.212.472-.472z"/>
         </symbol>
     </svg>
-    <div class="container-fluid" style="align-times:center;">
-        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top custom-footer">
-            <div class="col-md-4 d-flex align-items-center">
+    <!-- footer -->
+    <div>
+        <div class="py-3 my-4 border-top div-footer">
+            <div>
                 <span class="mb-3 mb-md-0 text-muted">Developed by Kyeongho Jeong</span>
             </div>
-            <ul class="nav col-md-4 justify-content-end list-unstyled d-flex custom-footer-icon">
-                <li><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#kakao"/></svg></a></li>
-                <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#instagram"/></svg></a></li>
-                <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#facebook"/></svg></a></li>
-            </ul>
-        </footer>
+            <div>
+                <ul class="ul-footer">
+                    <li><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#kakao"/></svg></a></li>
+                    <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#instagram"/></svg></a></li>
+                    <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#facebook"/></svg></a></li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
 </template>
 
 <style>
-@media (max-width: 576px) {
-    .custom-footer {
+.div-footer{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+.ul-footer{
+    display: flex;
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+/* 너비 576px 이하 시 footer 내용 가운데 정렬 */
+@media (max-width: 992px) {
+    .div-footer {
         flex-direction: column;
+        align-items: center;
+    }
+    .ul-footer{
+        margin-top: 15%;
     }
 }
 </style>
