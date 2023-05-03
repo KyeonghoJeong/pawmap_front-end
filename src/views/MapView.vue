@@ -60,10 +60,41 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
     data(){
         return {
+            emd: '',
+            cat: '',
             map: null,
+        }
+    },
+    created() {
+        this.emd = this.$route.query.emd
+        this.cat = this.$route.query.cat
+
+        console.log('읍면동:'+this.emd)
+        console.log('카테고리:'+this.cat)
+
+        if(typeof this.emd !== 'undefined'){
+            axios.get('http://localhost:8090/facility/single/emd', {params:{emd: this.emd}})
+            .then(response => {
+                console.log(response.data)
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        }
+
+        if(typeof this.cat !== 'undefined'){
+            axios.get('http://localhost:8090/facility/single/cat', {params:{cat: this.cat}})
+            .then(response =>{
+                console.log(response.data)
+            })
+            .catch(error =>{
+                console.log(error)
+            })
         }
     },
     methods: {
