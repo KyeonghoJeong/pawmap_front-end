@@ -42,13 +42,13 @@
     </div>
     <div class="div-list-and-map">
         <div class="div-list">
-            <div class="card card-in-list">
-                <div class="card-body">
-                    <h5 class="card-title">장소명</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">카테고리</h6>
-                    <p class="card-text">주소</p>
-                    <a href="#" class="card-link">자세히보기</a>
-                    <a href="#" class="card-link">관심목록 추가</a>
+            <div class="card card-in-list" v-if="facility && facility[0]" style="overflow:scroll; max-height: 100%;">
+                <div class="card-body" v-for="(facility, index) in facility" :key="index" style="border: 1px solid #EBEBFF;">
+                    <h5 class="card-title">{{facility.facility_name}}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{facility.basic_info}}</h6>
+                    <p class="card-text">{{facility.road_addr}}</p>
+                    <p class="card-text">{{facility.lat}}</p>
+                    <p class="card-text">{{facility.lng}}</p>
                 </div>
             </div>
         </div>
@@ -67,7 +67,28 @@ export default {
         return {
             emd: '',
             cat: '',
+            facility: [],
             map: null,
+        }
+    },
+    methods: {
+        initMap() {
+            const container = document.getElementById("map");
+            const options = {
+                center: new kakao.maps.LatLng(this.facility[0].lat, this.facility[0].lng, 16),
+                level: 5,
+            };
+            this.map = new kakao.maps.Map(container, options);
+
+            for(var i = 0; i < this.facility.length; i++){
+                const marker = new kakao.maps.Marker({
+                    position: new kakao.maps.LatLng(this.facility[i].lat, this.facility[i].lng, 16),
+                    title: this.facility[i].facility_name
+                });
+                
+                marker.setMap(this.map);
+            }
+            
         }
     },
     created() {
@@ -80,31 +101,21 @@ export default {
         if(typeof this.emd !== 'undefined'){
             axios.get('http://localhost:8090/facility/single/emd', {params:{emd: this.emd}})
             .then(response => {
-                console.log(response.data)
+                this.facility = response.data;
             })
             .catch(error => {
-                console.log(error)
+                console.log(error);
             })
         }
 
         if(typeof this.cat !== 'undefined'){
             axios.get('http://localhost:8090/facility/single/cat', {params:{cat: this.cat}})
             .then(response =>{
-                console.log(response.data)
+                this.facility = response.data;
             })
             .catch(error =>{
-                console.log(error)
+                console.log(error);
             })
-        }
-    },
-    methods: {
-        initMap() {
-            const container = document.getElementById("map");
-            const options = {
-                center: new kakao.maps.LatLng(37.64454276, 126.886336, 16),
-                level: 5,
-            };
-            this.map = new kakao.maps.Map(container, options);
         }
     },
     mounted() {
