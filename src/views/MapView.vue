@@ -43,12 +43,10 @@
     <div class="div-list-and-map">
         <div class="div-list">
             <div class="card card-in-list" v-if="facility && facility[0]" style="overflow:scroll; max-height: 100%;">
-                <div class="card-body" v-for="(facility, index) in facility" :key="index" style="border: 1px solid #EBEBFF;">
+                <div class="card-body" v-for="(facility, index) in limitedFacilities" :key="index" style="border: 1px solid #EBEBFF;">
                     <h5 class="card-title">{{facility.facility_name}}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{facility.basic_info}}</h6>
                     <p class="card-text">{{facility.road_addr}}</p>
-                    <p class="card-text">{{facility.lat}}</p>
-                    <p class="card-text">{{facility.lng}}</p>
                 </div>
             </div>
         </div>
@@ -68,28 +66,62 @@ export default {
             emd: '',
             cat: '',
             facility: [],
+            checkFacilityData: false,
+            markerPositions: [],
+            markers: [],
             map: null,
+            iw: '',
         }
     },
     methods: {
         initMap() {
-            const container = document.getElementById("map");
+            const container = document.getElementById('map');
             const options = {
                 center: new kakao.maps.LatLng(this.facility[0].lat, this.facility[0].lng, 16),
                 level: 5,
             };
             this.map = new kakao.maps.Map(container, options);
-
-            for(var i = 0; i < this.facility.length; i++){
-                const marker = new kakao.maps.Marker({
-                    position: new kakao.maps.LatLng(this.facility[i].lat, this.facility[i].lng, 16),
-                    title: this.facility[i].facility_name
-                });
-                
-                marker.setMap(this.map);
+            this.displayMarker(this.markerPositions);
+        },
+        displayMarker(markerPositions) {
+            if (this.markers.length > 0) {
+                this.markers.forEach((marker) => marker.setMap(null));
             }
-            
+
+            markerPositions.forEach((position) => {
+                const marker = new kakao.maps.Marker({
+                    map: this.map,
+                    position: new kakao.maps.LatLng(position[2], position[3]),
+                    title: position[1]
+                })
+                this.markers.push(marker);
+
+                const iwContent = `<div style="padding:5px;"><div class="card-body" style="border: 1px solid #EBEBFF;"><h5 class="card-title">${position[0]}</h5></div></div>`, iwRemovable = true;
+                
+                const infowindow = new kakao.maps.InfoWindow({
+                    content: iwContent,
+                    removable: iwRemovable
+                });
+
+                kakao.maps.event.addListener(marker, 'click', () => {                    
+                    if (this.iw) {
+                        this.iw.close();
+                    }
+
+                    this.iw = infowindow;
+                    infowindow.open(this.map, marker);
+                });
+
+                kakao.maps.event.addListener(this.map, 'click', function() {
+                    infowindow.close();
+                });
+            })
         }
+    },
+    computed:{
+      limitedFacilities(){
+        return this.facility.slice(0, 10);
+      }  
     },
     created() {
         this.emd = this.$route.query.emd
@@ -102,6 +134,8 @@ export default {
             axios.get('http://localhost:8090/facility/single/emd', {params:{emd: this.emd}})
             .then(response => {
                 this.facility = response.data;
+                console.log(this.facility);
+                this.checkFacilityData = true;
             })
             .catch(error => {
                 console.log(error);
@@ -112,28 +146,46 @@ export default {
             axios.get('http://localhost:8090/facility/single/cat', {params:{cat: this.cat}})
             .then(response =>{
                 this.facility = response.data;
+                console.log(this.facility);
+                this.checkFacilityData = true;
             })
             .catch(error =>{
                 console.log(error);
             })
         }
+
+        this.$watch('checkFacilityData', (value) => {
+            if (value === true) {
+                for(var k = 0; k < this.facility.length; k++){
+                    this.markerPositions.push([
+                        this.facility[k].facility_id,
+                        this.facility[k].facility_name,
+                        this.facility[k].lat, 
+                        this.facility[k].lng
+                    ]);
+                }
+            }
+        });
     },
     mounted() {
-        if(!window.kakao || !window.kakao.maps){
-            const script = document.createElement("script");
-            script.src = 
-                "//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=66547760b8e0c139b3bd1770f83f9bce";
+        this.$watch('checkFacilityData', (value) => {
+            if (value === true) {
+                if(!window.kakao || !window.kakao.maps){
+                    const script = document.createElement("script");
+                    script.src = 
+                        "//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=66547760b8e0c139b3bd1770f83f9bce";
 
-            /* global kakao */
-            script.addEventListener("load", () => {
-                kakao.maps.load(this.initMap);
-            });
+                    /* global kakao */
+                    script.addEventListener("load", () => {
+                        kakao.maps.load(this.initMap);
+                    });
 
-            document.head.appendChild(script);
-        }else {
-            console.log("이미 로딩됨 ", window.kakao);
-            this.initMap();
-        }
+                    document.head.appendChild(script);
+                }else {
+                    this.initMap();
+                }
+            }
+        });
     }
 }
 </script>
