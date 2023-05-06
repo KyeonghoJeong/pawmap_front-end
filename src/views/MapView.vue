@@ -71,50 +71,81 @@ export default {
             markers: [],
             map: null,
             iw: '',
+            checkParam: false
         }
     },
     methods: {
         initMap() {
             const container = document.getElementById('map');
             const options = {
-                center: new kakao.maps.LatLng(this.facility[0].lat, this.facility[0].lng, 16),
-                level: 5,
+                center: new kakao.maps.LatLng(37.566535, 126.9779692),
+                level: 4,
             };
             this.map = new kakao.maps.Map(container, options);
-            this.displayMarker(this.markerPositions);
+
+            if(this.checkParam === true){
+                if (navigator.geolocation){
+                    navigator.geolocation.getCurrentPosition((position) => {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+
+                            const locPosition = new kakao.maps.LatLng(lat, lng);
+                            
+                            this.map.setCenter(locPosition);
+                    })
+                }
+            }else{
+                const locPosition = new kakao.maps.LatLng(this.facility[0].lat, this.facility[0].lng);
+                this.map.setCenter(locPosition);
+                this.displayMarker(this.markerPositions);
+
+                kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
+                    if(this.map.getLevel() >= 5){
+                        this.displayMarker(this.markerPositions);
+                    }
+                });
+            }
+            
         },
         displayMarker(markerPositions) {
             if (this.markers.length > 0) {
                 this.markers.forEach((marker) => marker.setMap(null));
             }
 
+            const neLat = this.map.getBounds().getNorthEast().getLat();
+            const neLng = this.map.getBounds().getNorthEast().getLng();
+            const swLat = this.map.getBounds().getSouthWest().getLat();
+            const swLng = this.map.getBounds().getSouthWest().getLng();
+
             markerPositions.forEach((position) => {
-                const marker = new kakao.maps.Marker({
-                    map: this.map,
-                    position: new kakao.maps.LatLng(position[2], position[3]),
-                    title: position[1]
-                })
-                this.markers.push(marker);
+                if((position[2] >= swLat && position[2] <= neLat) && (position[3] >= swLng && position[3] <= neLng)){
+                    const marker = new kakao.maps.Marker({
+                        map: this.map,
+                        position: new kakao.maps.LatLng(position[2], position[3]),
+                        title: position[1]
+                    })
+                    this.markers.push(marker);
 
-                const iwContent = `<div style="padding:5px;"><div class="card-body" style="border: 1px solid #EBEBFF;"><h5 class="card-title">${position[0]}</h5></div></div>`, iwRemovable = true;
+                    const iwContent = `<div style="padding:5px;"><div class="card-body" style="border: 1px solid #EBEBFF;"><h5 class="card-title">${position[0]}</h5></div></div>`, iwRemovable = true;
                 
-                const infowindow = new kakao.maps.InfoWindow({
-                    content: iwContent,
-                    removable: iwRemovable
-                });
+                    const infowindow = new kakao.maps.InfoWindow({
+                        content: iwContent,
+                        removable: iwRemovable
+                    });
 
-                kakao.maps.event.addListener(marker, 'click', () => {                    
-                    if (this.iw) {
-                        this.iw.close();
-                    }
+                    kakao.maps.event.addListener(marker, 'click', () => {                    
+                        if (this.iw) {
+                            this.iw.close();
+                        }
 
-                    this.iw = infowindow;
-                    infowindow.open(this.map, marker);
-                });
+                        this.iw = infowindow;
+                        infowindow.open(this.map, marker);
+                    });
 
-                kakao.maps.event.addListener(this.map, 'click', function() {
-                    infowindow.close();
-                });
+                    kakao.maps.event.addListener(this.map, 'click', () => {
+                        infowindow.close();
+                    });
+                }
             })
         }
     },
@@ -126,9 +157,6 @@ export default {
     created() {
         this.emd = this.$route.query.emd
         this.cat = this.$route.query.cat
-
-        console.log('읍면동:'+this.emd)
-        console.log('카테고리:'+this.cat)
 
         if(typeof this.emd !== 'undefined'){
             axios.get('http://localhost:8090/facility/single/emd', {params:{emd: this.emd}})
@@ -152,6 +180,10 @@ export default {
             .catch(error =>{
                 console.log(error);
             })
+        }
+
+        if(typeof this.emd === 'undefined' && typeof this.cat === 'undefined'){
+            this.checkParam = true;
         }
 
         this.$watch('checkFacilityData', (value) => {
@@ -186,6 +218,22 @@ export default {
                 }
             }
         });
+
+        if(this.checkParam === true){
+            if(!window.kakao || !window.kakao.maps){
+                const script = document.createElement("script");
+                script.src = 
+                    "//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=66547760b8e0c139b3bd1770f83f9bce";
+
+                script.addEventListener("load", () => {
+                    kakao.maps.load(this.initMap);
+                });
+
+                document.head.appendChild(script);
+            }else {
+                this.initMap();
+            }
+        }
     }
 }
 </script>
