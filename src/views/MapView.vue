@@ -14,29 +14,21 @@
             </form>
         </div>
         <div class="div-select-in-map">
-            <select class="form-select select-in-map" aria-label="Default select example">
-                <option selected>시를 선택하세요</option>
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
+            <select class="form-select select-in-map" v-on:click="getSido()" v-model="selectedSido" aria-label="Default select example">
+                <option :value="[]" selected>시 선택</option>
+                <option v-for="item in optionSido" :value="item" :key="item.sido_id">{{ item.sido_name }}</option>
             </select>
-            <select class="form-select select-in-map" aria-label="Default select example">
-                <option selected>구를 선택하세요</option>
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
+            <select class="form-select select-in-map" v-on:click="getSigungu()" v-model="selectedSigungu" aria-label="Default select example">
+                <option :value="[]" selected>구 선택</option>
+                <option v-for="item in optionSigungu" :value="item" :key="item.sigungu_id">{{ item.sigungu_name }}</option>
             </select>
-            <select class="form-select select-in-map" aria-label="Default select example">
-                <option selected>동을 선택하세요</option>
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
+            <select class="form-select select-in-map" v-on:click="getEmd()" v-model="selectedEmd" aria-label="Default select example">
+                <option :value="[]" selected>동 선택</option>
+                <option v-for="item in optionEmd" :value="item" :key="item.emd_id">{{ item.emd_name }}</option>
             </select>
-            <select class="form-select select-in-map" aria-label="Default select example">
-                <option selected>카테고리를 선택하세요</option>
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
+            <select class="form-select select-in-map" v-model="selectedCat" v-on:click="getCat()" aria-label="Default select example">
+                <option value="" selected>카테고리 선택</option>
+                <option v-for="item in optionCat" :value="item" :key="item">{{ item }}</option>
             </select>
         </div>
     </div>
@@ -67,11 +59,36 @@ export default {
             cat: '',
             facility: [],
             checkFacilityData: false,
+            checkMarkerData: false,
             markerPositions: [],
             markers: [],
             map: null,
             iw: '',
-            checkParam: false
+            checkParam: false,
+            optionSido: [],
+            optionSigungu: [],
+            optionEmd: [],
+            optionCat: ['동물병원', 
+                        '동물약국', 
+                        '문예회관', 
+                        '미술관', 
+                        '미용', 
+                        '박물관', 
+                        '반려동물용품', 
+                        '식당', 
+                        '여행지', 
+                        '위탁관리', 
+                        '카페', 
+                        '펜션', 
+                        '호텔'],
+            selectedSido: [],
+            selectedSigungu: [],
+            selectedEmd: [],
+            selectedCat: '',
+            requestSido: '',
+            requestSigungu: '',
+            requestEmd: '',
+            requestCat: '',
         }
     },
     methods: {
@@ -81,31 +98,37 @@ export default {
                 center: new kakao.maps.LatLng(37.566535, 126.9779692),
                 level: 4,
             };
-            this.map = new kakao.maps.Map(container, options);
-
+            
             if(this.checkParam === true){
+                this.map = new kakao.maps.Map(container, options);
+
                 if (navigator.geolocation){
                     navigator.geolocation.getCurrentPosition((position) => {
-                            const lat = position.coords.latitude;
-                            const lng = position.coords.longitude;
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
 
-                            const locPosition = new kakao.maps.LatLng(lat, lng);
-                            
-                            this.map.setCenter(locPosition);
+                        const locPosition = new kakao.maps.LatLng(lat, lng);
+                        
+                        this.map.setCenter(locPosition);
                     })
                 }
             }else{
-                const locPosition = new kakao.maps.LatLng(this.facility[0].lat, this.facility[0].lng);
-                this.map.setCenter(locPosition);
-                this.displayMarker(this.markerPositions);
+                this.$watch('checkMarkerData', (value) => {
+                    if (value === true){
+                        this.map = new kakao.maps.Map(container, options);
 
-                kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
-                    if(this.map.getLevel() >= 5){
+                        const locPosition = new kakao.maps.LatLng(this.facility[0].lat, this.facility[0].lng);
+                        this.map.setCenter(locPosition);
                         this.displayMarker(this.markerPositions);
+
+                        kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
+                            if(this.map.getLevel() >= 1){
+                                this.displayMarker(this.markerPositions);
+                            }
+                        });
                     }
                 });
             }
-            
         },
         displayMarker(markerPositions) {
             if (this.markers.length > 0) {
@@ -147,6 +170,136 @@ export default {
                     });
                 }
             })
+        },
+        getSido(){
+            axios.get('http://localhost:8090/district/sido')
+            .then(response =>{
+                this.optionSido = response.data;
+            })
+            .catch(error =>{
+                console.log(error);
+            })
+
+            if(this.selectedSido.length !== 0 && this.requestSido !== this.selectedSido.sido_name){
+                this.requestSido = this.selectedSido.sido_name;
+
+                axios.get('http://localhost:8090/facility/group', {params:{sido: this.selectedSido.sido_name}})
+                .then(response => {
+                    this.facility = response.data;
+                    console.log(this.facility);
+                    this.checkFacilityData = true;
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+            }
+        },
+        getSigungu(){
+            if(this.selectedSido.length !== 0){
+                axios.get('http://localhost:8090/district/sigungu', {params:{sido_id: this.selectedSido.sido_id}})
+                .then(response =>{
+                    this.optionSigungu = response.data;
+                })
+                .catch(error =>{
+                    console.log(error);
+                })
+            }
+
+            if(this.selectedSigungu.length !== 0 && this.requestSigungu !== this.selectedSigungu.sigungu_name){
+                this.requestSigungu = this.selectedSigungu.sigungu_name;
+
+                axios.get('http://localhost:8090/facility/group', 
+                    {params:{
+                        sido: this.selectedSido.sido_name,
+                        sigungu: this.selectedSigungu.sigungu_name}})
+                .then(response => {
+                    this.facility = response.data;
+                    console.log(this.facility);
+                    this.checkFacilityData = true;
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+            }
+        },
+        getEmd(){
+            if(this.selectedSigungu.length !== 0){
+                axios.get('http://localhost:8090/district/emd', {params:{sigungu_id: this.selectedSigungu.sigungu_id}})
+                .then(response =>{
+                    this.optionEmd = response.data;
+                })
+                .catch(error =>{
+                    console.log(error);
+                })
+            }
+
+            if(this.selectedEmd.length !== 0 && this.requestEmd !== this.selectedEmd.emd_name){
+                this.requestEmd = this.selectedEmd.emd_name;
+
+                axios.get('http://localhost:8090/facility/group', 
+                    {params:{
+                        sido: this.selectedSido.sido_name,
+                        sigungu: this.selectedSigungu.sigungu_name,
+                        emd: this.selectedEmd.emd_name}})
+                .then(response => {
+                    this.facility = response.data;
+                    console.log(this.facility);
+                    this.checkFacilityData = true;
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+            }
+        },
+        getCat(){
+            if(this.selectedCat !== '' && this.requestCat !== this.selectedCat){
+                this.requestCat = this.selectedCat;
+
+                if(this.selectedSido.length === 0 && this.selectedSigungu.length === 0 && this.selectedEmd.length === 0){
+                    axios.get('http://localhost:8090/facility/single', {params:{cat: this.selectedCat}})
+                    .then(response =>{
+                        this.facility = [];
+                        this.facility = response.data;
+                        console.log(this.facility);
+
+                        this.markerPositions = [];
+                        for(var k = 0; k < this.facility.length; k++){
+                            this.markerPositions.push([
+                                this.facility[k].facility_id,
+                                this.facility[k].facility_name,
+                                this.facility[k].lat, 
+                                this.facility[k].lng
+                            ]);
+                        }
+
+                        this.displayMarker(this.markerPositions);
+
+                        kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
+                            if(this.map.getLevel() >= 1){
+                                this.displayMarker(this.markerPositions);
+                            }
+                        });
+                    })
+                    .catch(error =>{
+                        console.log(error);
+                    })
+                }else{
+                    axios.get('http://localhost:8090/facility/group', 
+                        {params:{
+                            sido: this.selectedSido.sido_name,
+                            sigungu: this.selectedSigungu.sigungu_name,
+                            emd: this.selectedEmd.emd_name,
+                            cat: this.selectedCat}})
+                    .then(response => {
+                        this.facility = response.data;
+                        console.log(this.facility);
+                        this.checkFacilityData = true;
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
+                }
+            }
         }
     },
     computed:{
@@ -159,8 +312,9 @@ export default {
         this.cat = this.$route.query.cat
 
         if(typeof this.emd !== 'undefined'){
-            axios.get('http://localhost:8090/facility/single/emd', {params:{emd: this.emd}})
+            axios.get('http://localhost:8090/facility/single', {params:{emd: this.emd}})
             .then(response => {
+                this.facility = [];
                 this.facility = response.data;
                 console.log(this.facility);
                 this.checkFacilityData = true;
@@ -171,8 +325,9 @@ export default {
         }
 
         if(typeof this.cat !== 'undefined'){
-            axios.get('http://localhost:8090/facility/single/cat', {params:{cat: this.cat}})
+            axios.get('http://localhost:8090/facility/single', {params:{cat: this.cat}})
             .then(response =>{
+                this.facility = [];
                 this.facility = response.data;
                 console.log(this.facility);
                 this.checkFacilityData = true;
@@ -188,6 +343,7 @@ export default {
 
         this.$watch('checkFacilityData', (value) => {
             if (value === true) {
+                this.markerPositions = [];
                 for(var k = 0; k < this.facility.length; k++){
                     this.markerPositions.push([
                         this.facility[k].facility_id,
@@ -196,43 +352,24 @@ export default {
                         this.facility[k].lng
                     ]);
                 }
+                this.checkMarkerData = true;
             }
         });
     },
     mounted() {
-        this.$watch('checkFacilityData', (value) => {
-            if (value === true) {
-                if(!window.kakao || !window.kakao.maps){
-                    const script = document.createElement("script");
-                    script.src = 
-                        "//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=66547760b8e0c139b3bd1770f83f9bce";
+        if(!window.kakao || !window.kakao.maps){
+            const script = document.createElement("script");
+            script.src = 
+                "//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=66547760b8e0c139b3bd1770f83f9bce";
 
-                    /* global kakao */
-                    script.addEventListener("load", () => {
-                        kakao.maps.load(this.initMap);
-                    });
+            /* global kakao */
+            script.addEventListener("load", () => {
+                kakao.maps.load(this.initMap);
+            });
 
-                    document.head.appendChild(script);
-                }else {
-                    this.initMap();
-                }
-            }
-        });
-
-        if(this.checkParam === true){
-            if(!window.kakao || !window.kakao.maps){
-                const script = document.createElement("script");
-                script.src = 
-                    "//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=66547760b8e0c139b3bd1770f83f9bce";
-
-                script.addEventListener("load", () => {
-                    kakao.maps.load(this.initMap);
-                });
-
-                document.head.appendChild(script);
-            }else {
-                this.initMap();
-            }
+            document.head.appendChild(script);
+        }else {
+            this.initMap();
         }
     }
 }
