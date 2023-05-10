@@ -34,8 +34,8 @@
     </div>
     <div class="div-list-and-map">
         <div class="div-list">
-            <div class="card card-in-list" v-if="facility && facility[0]" style="overflow:scroll; max-height: 100%;">
-                <div class="card-body" v-for="(facility, index) in facility" :key="index" style="border: 1px solid #EBEBFF;">
+            <div class="card card-in-list" v-if="facilityInfo && facilityInfo[0]" style="overflow:scroll; max-height: 100%;">
+                <div class="card-body" v-for="(facility, index) in facilityInfo" :key="index" style="border: 1px solid #EBEBFF;">
                     <h5 class="card-title">{{facility.facilityName}}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{facility.basicInfo}}</h6>
                     <p class="card-text">{{facility.roadAddr}}</p>
@@ -79,7 +79,7 @@ export default {
         return {
             emd: '',
             cat: '',
-            facility: [],
+            facilityInfo: [],
             facilityLocation: [],
             markerPositions: [],
             markers: [],
@@ -114,8 +114,8 @@ export default {
             totalPages: '',
             contentKey: '',
             contentUrl: '',
-            startNum: 0,
-            endNum: 0,
+            startNum: 0, // Pagination을 위해 현재 출력 페이지 배열의 시작 페이지 번호
+            endNum: 0, // Pagination을 위해 현재 출력 페이지 배열의 마지막 페이지 번호
         }
     },
     methods: {
@@ -127,32 +127,38 @@ export default {
             };
 
             if(this.checkParam === true){
-                if (navigator.geolocation){
-                    navigator.geolocation.getCurrentPosition((position) => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
+                if(navigator.geolocation){
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
 
-                        options = {
-                            center: new kakao.maps.LatLng(lat, lng),
-                            level: 4,
-                        };
+                            options = {
+                                center: new kakao.maps.LatLng(lat, lng),
+                                level: 4,
+                            };
 
-                        this.map = new kakao.maps.Map(container, options);
+                            this.map = new kakao.maps.Map(container, options);
 
-                        kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
-                            if(this.map.getLevel() >= 1){
+                            kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
+                                if(this.map.getLevel() >= 1){
+                                    this.displayMarker(this.markerPositions);
+                                }
+                            });
+
+                            kakao.maps.event.addListener(this.map, 'dragend', ()=> {        
                                 this.displayMarker(this.markerPositions);
-                            }
-                        });
-
-                        kakao.maps.event.addListener(this.map, 'dragend', ()=> {        
-                            this.displayMarker(this.markerPositions);
-                        });
-                    })
+                            });
+                        },
+                        function(error){
+                            console.log(error);
+                            alert("위치 정보 사용을 허가해주세요");
+                        }
+                    )   
                 }
             }else{
                 if(typeof this.emd !== 'undefined'){
-                    axios.get('http://localhost:8090/facility/single/location', {params:{emd: this.emd}})
+                    axios.get('http://localhost:8090/facility/location/single', {params:{emd: this.emd}})
                     .then(response =>{
                         this.facilityLocation = response.data;
 
@@ -279,7 +285,7 @@ export default {
 
                 axios.get('http://localhost:8090/facility/group', {params:{sido: this.selectedSido.sidoName}})
                 .then(response => {
-                    this.facility = response.data;
+                    this.facilityInfo = response.data;
                 })
                 .catch(error => {
                     console.log(error);
@@ -305,7 +311,7 @@ export default {
                         sido: this.selectedSido.sidoName,
                         sigungu: this.selectedSigungu.sigunguName}})
                 .then(response => {
-                    this.facility = response.data;
+                    this.facilityInfo = response.data;
                 })
                 .catch(error => {
                     console.log(error);
@@ -332,7 +338,7 @@ export default {
                         sigungu: this.selectedSigungu.sigunguName,
                         emd: this.selectedEmd.emdName}})
                 .then(response => {
-                    this.facility = response.data;
+                    this.facilityInfo = response.data;
                 })
                 .catch(error => {
                     console.log(error);
@@ -340,16 +346,22 @@ export default {
             }
         },
         getCat(){
+            // selectedCat은 현재 선택된 카테고리 이름
+            // requestCat은 이전에 선택한 카테고리 이름
+            // 선택된 카테고리가 있고 이전 선택 카테고리와 현재 선택 카테고리가 다르다면 카테고리를 새로 선택한 경우에 해당
             if(this.selectedCat !== '' && this.requestCat !== this.selectedCat){
                 this.requestCat = this.selectedCat;
 
+                // 선택된 시도, 시군구, 읍면동이 없는 경우는 카테고리만 선택한 경우
+                // 새로 카테고리 정보와, 위치 정보를 받아옴
                 if(this.selectedSido.length === 0 && this.selectedSigungu.length === 0 && this.selectedEmd.length === 0){
                     axios.get('http://localhost:8090/facility/single', {params:{cat: this.selectedCat, page: 0, size: 10}})
                     .then(response =>{
-                        this.facility = response.data.content;
+                        this.facilityInfo = response.data.content;
                         this.totalPages = response.data.totalPages;
                         this.contentKey = 'singleCat';
 
+                        // startNum, endNum, pageActive 재설정
                         if(this.totalPages != 0){
                             this.startNum = 1;
                             this.endNum = this.totalPages;
@@ -359,12 +371,14 @@ export default {
                         }
                         this.pageActive = this.startNum;
 
+                        // 페이지 번호 클릭 시 시설 정보를 새로 받아오기 위해 참조 파라미터 변경
                         this.cat = this.selectedCat;
                     })
                     .catch(error =>{
                         console.log(error);
                     })
 
+                    // 위치 정보를 받아와서 중심 위치, 마커 재설정
                     axios.get('http://localhost:8090/facility/single/location', {params:{cat: this.selectedCat}})
                     .then(response =>{
                         this.facilityLocation = response.data;
@@ -398,8 +412,7 @@ export default {
                             emd: this.selectedEmd.emdName,
                             cat: this.selectedCat}})
                     .then(response => {
-                        this.facility = response.data;
-                        console.log(this.facility);
+                        this.facilityInfo = response.data;
                     })
                     .catch(error => {
                         console.log(error);
@@ -407,39 +420,45 @@ export default {
                 }
             }
         },
+        // 이전 버튼 클릭 시 startNum, endNum 재설정을 위한 메소드
         setPrevPageNum(){
-            this.startNum = this.startNum - 5;
-            this.endNum = this.startNum + 4;
-            this.pageActive = this.endNum;
-            this.getFacilityContent(this.endNum-1);
+            // isPrevDisabled()에 의해 startNum이 5 이하인 경우는 신경 X
+            this.startNum = this.startNum - 5; // 시작 번호는 현재 시작 번호 - 5
+            this.endNum = this.startNum + 4; // 마지막 번호는 현재 시작 번호 + 4
+            this.pageActive = this.endNum; // 이전 버튼 클릭 시 선택 중인 페이지 표시를 위해 선택한 페이지 번호 리턴
+            this.getFacilityContent(this.endNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
         },
+        // 다음 버튼 클릭 시 startNum, endNum 재설정을 위한 메소드
         setNextPageNum(){
+            // 페이지를 처음 띄우는 경우 startNum은 0, endNum은 0이므로 startNum은 startNum + 6으로 설정
+            // 페이지를 처음 띄우는 경우가 아닌 경우는 startNum은 endNum + 1
             if(this.endNum === 0){
                 this.startNum = this.startNum + 6;
             }else{
                 this.startNum = this.endNum + 1;
             }
             
-            this.endNum = this.startNum + 4;
+            this.endNum = this.startNum + 4; // endNum은 startNum + 4
+            // 마지막 페이지로 설정한 번호가 총 페이지 수를 넘는 경우 마지막 페이지 번호를 총 페이지 수로 설정
             if(this.endNum > this.totalPages){
                 this.endNum = this.totalPages;
             }
 
-            this.pageActive = this.startNum;
-            this.getFacilityContent(this.startNum-1);
+            this.pageActive = this.startNum; // 다음 버튼을 누르면 첫 페이지 번호를 active
+            this.getFacilityContent(this.startNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
         },
+        // 리스트 재출력을 위해 다시 facility 정보를 받아오기 위한 메소드
         getFacilityContent(i){
+            // contentKey는 어떤 조건으로 facility 정보를 수신 했는지 나타냄
             if(this.contentKey === 'singleEmd'){
-                this.contentUrl = `http://localhost:8090/facility/single?emd=${this.emd}&page=${i}&size=10`;
+                this.contentUrl = `http://localhost:8090/facility/info/single?emd=${this.emd}&page=${i}&size=10`;
             }else if(this.contentKey === 'singleCat'){
                 this.contentUrl = `http://localhost:8090/facility/single?cat=${this.cat}&page=${i}&size=10`;
             }
 
-            console.log(this.contentUrl);
             axios.get(this.contentUrl)
             .then(response => {
-                this.facility = response.data.content;
-                console.log(this.facility);
+                this.facilityInfo = response.data.content;
             })
             .catch(error => {
                 console.log(error);
@@ -447,21 +466,28 @@ export default {
         },
     },
     computed:{
+      // 맨 첫 페이지 이전 버튼 동작 중지를 위해 startNum이 5 이하인 경우 false 리턴
       isPrevDisabled(){
         return this.startNum <= 5;
       },
+      // startNum + 5를 하면 다음 페이지 배열의 시작 페이지 번호인데 총 페이지 수를 넘을 경우 false 리턴
       isNextDisabled(){
         return this.startNum+5 >= this.totalPages;
       },
+      // 페이지 5개 단위로 출력을 위해 numbers 배열에 5개씩 담아 리턴
       pageNumbers(){
+        // startNum = 0, endNum = 0인 경우 고려
+        // 이후 같은 패턴 반복
+
         let numbers = [];
         let start = this.startNum;
         let end = this.endNum;
 
+        // startNum이 0이면 맨 처음 페이지 배열에 해당
         if(this.startNum === 0){
-            start = 1;
-            end = this.totalPages;
-            if(end > 5){
+            start = 1; // 맨 처음 페이지 배열 시작 페이지 번호를 1로 설정
+            end = this.totalPages; // 총 페이지 배열의 수가 하나를 넘지 않는 경우 시작 페이지의 마지막 번호를 총 페이지 수로 설정
+            if(end > 5){ // 총 페이지 배열의 수가 하나 이상인 경우 시작 페이지의 마지막 번호를 첫 번째 페이지 배열의 마지막 번호인 5로 설정
                 end = 5;
             }
         }
@@ -478,9 +504,9 @@ export default {
         this.cat = this.$route.query.cat
 
         if(typeof this.emd !== 'undefined'){
-            axios.get('http://localhost:8090/facility/single', {params:{emd: this.emd, page: 0, size: 10}})
+            axios.get('http://localhost:8090/facility/info/single', {params:{emd: this.emd, page: 0, size: 10}})
             .then(response => {
-                this.facility = response.data.content;
+                this.facilityInfo = response.data.content;
                 this.totalPages = response.data.totalPages;
                 this.contentKey = 'singleEmd';
             })
@@ -492,7 +518,7 @@ export default {
         if(typeof this.cat !== 'undefined'){
             axios.get('http://localhost:8090/facility/single', {params:{cat: this.cat, page: 0, size: 10}})
             .then(response =>{
-                this.facility = response.data.content;
+                this.facilityInfo = response.data.content;
                 this.totalPages = response.data.totalPages;
                 this.contentKey = 'singleCat';
             })
