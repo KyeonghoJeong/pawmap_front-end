@@ -51,7 +51,7 @@
                             </li>
 
                             <li v-for="i in pageNumbers" :key="i" :class="['page-item', pageActive === i ? 'active' : '']" @click="pageActive = i">
-                                <button class="page-link" @click="getFacilityContent(contentKey, i-1)">{{i}}</button>
+                                <button class="page-link" @click="getFacilityContent(i-1)">{{i}}</button>
                             </li>
 
                             <li class="page-item">
@@ -242,7 +242,6 @@ export default {
                         title: position[0]
                     })
                     this.markers.push(marker);
-                    console.log(marker);
 
                     const iwContent = `<div style="padding:5px;"><div class="card-body" style="border: 1px solid #EBEBFF;"><h5 class="card-title">${position[0]}</h5></div></div>`, iwRemovable = true;
                 
@@ -351,7 +350,16 @@ export default {
                         this.totalPages = response.data.totalPages;
                         this.contentKey = 'singleCat';
 
-                        console.log(this.facility);
+                        if(this.totalPages != 0){
+                            this.startNum = 1;
+                            this.endNum = this.totalPages;
+                            if(this.endNum > 5){
+                                this.endNum = 5;
+                            }
+                        }
+                        this.pageActive = this.startNum;
+
+                        this.cat = this.selectedCat;
                     })
                     .catch(error =>{
                         console.log(error);
@@ -360,7 +368,6 @@ export default {
                     axios.get('http://localhost:8090/facility/single/location', {params:{cat: this.selectedCat}})
                     .then(response =>{
                         this.facilityLocation = response.data;
-                        console.log(this.facilityLocation);
                         
                         this.markerPositions = [];
                         for(var k = 0; k < this.facilityLocation.length; k++){
@@ -400,26 +407,11 @@ export default {
                 }
             }
         },
-        getFacilityContent(contentKey, i){
-            if(this.contentKey === 'singleEmd'){
-                this.contentUrl = `http://localhost:8090/facility/single?emd=${this.emd}&page=${i}&size=10`;
-            }else if(this.contentKey === 'singleCat'){
-                this.contentUrl = `http://localhost:8090/facility/single?&cat=${this.cat}&page=${i}&size=10`;
-            }
-
-            axios.get(this.contentUrl)
-            .then(response => {
-                this.facility = response.data.content;
-            })
-            .catch(error => {
-                console.log(error);
-            })
-        },
         setPrevPageNum(){
             this.startNum = this.startNum - 5;
             this.endNum = this.startNum + 4;
             this.pageActive = this.endNum;
-            this.getFacilityContent(this.contentKey, this.endNum-1);
+            this.getFacilityContent(this.endNum-1);
         },
         setNextPageNum(){
             if(this.endNum === 0){
@@ -434,8 +426,25 @@ export default {
             }
 
             this.pageActive = this.startNum;
-            this.getFacilityContent(this.contentKey, this.startNum-1);
-        }
+            this.getFacilityContent(this.startNum-1);
+        },
+        getFacilityContent(i){
+            if(this.contentKey === 'singleEmd'){
+                this.contentUrl = `http://localhost:8090/facility/single?emd=${this.emd}&page=${i}&size=10`;
+            }else if(this.contentKey === 'singleCat'){
+                this.contentUrl = `http://localhost:8090/facility/single?cat=${this.cat}&page=${i}&size=10`;
+            }
+
+            console.log(this.contentUrl);
+            axios.get(this.contentUrl)
+            .then(response => {
+                this.facility = response.data.content;
+                console.log(this.facility);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+        },
     },
     computed:{
       isPrevDisabled(){
