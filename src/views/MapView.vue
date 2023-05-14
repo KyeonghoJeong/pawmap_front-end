@@ -1,25 +1,34 @@
 <template>
 <div>
     <div class="div-search-and-select">
-        <div class="div-search-in-map" style="height: 80px">
-
+        <div class="div-search-in-map">
+            <form class="search-in-map" @submit.prevent="">
+                <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1"  style="background-color:white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                    </span>
+                    <input type="text" class="form-control" placeholder="동 이름을 검색하세요" aria-label="keyword" aria-describedby="basic-addon1" style="height:50px">
+                </div>
+            </form>
         </div>
         <div class="div-select-in-map">
+            <select class="form-select select-in-map" v-model="selectedCat" v-on:click="getCat()" aria-label="Default select example">
+                <option value="" selected>카테고리 선택</option>
+                <option v-for="item in optionCat" :value="item" :key="item">{{ item }}</option>
+            </select>
             <select class="form-select select-in-map" v-on:click="getSido()" v-model="selectedSido" aria-label="Default select example">
-                <option value="" selected>{{ defaultSido }}</option>
+                <option value="" selected>시도 선택</option>
                 <option v-for="item in optionSido" :value="item" :key="item.sidoId">{{ item.sidoName }}</option>
             </select>
             <select class="form-select select-in-map" v-on:click="getSigungu()" v-model="selectedSigungu" aria-label="Default select example">
-                <option value="" selected>{{ defaultSigungu }}</option>
+                <option value="" selected>시군구 선택</option>
                 <option v-for="item in optionSigungu" :value="item" :key="item.sigunguId">{{ item.sigunguName }}</option>
             </select>
             <select class="form-select select-in-map" v-on:click="getEmd()" v-model="selectedEmd" aria-label="Default select example">
-                <option value="" selected>{{ defaultEmd }}</option>
+                <option value="" selected>읍면동 선택</option>
                 <option v-for="item in optionEmd" :value="item" :key="item.emdId">{{ item.emdName }}</option>
-            </select>
-            <select class="form-select select-in-map" v-model="selectedCat" v-on:click="getCat()" aria-label="Default select example">
-                <option value="" selected>{{ defaultCat }}</option>
-                <option v-for="item in optionCat" :value="item" :key="item">{{ item }}</option>
             </select>
         </div>
     </div>
@@ -79,10 +88,6 @@ export default {
             markers: [], // 실제 마커를 담을 배열
             clickedMarker: '', // 마커 클릭 시 기존 선택된 마커의 infowindow on/off를 위한 변수
             map: null,
-            defaultSido: '시도 선택',
-            defaultSigungu: '시군구 선택',
-            defaultEmd: '읍면동 선택',
-            defaultCat: '카테고리 선택',
             optionSido: [], // 행정구역 '시도'를 담을 배열
             optionSigungu: [], // 행정구역 '시군구'를 담을 배열
             optionEmd: [], // 행정구역 '읍면동'을 담을 배열
@@ -117,70 +122,34 @@ export default {
     methods: {
         initMap() {
             // 두 가지 경우
-            // created() 사이클에서 axios 사용 시 비동기적 동작으로 인해 fetch 완료 전 (isFacilityDataLoaded = false) mounted() 실행 가능 -> watch 동작 O
-            // created() 사이클에서 axios 사용 시 비동기적 동작으로 인해 fetch 완료 후 (isFacilityDataLoaded = true) mounted() 실행 가능 -> watch 동작 X
+            // created 사이클에서 axios 사용 시 비동기적 동작으로 인해 fetch 완료 전 (isFacilityDataLoaded = false) mounted() 실행 가능 -> watch 동작 O
+            // created 사이클에서 axios 사용 시 비동기적 동작으로 인해 fetch 완료 후 (isFacilityDataLoaded = true) mounted() 실행 가능 -> watch 동작 X
 
             const container = document.getElementById('map');
-            let options = {
-                center: new kakao.maps.LatLng(37.566535, 126.9779692),
-                level: 4,
-            };
 
-            if(this.isNoParam === true){
-                if(navigator.geolocation){
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            const lat = position.coords.latitude;
-                            const lng = position.coords.longitude;
+            if(this.isFacilityDataLoaded === true){
+                const options = {
+                    center: new kakao.maps.LatLng(this.facilityInfo[0].lat, this.facilityInfo[0].lng),
+                    level: 4,
+                };
 
-                            options = {
-                                center: new kakao.maps.LatLng(lat, lng),
-                                level: 4,
-                            };
+                this.map = new kakao.maps.Map(container, options);
 
-                            this.map = new kakao.maps.Map(container, options);
+                this.displayMarker(this.markerPositions);
 
-                            kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
-                                if(this.map.getLevel() >= 1){
-                                    this.displayMarker(this.markerPositions);
-                                }
-                            });
-
-                            kakao.maps.event.addListener(this.map, 'dragend', ()=> {        
-                                this.displayMarker(this.markerPositions);
-                            });
-                        },
-                        (error) => {
-                            console.log(error);
-                            alert("위치 정보 사용을 허가해주세요");
-
-                            this.map = new kakao.maps.Map(container, options);
-                        }
-                    )   
-                }
-            }else{
-                if(this.isFacilityDataLoaded === true){
-                    if(typeof this.emd !== 'undefined'){
-                        options = {
-                            center: new kakao.maps.LatLng(this.facilityInfo[0].lat, this.facilityInfo[0].lng),
-                            level: 4,
-                        };
-
-                        this.map = new kakao.maps.Map(container, options);
-
+                kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
+                    if(this.map.getLevel() >= 1){
                         this.displayMarker(this.markerPositions);
+                    }
+                });
 
-                        kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
-                            if(this.map.getLevel() >= 1){
-                                this.displayMarker(this.markerPositions);
-                            }
-                        });
-
-                        kakao.maps.event.addListener(this.map, 'dragend', ()=> {        
-                            this.displayMarker(this.markerPositions);
-                        });
-                    }else if(typeof this.cat !== 'undefined'){
-                        options = {
+                kakao.maps.event.addListener(this.map, 'dragend', ()=> {        
+                    this.displayMarker(this.markerPositions);
+                });
+            }else{
+                this.$watch('isFacilityDataLoaded', (value) => {
+                    if(value === true){
+                        const options = {
                             center: new kakao.maps.LatLng(this.facilityInfo[0].lat, this.facilityInfo[0].lng),
                             level: 4,
                         };
@@ -199,51 +168,7 @@ export default {
                             this.displayMarker(this.markerPositions);
                         });
                     }
-                }else{
-                    this.$watch('isFacilityDataLoaded', (value) => {
-                        if(value === true){
-                            if(typeof this.emd !== 'undefined'){
-                                options = {
-                                    center: new kakao.maps.LatLng(this.facilityInfo[0].lat, this.facilityInfo[0].lng),
-                                    level: 4,
-                                };
-
-                                this.map = new kakao.maps.Map(container, options);
-
-                                this.displayMarker(this.markerPositions);
-
-                                kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
-                                    if(this.map.getLevel() >= 1){
-                                        this.displayMarker(this.markerPositions);
-                                    }
-                                });
-
-                                kakao.maps.event.addListener(this.map, 'dragend', ()=> {        
-                                    this.displayMarker(this.markerPositions);
-                                });
-                            }else if(typeof this.cat !== 'undefined'){
-                                options = {
-                                    center: new kakao.maps.LatLng(this.facilityInfo[0].lat, this.facilityInfo[0].lng),
-                                    level: 4,
-                                };
-
-                                this.map = new kakao.maps.Map(container, options);
-
-                                this.displayMarker(this.markerPositions);
-
-                                kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
-                                    if(this.map.getLevel() >= 1){
-                                        this.displayMarker(this.markerPositions);
-                                    }
-                                });
-
-                                kakao.maps.event.addListener(this.map, 'dragend', ()=> {        
-                                    this.displayMarker(this.markerPositions);
-                                });
-                            }
-                        }
-                    });
-                }
+                });
             }
         },
         displayMarker(markerPositions) {
@@ -305,12 +230,11 @@ export default {
                 console.log(error);
             })
 
+            // 항목을 선택했고 (this.selectedSido.length != 0) 이전에 선택한 항목과 새로 선택한 항목이 다른 경우만 api 호출
             if(this.selectedSido.length !== 0 && this.beforeSelectedSido !== this.selectedSido.sidoName){
                 this.beforeSelectedSido = this.selectedSido.sidoName;
 
-                this.defaultSigungu = '시군구 선택';
-                this.defaultEmd = '읍면동 선택';
-                this.defaultCat = '카테고리 선택';
+                // 카테고리도 선택되어
 
                 // axios.get('http://localhost:8090/facility/group', {params:{sido: this.selectedSido.sidoName}})
                 // .then(response => {
@@ -483,10 +407,12 @@ export default {
 
             // contentKey는 어떤 조건으로 facility 정보를 수신 했는지 나타냄
             if(this.contentKey === 'singleEmd'){
-                contentUrl = `http://localhost:8090/facility/info/single/emd?emd=${this.emd}&page=${i}&size=10`;
+                contentUrl = `http://localhost:8090/api/facilities?emd=${this.emd}&page=${i}&size=10`;
             }else if(this.contentKey === 'singleCat'){
                 contentUrl = 
-                    `http://localhost:8090/facility/info/single/cat?cat=${this.cat}&lat=${this.latitude}&lng=${this.longitude}&page=${i}&size=10`;
+                    `http://localhost:8090/api/facilities?cat=${this.cat}&lat=${this.latitude}&lng=${this.longitude}&page=${i}&size=10`;
+            }else if(this.contentKey === 'singleMap'){
+                contentUrl = `http://localhost:8090/api/facilities?lat=${this.latitude}&lng=${this.longitude}&page=${i}&size=10`;
             }
 
             axios.get(contentUrl)
@@ -544,13 +470,13 @@ export default {
         if(typeof this.emd !== 'undefined'){
             // axios는 비동기적
             // 시설 정보를 받고나서 시설 위치 정보를 받아오기 위해 .then 내부에서 다시 get 호출 
-            axios.get('http://localhost:8090/facility/info/single/emd', {params:{emd: this.emd, page: 0, size: 10}})
+            axios.get('http://localhost:8090/api/facilities', {params:{emd: this.emd, page: 0, size: 10}})
             .then(response => {
                 this.facilityInfo = response.data.content;
                 this.totalPages = response.data.totalPages;
                 this.contentKey = 'singleEmd';
 
-                axios.get('http://localhost:8090/facility/location/single', {params:{emd: this.emd}})
+                axios.get('http://localhost:8090/api/facilities/locations', {params:{emd: this.emd}})
                 .then(response =>{
                     this.facilityLocation = response.data;
 
@@ -571,112 +497,177 @@ export default {
             .catch(error => {
                 console.log(error);
             })
-        }
-
-        // 카테고리 이름을 파라미터로 받은 경우
-        if(typeof this.cat !== 'undefined'){
+        }else{
             if(navigator.geolocation){
-                // 현재 위치 정보를 받음
                 navigator.geolocation.getCurrentPosition(
-                    // 현재 위치 정보를 받아올 수 있는 경우
                     (position) => {
-                        // axios는 비동기적
-                        // 시설 정보를 받고나서 시설 위치 정보를 받아오기 위해 .then 내부에서 다시 get 호출
-                        // 현재 위치를 기준으로 정렬하여 받아오기 위해 현재 위치의 위도, 경도를 같이 보냄
                         this.latitude = position.coords.latitude;
                         this.longitude = position.coords.longitude;
 
-                        axios.get('http://localhost:8090/facility/info/single/cat', {
-                            params:{
-                                cat: this.cat, 
-                                lat: this.latitude, 
-                                lng: this.longitude, 
-                                page: 0, 
-                                size: 10
-                            }
-                        })
-                        .then(response =>{
-                            this.facilityInfo = response.data.content;
-                            this.totalPages = response.data.totalPages;
-                            this.contentKey = 'singleCat';
-
-                            axios.get('http://localhost:8090/facility/location/single', {params:{cat: this.cat}})
-                            .then(response =>{
-                                this.facilityLocation = response.data;
-
-                                for(var i = 0; i < this.facilityLocation.length; i++){
-                                    this.markerPositions.push([
-                                        this.facilityLocation[i].facilityName,
-                                        this.facilityLocation[i].lat, 
-                                        this.facilityLocation[i].lng
-                                    ]);
+                        // 카테고리 이름을 파라미터로 받은 경우
+                        if(typeof this.cat !== 'undefined'){
+                            axios.get('http://localhost:8090/api/facilities', {
+                                params:{
+                                    cat: this.cat, 
+                                    lat: this.latitude, 
+                                    lng: this.longitude, 
+                                    page: 0, 
+                                    size: 10
                                 }
+                            })
+                            .then(response =>{
+                                this.facilityInfo = response.data.content;
+                                this.totalPages = response.data.totalPages;
+                                this.contentKey = 'singleCat';
 
-                                this.isFacilityDataLoaded = true; // 시설 정보, 시설 위치 정보 전부 fetch 완료 표시
+                                axios.get('http://localhost:8090/api/facilities/locations', {params:{cat: this.cat}})
+                                .then(response =>{
+                                    this.facilityLocation = response.data;
+
+                                    for(var i = 0; i < this.facilityLocation.length; i++){
+                                        this.markerPositions.push([
+                                            this.facilityLocation[i].facilityName,
+                                            this.facilityLocation[i].lat, 
+                                            this.facilityLocation[i].lng
+                                        ]);
+                                    }
+
+                                    this.isFacilityDataLoaded = true; // 시설 정보, 시설 위치 정보 전부 fetch 완료 표시
+                                })
+                                .catch(error =>{
+                                    console.log(error);
+                                })
                             })
                             .catch(error =>{
                                 console.log(error);
                             })
-                        })
-                        .catch(error =>{
-                            console.log(error);
-                        })
+                        }
+
+                        // 동 이름, 카테고리 전부 파라미터에 없는 경우
+                        // 지도 버튼을 클릭한 경우에 해당
+                        if(typeof this.emd === 'undefined' && typeof this.cat === 'undefined'){
+                            axios.get('http://localhost:8090/api/facilities', {
+                                params:{
+                                    lat: this.latitude, 
+                                    lng: this.longitude, 
+                                    page: 0, 
+                                    size: 10
+                                }
+                            })
+                            .then(response =>{
+                                this.facilityInfo = response.data.content;
+                                this.totalPages = response.data.totalPages;
+                                this.contentKey = 'singleMap';
+
+                                axios.get('http://localhost:8090/api/facilities/locations')
+                                .then(response =>{
+                                    this.facilityLocation = response.data;
+
+                                    for(var i = 0; i < this.facilityLocation.length; i++){
+                                        this.markerPositions.push([
+                                            this.facilityLocation[i].facilityName,
+                                            this.facilityLocation[i].lat, 
+                                            this.facilityLocation[i].lng
+                                        ]);
+                                    }
+
+                                    this.isFacilityDataLoaded = true; // 시설 정보, 시설 위치 정보 전부 fetch 완료 표시
+                                })
+                                .catch(error =>{
+                                    console.log(error);
+                                })
+                            })
+                            .catch(error =>{
+                                console.log(error);
+                            })
+                        }
                     },
-                    // 현재 위치를 받을 수 없는 경우
                     (error) => {
                         console.log(error);
 
                         this.latitude = 37.566535;
                         this.longitude = 126.9779692;
 
-                        // axios는 비동기적
-                        // 시설 정보를 받고나서 시설 위치 정보를 받아오기 위해 .then 내부에서 다시 get 호출
-                        // 현재 위치를 받을 수 없는 경우 서울시를 기준으로 정렬하여 받아오기 위해 서울시의 위도, 경도를 같이 보냄
-
-                        axios.get('http://localhost:8090/facility/info/single/cat', {
-                            params:{
-                                cat: this.cat, 
-                                lat: this.latitude, 
-                                lng: this.longitude, 
-                                page: 0, 
-                                size: 10
-                            }
-                        })
-                        .then(response =>{
-                            this.facilityInfo = response.data.content;
-                            this.totalPages = response.data.totalPages;
-                            this.contentKey = 'singleCat';
-
-                            axios.get('http://localhost:8090/facility/location/single', {params:{cat: this.cat}})
-                            .then(response =>{
-                                this.facilityLocation = response.data;
-
-                                for(var i = 0; i < this.facilityLocation.length; i++){
-                                    this.markerPositions.push([
-                                        this.facilityLocation[i].facilityName,
-                                        this.facilityLocation[i].lat, 
-                                        this.facilityLocation[i].lng
-                                    ]);
+                        // 카테고리 이름을 파라미터로 받은 경우
+                        if(typeof this.cat !== 'undefined'){
+                            axios.get('http://localhost:8090/api/facilities', {
+                                params:{
+                                    cat: this.cat, 
+                                    lat: this.latitude, 
+                                    lng: this.longitude, 
+                                    page: 0, 
+                                    size: 10
                                 }
+                            })
+                            .then(response =>{
+                                this.facilityInfo = response.data.content;
+                                this.totalPages = response.data.totalPages;
+                                this.contentKey = 'singleCat';
 
-                                this.isFacilityDataLoaded = true;
+                                axios.get('http://localhost:8090/api/facilities/locations', {params:{cat: this.cat}})
+                                .then(response =>{
+                                    this.facilityLocation = response.data;
+
+                                    for(var i = 0; i < this.facilityLocation.length; i++){
+                                        this.markerPositions.push([
+                                            this.facilityLocation[i].facilityName,
+                                            this.facilityLocation[i].lat, 
+                                            this.facilityLocation[i].lng
+                                        ]);
+                                    }
+
+                                    this.isFacilityDataLoaded = true; // 시설 정보, 시설 위치 정보 전부 fetch 완료 표시
+                                })
+                                .catch(error =>{
+                                    console.log(error);
+                                })
                             })
                             .catch(error =>{
                                 console.log(error);
                             })
-                        })
-                        .catch(error =>{
-                            console.log(error);
-                        })
-                    }
-                )   
-            }
-        }
+                        }
 
-        // 동 이름, 카테고리 전부 파라미터에 없는 경우
-        // 지도 버튼을 클릭한 경우에 해당
-        if(typeof this.emd === 'undefined' && typeof this.cat === 'undefined'){
-            this.isNoParam = true; // 파라미터가 없음 표시
+                        // 동 이름, 카테고리 전부 파라미터에 없는 경우
+                        // 지도 버튼을 클릭한 경우에 해당
+                        if(typeof this.emd === 'undefined' && typeof this.cat === 'undefined'){
+                            axios.get('http://localhost:8090/api/facilities', {
+                                params:{
+                                    lat: this.latitude, 
+                                    lng: this.longitude, 
+                                    page: 0, 
+                                    size: 10
+                                }
+                            })
+                            .then(response =>{
+                                this.facilityInfo = response.data.content;
+                                this.totalPages = response.data.totalPages;
+                                this.contentKey = 'singleMap';
+
+                                axios.get('http://localhost:8090/api/facilities/locations')
+                                .then(response =>{
+                                    this.facilityLocation = response.data;
+
+                                    for(var i = 0; i < this.facilityLocation.length; i++){
+                                        this.markerPositions.push([
+                                            this.facilityLocation[i].facilityName,
+                                            this.facilityLocation[i].lat, 
+                                            this.facilityLocation[i].lng
+                                        ]);
+                                    }
+
+                                    this.isFacilityDataLoaded = true; // 시설 정보, 시설 위치 정보 전부 fetch 완료 표시
+                                })
+                                .catch(error =>{
+                                    console.log(error);
+                                })
+                            })
+                            .catch(error =>{
+                                console.log(error);
+                            })
+                        }
+                    }
+                )
+            }
         }
     },
     mounted() {    
@@ -700,16 +691,11 @@ export default {
             this.selectedSigungu = '',
             this.optionSigungu = [],
             this.selectedEmd = '',
-            this.optionEmd = [],
-            this.selectedCat = ''
+            this.optionEmd = []
         },
         selectedSigungu: function(){
             this.selectedEmd = '',
-            this.optionEmd = [],
-            this.selectedCat = ''
-        },
-        selectedEmd: function(){
-            this.selectedCat = ''
+            this.optionEmd = []
         }
     }
 }
