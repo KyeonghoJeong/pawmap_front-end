@@ -112,6 +112,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default{
     data(){
         return{
@@ -121,7 +123,19 @@ export default{
     },
     methods:{
         redirectMapViewByEmd(){
-            this.$router.push({ path: "/map", query: {emd: this.emd}});
+            axios.get('http://localhost:8090/api/facilities/availability', {params:{emd: this.emd}})
+            .then(response =>{
+                const count = response.data;
+
+                if(count == 0){
+                    alert("존재하지 않는 동 이름입니다.");
+                }else{
+                    this.$router.push({ path: "/map", query: {emd: this.emd}});
+                }
+            })
+            .catch(error =>{
+                console.log(error);
+            })
         }
     }
 }
