@@ -34,7 +34,7 @@
     </div>
     <div class="div-list-and-map">
         <div class="div-list">
-            <div class="card card-in-list" v-if="facilityInfo && facilityInfo[0]" style="overflow:scroll; max-height: 100%;">
+            <div class="card card-in-list" ref="scrollController" v-if="facilityInfo && facilityInfo[0]" style="overflow:scroll; max-height: 100%;">
                 <div class="card-body" v-for="(facility, index) in facilityInfo" :key="index" style="border: 1px solid #EBEBFF;">
                     <h5 class="card-title">{{facility.facilityName}}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{facility.basicInfo}}</h6>
@@ -86,7 +86,9 @@ export default {
             isFacilityDataLoaded: false, // 시설 정보 + 시설 위치 정보를 전부 다 완전히 featch 했는지 확인을 위한 변수
             markerPositions: [], // 마커 위치를 저장할 배열, 시설 위치 정보를 받아 지정함
             markers: [], // 실제 마커를 담을 배열
-            clickedMarker: '', // 마커 클릭 시 기존 선택된 마커의 infowindow on/off를 위한 변수
+            checkClickedMarker: false,
+            clickedInfoWindow: '', // 마커 클릭 시 기존 선택된 마커의 infowindow on/off를 위한 변수
+            clickedMarker: '',
             map: null,
             optionSido: [], // 행정구역 '시도'를 담을 배열
             optionSigungu: [], // 행정구역 '시군구'를 담을 배열
@@ -121,8 +123,9 @@ export default {
     },
     methods: {
         showInfoWindow(facilityInfo){
-            if(this.clickedMarker != ''){
-                this.clickedMarker.close();
+            if(this.clickedInfoWindow != ''){
+                this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30)));
+                this.clickedInfoWindow.close();
             }
 
             this.map.setCenter(new kakao.maps.LatLng(facilityInfo.lat, facilityInfo.lng));
@@ -133,10 +136,15 @@ export default {
                 targetMarkerObj.marker.setMap(null);
             }
 
+            const imageSrc = require('../assets/marker/over.png');
+            const imageSize = new kakao.maps.Size(30, 30);
+            const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
+
             const marker = new kakao.maps.Marker({
                 map: this.map,
                 position: new kakao.maps.LatLng(facilityInfo.lat, facilityInfo.lng),
-                title: facilityInfo.facilityName
+                title: facilityInfo.facilityName,
+                image: markerImage
             })
 
             const markerObj = {
@@ -154,22 +162,47 @@ export default {
             });
 
             infowindow.open(this.map, marker);
-            this.clickedMarker = infowindow;
+            this.clickedMarker = marker;
+            this.clickedInfoWindow = infowindow;
+            this.checkClickedMarker = true;
+
+            kakao.maps.event.addListener(marker, 'mouseover', () => {
+                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+            });
+
+            kakao.maps.event.addListener(marker, 'mouseout', () => {
+                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+
+                if(this.checkClickedMarker === true){
+                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+                }
+            });
 
             // 마커 클릭 시 이벤트 설정
             kakao.maps.event.addListener(marker, 'click', () => {
                 // 이전 클릭된 마커가 있을 경우 해당 마커의 infowindow는 닫음
-                if(this.clickedMarker != ''){
-                    this.clickedMarker.close();
-                } 
+                if(this.clickedInfoWindow != ''){
+                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+                    this.clickedInfoWindow.close();
+                    this.checkClickedMarker = false;
+                }
+
+                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+
+                infowindow.open(this.map, marker);
 
                 // 클릭된 마커 변수에 현재 클릭된 마커의 infowindow를 새로 넣어줌
-                this.clickedMarker = infowindow;
-                infowindow.open(this.map, marker);
+                this.clickedMarker = marker;
+                this.clickedInfoWindow = infowindow;
+                this.checkClickedMarker = true;
             });
 
-            kakao.maps.event.addListener(this.map, 'click', () => {
+            kakao.maps.event.addListener(this.map, 'click', () => { 
+                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+
                 infowindow.close();
+
+                this.checkClickedMarker = false;
             });
         },
         setListAndMarker(facilityInfoUrl, facilityLocationUrl, contentUrl){
@@ -177,6 +210,10 @@ export default {
             .then(response => {
                 this.facilityInfo = response.data.content;
                 this.totalPages = response.data.totalPages;
+
+                if(typeof this.$refs.scrollController !== 'undefined'){
+                    this.$refs.scrollController.scrollTop = 0;
+                }
 
                 this.map.setCenter(new kakao.maps.LatLng(this.facilityInfo[0].lat, this.facilityInfo[0].lng));
 
@@ -206,21 +243,10 @@ export default {
                     }
 
                     this.displayMarker(this.markerPositions);
-
-                    kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
-                        if(this.map.getLevel() >= 1){
-                            this.displayMarker(this.markerPositions);
-                        }
-                    });
-
-                    kakao.maps.event.addListener(this.map, 'dragend', ()=> {        
-                        this.displayMarker(this.markerPositions);
-                    });
                 })
                 .catch(error =>{
                     console.log(error);
                 })
-
             })
             .catch(error => {
                 console.log(error);
@@ -233,7 +259,20 @@ export default {
 
                 if(count == 0){
                     alert("존재하지 않는 동 이름입니다.");
+
+                    this.emd = '';
                 }else{
+                    this.map.setLevel(5);
+
+                    this.selectedCat = '';
+                    this.beforeSelectedCat = '';
+                    this.selectedSido = '';
+                    this.beforeSelectedSido = '';
+                    this.selectedSigungu = '';
+                    this.beforeSelectedSigungu = '';
+                    this.selectedEmd = '';
+                    this.beforeSelectedEmd = '';
+
                     this.setListAndMarker(
                         `http://localhost:8090/api/facilities?emd=${this.emd}&page=0&size=10`,
                         `http://localhost:8090/api/facilities/locations?emd=${this.emd}`,
@@ -278,12 +317,32 @@ export default {
                 console.log(error);
             })
         },
+        displayDefaultMap(lat, lng){
+            const container = document.getElementById('map');
+
+            const options = {
+                center: new kakao.maps.LatLng(lat, lng),
+                level: 5,
+            };
+
+            this.map = new kakao.maps.Map(container, options);
+
+            kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
+                if(this.map.getLevel() >= 1){
+                    this.displayMarker(this.markerPositions);
+                }
+            });
+
+            kakao.maps.event.addListener(this.map, 'dragend', ()=> {        
+                this.displayMarker(this.markerPositions);
+            });
+        },
         displayMap(){
             const container = document.getElementById('map');
 
             const options = {
                 center: new kakao.maps.LatLng(this.facilityInfo[0].lat, this.facilityInfo[0].lng),
-                level: 4,
+                level: 5,
             };
 
             this.map = new kakao.maps.Map(container, options);
@@ -319,37 +378,16 @@ export default {
                 if(navigator.geolocation){
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
-                            const container = document.getElementById('map');
-
-                            const options = {
-                                center: new kakao.maps.LatLng(position.coords.latitude, position.coords.longitude),
-                                level: 4,
-                            };
-
-                            this.map = new kakao.maps.Map(container, options);
+                            this.displayDefaultMap(position.coords.latitude, position.coords.longitude);
                         },
                         (error) => {
                             console.log(error);
 
-                            const container = document.getElementById('map');
-
-                            const options = {
-                                center: new kakao.maps.LatLng(37.566535, 126.9779692),
-                                level: 4,
-                            };
-
-                            this.map = new kakao.maps.Map(container, options);
+                            this.displayDefaultMap(37.566535, 126.9779692);
                         }
                     )
                 }else{
-                    const container = document.getElementById('map');
-
-                    const options = {
-                        center: new kakao.maps.LatLng(37.566535, 126.9779692),
-                        level: 4,
-                    };
-
-                    this.map = new kakao.maps.Map(container, options);
+                    this.displayDefaultMap(37.566535, 126.9779692);
                 }
             }
         },
@@ -366,10 +404,15 @@ export default {
 
             markerPositions.forEach((position) => {
                 if((position[2] >= swLat && position[2] <= neLat) && (position[3] >= swLng && position[3] <= neLng)){
+                    const imageSrc = require('../assets/marker/default.png');
+                    const imageSize = new kakao.maps.Size(30, 30);
+                    const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
+
                     const marker = new kakao.maps.Marker({
                         map: this.map,
                         position: new kakao.maps.LatLng(position[2], position[3]),
-                        title: position[1]
+                        title: position[1],
+                        image: markerImage
                     })
 
                     const markerObj = {
@@ -387,20 +430,43 @@ export default {
                         removable: iwRemovable
                     });
 
+                    kakao.maps.event.addListener(marker, 'mouseover', () => {
+                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+                    });
+
+                    kakao.maps.event.addListener(marker, 'mouseout', () => {
+                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+
+                        if(this.checkClickedMarker === true){
+                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+                        }
+                    });
+
                     // 마커 클릭 시 이벤트 설정
                     kakao.maps.event.addListener(marker, 'click', () => {
                         // 이전 클릭된 마커가 있을 경우 해당 마커의 infowindow는 닫음
-                        if(this.clickedMarker != ''){
-                            this.clickedMarker.close();
-                        } 
+                        if(this.clickedInfoWindow != ''){
+                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+                            this.clickedInfoWindow.close();
+                            this.checkClickedMarker = false;
+                        }
+
+                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+
+                        infowindow.open(this.map, marker);
 
                         // 클릭된 마커 변수에 현재 클릭된 마커의 infowindow를 새로 넣어줌
-                        this.clickedMarker = infowindow;
-                        infowindow.open(this.map, marker);
+                        this.clickedMarker = marker;
+                        this.clickedInfoWindow = infowindow;
+                        this.checkClickedMarker = true;
                     });
 
-                    kakao.maps.event.addListener(this.map, 'click', () => {
+                    kakao.maps.event.addListener(this.map, 'click', () => { 
+                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+
                         infowindow.close();
+
+                        this.checkClickedMarker = false;
                     });
                 }
             })
@@ -418,6 +484,8 @@ export default {
                     if(navigator.geolocation){
                         navigator.geolocation.getCurrentPosition(
                             (position) => {
+                                this.map.setLevel(5);
+
                                 this.setListAndMarker(
                                     `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${position.coords.latitude}&lng=${position.coords.longitude}&page=0&size=10`,
                                     `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`,
@@ -427,6 +495,8 @@ export default {
                             (error) => {
                                 console.log(error);
 
+                                this.map.setLevel(5);
+
                                 this.setListAndMarker(
                                     `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}&page=0&size=10`,
                                     `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`,
@@ -435,12 +505,16 @@ export default {
                             }
                         )
                     }else{
+                        this.map.setLevel(5);
+
                         this.setListAndMarker(
                             `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}&page=0&size=10`,
                             `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`,
                             `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}`
                         );
                     }
+
+                    this.emd = '';
                 }
             }
         },
@@ -463,14 +537,37 @@ export default {
                 // 이전에 선택한 항목(this.selectedSido.length != 0)과 
                 // 새로 선택한 항목이 다른 경우(this.beforeSelectedSido !== this.selectedSido.sidoName)만 api 호출
                 // 항목 선택 (this.selectedSido.length != 0) + 카테고리 선택 (강제)
-                if(this.selectedSido.length !== 0 && this.beforeSelectedSido !== this.selectedSido.sidoName){
-                    this.beforeSelectedSido = this.selectedSido.sidoName;
+                if(this.selectedSido.length !== 0 && this.beforeSelectedSido !== this.selectedSido.sidoName){      
+                    axios.get('http://localhost:8090/api/facilities/availability', {
+                        params:{
+                            cat: this.selectedCat,
+                            sido: this.selectedSido.sidoName
+                        }
+                    })
+                    .then(response =>{
+                        const count = response.data;
 
-                    this.setListAndMarker(
-                        `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&page=0&size=10`,
-                        `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`,
-                        `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`
-                    );
+                        if(count === 0){
+                            alert("해당하는 시설이 없습니다.");
+
+                            this.selectedSido = '';
+                        }else{
+                            this.beforeSelectedSido = this.selectedSido.sidoName;
+
+                            this.map.setLevel(7);
+
+                            this.setListAndMarker(
+                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&page=0&size=10`,
+                                `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`,
+                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`
+                            );
+                        }
+                    })
+                    .catch(error =>{
+                        console.log(error);
+                    })
+
+                    this.emd = '';
                 }
             }
         },
@@ -489,13 +586,37 @@ export default {
                 alert("시도를 먼저 선택해주세요");
             }else{
                 if(this.selectedSigungu.length !== 0 && this.beforeSelectedSigungu !== this.selectedSigungu.sigunguName){
-                    this.beforeSelectedSigungu = this.selectedSigungu.sigunguName;
+                    axios.get('http://localhost:8090/api/facilities/availability', {
+                        params:{
+                            cat: this.selectedCat,
+                            sido: this.selectedSido.sidoName,
+                            sigungu: this.selectedSigungu.sigunguName
+                        }
+                    })
+                    .then(response =>{
+                        const count = response.data;
 
-                    this.setListAndMarker(
-                        `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&page=0&size=10`,
-                        `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`,
-                        `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`
-                    );
+                        if(count === 0){
+                            alert("해당하는 시설이 없습니다.");
+
+                            this.selectedSigungu = '';
+                        }else{
+                            this.beforeSelectedSigungu = this.selectedSigungu.sigunguName;
+
+                            this.map.setLevel(6);
+
+                            this.setListAndMarker(
+                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&page=0&size=10`,
+                                `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`,
+                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`
+                            );
+                        }
+                    })
+                    .catch(error =>{
+                        console.log(error);
+                    })
+
+                    this.emd = '';
                 }
             }
         },
@@ -514,13 +635,38 @@ export default {
                 alert("시군구를 먼저 선택해주세요");
             }else{
                 if(this.selectedEmd.length !== 0 && this.beforeSelectedEmd !== this.selectedEmd.emdName){
-                    this.beforeSelectedEmd = this.selectedEmd.emdName;
+                    axios.get('http://localhost:8090/api/facilities/availability', {
+                        params:{
+                            cat: this.selectedCat,
+                            sido: this.selectedSido.sidoName,
+                            sigungu: this.selectedSigungu.sigunguName,
+                            emd: this.selectedEmd.emdName
+                        }
+                    })
+                    .then(response =>{
+                        const count = response.data;
 
-                    this.setListAndMarker(
-                        `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}&page=0&size=10`,
-                        `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`,
-                        `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`
-                    );
+                        if(count === 0){
+                            alert("해당하는 시설이 없습니다.");
+
+                            this.selectedEmd = '';
+                        }else{
+                            this.beforeSelectedEmd = this.selectedEmd.emdName;
+
+                            this.map.setLevel(5);
+
+                            this.setListAndMarker(
+                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}&page=0&size=10`,
+                                `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`,
+                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`
+                            );
+                        }
+                    })
+                    .catch(error =>{
+                        console.log(error);
+                    })   
+                    
+                    this.emd = '';
                 }
             }
         },
@@ -558,6 +704,8 @@ export default {
             axios.get(url)
             .then(response => {
                 this.facilityInfo = response.data.content;
+
+                this.$refs.scrollController.scrollTop = 0;
                 
                 this.map.setCenter(new kakao.maps.LatLng(this.facilityInfo[0].lat, this.facilityInfo[0].lng));
                 

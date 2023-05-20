@@ -27,83 +27,13 @@
     <!-- 카테고리 카드 담을 div -->
     <!-- h5-home-category는 카드 내부 폰트 설정을 위한 클래스 -->
     <div class="row row-cols-1 row-cols-md-4 g-4 div-home-category">
-        <div class="col">
-            <router-link :to="{ path: '/map', query: {cat: '동물병원'}}" class="nav-link active navbar-link">
+        <div class="col" v-for="(category, index) in categories" :key="index">
+            <router-link :to="{ path: '/map', query: {cat: category}}" class="nav-link active navbar-link">
                 <div class="card">
-                <img src="../assets/images/veterinarian.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title h5-home-category">동물병원</h5>
-                </div>
-                </div>
-            </router-link>
-        </div>
-        <div class="col">
-            <router-link :to="{ path: '/map', query: {cat: '동물약국'}}" class="nav-link active navbar-link">
-                <div class="card">
-                <img src="../assets/images/pharmacy.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title h5-home-category">동물약국</h5>
-                </div>
-                </div>
-            </router-link> 
-        </div>
-        <div class="col">
-            <router-link :to="{ path: '/map', query: {cat: '반려동물용품'}}" class="nav-link active navbar-link">
-                <div class="card">
-                <img src="../assets/images/toy.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title h5-home-category">동물용품</h5>
-                </div>
-                </div>
-            </router-link>
-        </div>
-        <div class="col">
-            <router-link :to="{ path: '/map', query: {cat: '위탁관리'}}" class="nav-link active navbar-link">
-                <div class="card">
-                <img src="../assets/images/sleep.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title h5-home-category">위탁관리</h5>
-                </div>
-                </div>
-            </router-link>
-        </div>
-        <div class="col">
-            <router-link :to="{ path: '/map', query: {cat: '미용'}}" class="nav-link active navbar-link">
-                <div class="card">
-                <img src="../assets/images/beauty.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title h5-home-category">미용</h5>
-                </div>
-                </div>
-            </router-link>
-        </div>
-        <div class="col">
-            <router-link :to="{ path: '/map', query: {cat: '카페'}}" class="nav-link active navbar-link">
-                <div class="card">
-                <img src="../assets/images/cafe.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title h5-home-category">카페</h5>
-                </div>
-                </div>
-            </router-link> 
-        </div>
-        <div class="col">
-            <router-link :to="{ path: '/map', query: {cat: '펜션'}}" class="nav-link active navbar-link">
-                <div class="card">
-                <img src="../assets/images/villa.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title h5-home-category">펜션</h5>
-                </div>
-                </div>
-            </router-link>
-        </div>
-        <div class="col">
-            <router-link :to="{ path: '/map', query: {cat: '여행지'}}" class="nav-link active navbar-link">
-                <div class="card">
-                <img src="../assets/images/travel.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title h5-home-category">여행지</h5>
-                </div>
+                    <img :src="require(`../assets/images/${category}.jpg`)" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title h5-home-category">{{category}}</h5>
+                    </div>
                 </div>
             </router-link>
         </div>
@@ -118,7 +48,8 @@ export default{
     data(){
         return{
             emd: '',
-            cat: ''
+            cat: '',
+            categories: ['동물병원', '동물약국', '동물용품', '위탁관리', '미용', '카페', '펜션', '여행지'],
         }
     },
     methods:{
