@@ -34,13 +34,30 @@
     </div>
     <div class="div-list-and-map">
         <div class="div-list">
-            <div class="card card-in-list" ref="scrollController" v-if="facilityInfo && facilityInfo[0]" style="overflow:scroll; max-height: 100%;">
-                <div class="card-body" v-for="(facility, index) in facilityInfo" :key="index" style="border: 1px solid #EBEBFF;">
-                    <h5 class="card-title">{{facility.facilityName}}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">{{facility.basicInfo}}</h6>
-                    <p class="card-text">{{facility.roadAddr}}</p>
-                    <a href="" @click.prevent="showInfoWindow(facility)" class="card-link">자세히보기</a>
-                    <a href="" class="card-link">즐겨찾기</a>
+            <div class="card card-in-list" ref="scrollController" v-if="facilityList && facilityList[0]" style="overflow:scroll; max-height: 100%;">
+                <div class="card-body" v-for="(facility, index) in facilityList" :key="index" style="border: 1px solid #EBEBFF;">
+                    <div style="display: flex; align-items: center; margin-bottom:8px;">
+                        <div style="font-weight:bold; font-size: 18px">{{facility.facilityName}}</div>
+                        <div style="font-size: 11px">&nbsp;&nbsp;{{facility.cat}}</div>
+                    </div>
+                    <div style="font-size: 11px">{{facility.roadAddr}}</div>
+                    <div style="font-size: 11px;">(지번) {{facility.landAddr}}</div>
+                    <div style="display: flex; margin-top:8px; font-size: 11px">
+                        <div style="font-weight:bold;">기본정보&nbsp;</div>
+                        <div>{{facility.basicInfo}}</div>
+                    </div>
+                    <div style="display: flex; font-size: 11px">
+                        <div style="font-weight:bold;">영업시간&nbsp;</div>
+                        <div>{{facility.businessHr}}</div>
+                    </div>
+                    <div style="display: flex; font-size: 11px">
+                        <div style="font-weight:bold;">전화번호&nbsp;</div>
+                        <div style="color:green">{{facility.phoneNum}}</div>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button style="background:white; color:blue; border:none; padding:0px; margin-right:15px; font-size: 12px;">북마크</button>
+                        <button style="background:white; color:blue; border:none; padding:0px; font-size: 12px;" @click="showOverlay(facility)">상세보기</button>
+                    </div>
                 </div>
 
                 <div style="display:flex; flex-direction: column; align-items: center">
@@ -81,14 +98,13 @@ export default {
         return {
             emd: '',
             cat: '', // MapView로 이동 시 카테고리 이름을 받을 변수, 이후 데이터를 받고 맵 설정을 하는 데 사용
-            facilityInfo: [], // 리스트 출력을 위해 시설 정보를 받을 배열
+            facilityList: [], // 리스트 출력을 위해 시설 정보를 받을 배열
             facilityLocation: [], // 마커 출력을 위해 시설 위치 정보를 받을 배열
             isFacilityDataLoaded: false, // 시설 정보 + 시설 위치 정보를 전부 다 완전히 featch 했는지 확인을 위한 변수
             markerPositions: [], // 마커 위치를 저장할 배열, 시설 위치 정보를 받아 지정함
             markers: [], // 실제 마커를 담을 배열
-            checkClickedMarker: false,
-            clickedInfoWindow: '', // 마커 클릭 시 기존 선택된 마커의 infowindow on/off를 위한 변수
             clickedMarker: '',
+            activatedOverlay: '',
             map: null,
             optionSido: [], // 행정구역 '시도'를 담을 배열
             optionSigungu: [], // 행정구역 '시군구'를 담을 배열
@@ -122,100 +138,169 @@ export default {
         }
     },
     methods: {
-        showInfoWindow(facilityInfo){
-            if(this.clickedInfoWindow != ''){
-                this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30)));
-                this.clickedInfoWindow.close();
-            }
+        setOverlay(marker, facilityId){
+            /////////////////////////////////////////////////////////////////////////////////////////////////
+            // 데이터 가져오기
+            axios.get('http://localhost:8090/api/facility', {params:{facilityId: facilityId}})
+            .then(response =>{
+                const facility = response.data;  
+                /////////////////////////////////////////////////////////////////////////////////////////////////
+                // content 설정
+                const contentString = 
+                    '<div style="width:300px; height: 300px; border:1px solid; border-color:black; overflow:scroll">'+
+                        '<div style="padding:10px; background:white;">'+
+                            '<div style="display: flex; align-items: center; margin-bottom:8px;">'+
+                                `<div style="font-weight:bold; font-size: 18px">${facility.facilityName}</div>`+
+                                `<div style="font-size: 11px">&nbsp;&nbsp;${facility.cat}</div>`+
+                            '</div>'+
+                            `<div style="font-size: 11px">${facility.roadAddr}</div>`+
+                            `<div style="font-size: 11px; ">(지번) ${facility.landAddr}</div>`+
+                            '<div style="display: flex; margin-top:8px; font-size: 11px">'+
+                                '<div style="font-weight:bold;">기본정보&nbsp;</div>'+
+                                `<div>${facility.basicInfo}</div>`+
+                            '</div>'+
+                            '<div style="display: flex; margin-top:1px; font-size: 11px">'+
+                                '<div style="font-weight:bold;">영업시간&nbsp;</div>'+
+                                `<div>${facility.businessHr}</div>`+
+                            '</div>'+
+                            '<div style="display: flex; margin-top:1px; font-size: 11px">'+
+                                '<div style="font-weight:bold;">휴무일&nbsp;</div>'+
+                                `<div>${facility.closedDay}</div>`+
+                            '</div>'+   
+                            '<div style="display: flex; margin-top:1px; font-size: 11px">'+
+                                '<div style="font-weight:bold;">전화번호&nbsp;</div>'+
+                                `<div style="color:green">${facility.phoneNum}</div>`+
+                            '</div>'+
+                            '<div style="display: flex; margin-top:1px; font-size: 11px">'+
+                                `<div style="font-weight:bold;" v-if="">홈페이지&nbsp;</div>`+
+                                `${facility.website === '정보없음' ? '정보없음' : `<a href="${facility.website}" target="_blank">${facility.website}</a>`}` +
+                            '</div>'+
+                            '<div style="display: flex; margin-top:1px; font-size: 11px">'+
+                                '<div style="font-weight:bold;">주차&nbsp;</div>'+
+                                `<div>${facility.parkingAvail}</div>`+
+                            '</div>'+   
+                            '<div style="display: flex; margin-top:1px; font-size: 11px">'+
+                                '<div style="font-weight:bold;">이용로&nbsp;</div>'+
+                                `<div>${facility.admissionFee}</div>`+
+                            '</div>'+
+                            '<div style="display :flex; justify-content: flex-end;">'+
+                                '<button style="background:white; color:blue; border:none; padding:0px; margin-right:15px; font-size: 12px;">북마크</button>'+
+                                '<button id="closeButton" style="background:white; color:blue; border:none; padding:0px; font-size: 12px;">닫기</button>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div style="padding:10px; background:#F7F7F7;">'+
+                            '<div style="display: flex; align-items: center; margin-bottom:8px;">'+
+                                '<div style="font-weight:bold;">반려동물 관련 사항</div>'+
+                            '</div>'+        
+                            '<div style="display: flex; margin-top:1px; font-size: 11px">'+
+                                '<div style="font-weight:bold;">추가요금&nbsp;</div>'+
+                                `<div>${facility.petFee}</div>`+
+                            '</div>'+
+                            '<div style="display: flex; margin-top:1px; font-size: 11px">'+
+                                '<div style="font-weight:bold;">전용&nbsp;</div>'+
+                                `<div>${facility.petExclusive}</div>`+
+                            '</div>'+
+                            '<div style="display: flex; margin-top:1px; font-size: 11px">'+
+                                '<div style="font-weight:bold;">크기&nbsp;</div>'+
+                                `<div>${facility.petSize}</div>`+
+                            '</div>'+
+                            '<div style="display: flex; margin-top:1px; font-size: 11px">'+
+                                '<div style="font-weight:bold;">제한사항&nbsp;</div>'+
+                                `<div>${facility.petRestrictions}</div>`+
+                            '</div>'+
+                            '<div style="display: flex; margin-top:1px; font-size: 11px">'+
+                                '<div style="font-weight:bold;">장소(실내)&nbsp;</div>'+
+                                `<div>${facility.indoorAvail}</div>`+
+                            '</div>'+    
+                            '<div style="display: flex; margin-top:1px; font-size: 11px">'+
+                                '<div style="font-weight:bold;">장소(실외)&nbsp;</div>'+
+                                `<div>${facility.outdoorAvail}</div>`+
+                            '</div>'+  
+                        '</div>'+
+                    '</div>';
 
-            this.map.setCenter(new kakao.maps.LatLng(facilityInfo.lat, facilityInfo.lng));
+                const parser = new DOMParser();
+                const content = parser.parseFromString(contentString, 'text/html');
 
-            const targetMarkerObj = this.markers.find(markerObj => markerObj.facilityId === facilityInfo.facilityId);
+                const closeButton = content.getElementById('closeButton');
+                closeButton.addEventListener('click', () => {
+                    this.activatedOverlay.setMap(null);
+                    this.activatedOverlay = '';
 
-            if(targetMarkerObj){
-                targetMarkerObj.marker.setMap(null);
-            }
+                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30)));
+                    this.clickedMarker = '';
+                });
 
-            const imageSrc = require('../assets/marker/over.png');
-            const imageSize = new kakao.maps.Size(30, 30);
-            const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
+                content.body.addEventListener('mouseover', () => {
+                    this.map.setCursor('default');
+                });
 
-            const marker = new kakao.maps.Marker({
-                map: this.map,
-                position: new kakao.maps.LatLng(facilityInfo.lat, facilityInfo.lng),
-                title: facilityInfo.facilityName,
-                image: markerImage
+                content.body.addEventListener('mouseout', () => {
+                    this.map.setCursor('grab');
+                });
+
+                content.body.addEventListener('wheel', () => {
+                    kakao.maps.event.preventMap();
+                });
+
+                /////////////////////////////////////////////////////////////////////////////////////////////////
+                // overlay 설정
+                // 이전에 출력한 overlay가 있는 경우 출력 해제 후 제거
+                if(this.activatedOverlay !== ''){
+                    this.activatedOverlay.setMap(null);
+                    this.activatedOverlay = '';
+                }
+
+                const overlay = new kakao.maps.CustomOverlay({
+                    position: marker.getPosition(),
+                    content: content.body,
+                    clickable: true,
+                    xAnchor: -0.1,
+                    zIndex: 1,
+                });
+
+                overlay.setMap(this.map);
+
+                this.activatedOverlay = overlay;
             })
-
-            const markerObj = {
-                facilityId: facilityInfo.facilityId,
-                marker: marker
-            };
-
-            this.markers.push(markerObj);
-
-            const iwContent = `<div style="padding:5px;"><div class="card-body" style="border: 1px solid #EBEBFF;"><h5 class="card-title">${facilityInfo.facilityName}</h5></div></div>`, iwRemovable = true;
-        
-            const infowindow = new kakao.maps.InfoWindow({
-                content: iwContent,
-                removable: iwRemovable
-            });
-
-            infowindow.open(this.map, marker);
-            this.clickedMarker = marker;
-            this.clickedInfoWindow = infowindow;
-            this.checkClickedMarker = true;
-
-            kakao.maps.event.addListener(marker, 'mouseover', () => {
-                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
-            });
-
-            kakao.maps.event.addListener(marker, 'mouseout', () => {
-                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
-
-                if(this.checkClickedMarker === true){
-                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
-                }
-            });
-
-            // 마커 클릭 시 이벤트 설정
-            kakao.maps.event.addListener(marker, 'click', () => {
-                // 이전 클릭된 마커가 있을 경우 해당 마커의 infowindow는 닫음
-                if(this.clickedInfoWindow != ''){
-                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
-                    this.clickedInfoWindow.close();
-                    this.checkClickedMarker = false;
-                }
-
-                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
-
-                infowindow.open(this.map, marker);
-
-                // 클릭된 마커 변수에 현재 클릭된 마커의 infowindow를 새로 넣어줌
-                this.clickedMarker = marker;
-                this.clickedInfoWindow = infowindow;
-                this.checkClickedMarker = true;
-            });
-
-            kakao.maps.event.addListener(this.map, 'click', () => { 
-                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
-
-                infowindow.close();
-
-                this.checkClickedMarker = false;
-            });
+            .catch(error => {
+                console.log(error);
+            })
         },
-        setListAndMarker(facilityInfoUrl, facilityLocationUrl, contentUrl){
-            axios.get(facilityInfoUrl)
+        showOverlay(facilityList){
+            // 맵 위치 클릭한 마커 중심으로 변경
+            this.map.setCenter(new kakao.maps.LatLng(facilityList.lat, facilityList.lng));
+
+            // 마커 다시 그리기
+            this.displayMarker(this.markerPositions);
+
+            // 이전에 클릭한 마커가 있는 경우 아이콘 기본값으로 변경
+            if(this.clickedMarker !== ''){
+                this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30)));
+                this.clickedMarker = '';
+            }
+            
+            // id로 해당 마커 찾기
+            const targetMarker = this.markers.find((marker) => marker.id === facilityList.facilityId);
+            const marker = targetMarker;
+
+            marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), new kakao.maps.Size(30, 30)));
+            
+            this.clickedMarker = marker;
+
+            this.setOverlay(marker, facilityList.facilityId);
+        },
+        setListAndMarker(facilityListUrl, facilityLocationUrl, contentUrl){
+            axios.get(facilityListUrl)
             .then(response => {
-                this.facilityInfo = response.data.content;
+                this.facilityList = response.data.content;
                 this.totalPages = response.data.totalPages;
 
                 if(typeof this.$refs.scrollController !== 'undefined'){
                     this.$refs.scrollController.scrollTop = 0;
                 }
 
-                this.map.setCenter(new kakao.maps.LatLng(this.facilityInfo[0].lat, this.facilityInfo[0].lng));
+                this.map.setCenter(new kakao.maps.LatLng(this.facilityList[0].lat, this.facilityList[0].lng));
 
                 // startNum, endNum, pageActive 재설정
                 if(this.totalPages != 0){
@@ -287,7 +372,7 @@ export default {
         setMapByCat(lat, lng){
             axios.get(`http://localhost:8090/api/facilities?cat=${this.cat}&lat=${lat}&lng=${lng}&page=0&size=10`)
             .then(response => {
-                this.facilityInfo = response.data.content;
+                this.facilityList = response.data.content;
                 this.totalPages = response.data.totalPages;
 
                 axios.get(`http://localhost:8090/api/facilities/locations?cat=${this.cat}`)
@@ -303,7 +388,7 @@ export default {
                         ]);
                     }
 
-                    this.selectedCat = this.facilityInfo[0].cat;
+                    this.selectedCat = this.facilityList[0].cat;
                     this.beforeSelectedCat = this.selectedCat;
                     this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.cat}&lat=${lat}&lng=${lng}`;
 
@@ -341,7 +426,7 @@ export default {
             const container = document.getElementById('map');
 
             const options = {
-                center: new kakao.maps.LatLng(this.facilityInfo[0].lat, this.facilityInfo[0].lng),
+                center: new kakao.maps.LatLng(this.facilityList[0].lat, this.facilityList[0].lng),
                 level: 5,
             };
 
@@ -392,81 +477,89 @@ export default {
             }
         },
         displayMarker(markerPositions) {
+            // 기존 마커 제거
             if (this.markers.length > 0) {
-                this.markers.forEach((markerObj) => markerObj.marker.setMap(null));
-                //this.markers.forEach((marker) => marker.setMap(null));
+                this.markers.forEach((marker) => {
+                    marker.setMap(null);
+                })
+                this.markers = [];
             }
 
+            // 범위를 지정할 각 모서리 변수
             const neLat = this.map.getBounds().getNorthEast().getLat();
             const neLng = this.map.getBounds().getNorthEast().getLng();
             const swLat = this.map.getBounds().getSouthWest().getLat();
             const swLng = this.map.getBounds().getSouthWest().getLng();
 
+            // 반복문으로 마커 생성
             markerPositions.forEach((position) => {
                 if((position[2] >= swLat && position[2] <= neLat) && (position[3] >= swLng && position[3] <= neLng)){
-                    const imageSrc = require('../assets/marker/default.png');
-                    const imageSize = new kakao.maps.Size(30, 30);
-                    const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
-
+                    /////////////////////////////////////////////////////////////////////////////////////////////////
+                    // 마커 생성
                     const marker = new kakao.maps.Marker({
                         map: this.map,
                         position: new kakao.maps.LatLng(position[2], position[3]),
                         title: position[1],
-                        image: markerImage
+                        image: new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30))
                     })
+                    marker.id = position[0];
+                    this.markers.push(marker);
 
-                    const markerObj = {
-                        facilityId: position[0],
-                        marker: marker
-                    };
+                    /////////////////////////////////////////////////////////////////////////////////////////////////
+                    // 마커 아이콘 관련 설정 및 이벤트
+                    // 줌, 드래그 시 이전에 클릭한 마커 아이콘을 유지하기 위해 id로 체크 후 같은 마커는 아이콘 유지 
+                    if(this.clickedMarker !== ''){
+                        if(marker.id === this.clickedMarker.id){
+                            marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), new kakao.maps.Size(30, 30)));
+                            this.clickedMarker = marker;
+                        }
+                    }
 
-                    this.markers.push(markerObj);
-
-                    const iwContent = `<div style="padding:5px;"><div class="card-body" style="border: 1px solid #EBEBFF;"><h5 class="card-title">${position[0]}</h5></div></div>`, iwRemovable = true;
-                
-                    // 모든 마커에 infowindow 생성
-                    const infowindow = new kakao.maps.InfoWindow({
-                        content: iwContent,
-                        removable: iwRemovable
-                    });
-
+                    // 마우스오버 할 때마다 아이콘 변경 표시
                     kakao.maps.event.addListener(marker, 'mouseover', () => {
-                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), new kakao.maps.Size(30, 30)));
                     });
 
+                    // 마우스아웃 할 때는 다시 아이콘 기본값 표시
                     kakao.maps.event.addListener(marker, 'mouseout', () => {
-                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30)));
 
-                        if(this.checkClickedMarker === true){
-                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+                        // 단, 클릭한 마커가 있는 경우 아이콘 변경값 유지
+                        if(this.clickedMarker !== ''){
+                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), new kakao.maps.Size(30, 30)));
                         }
                     });
 
-                    // 마커 클릭 시 이벤트 설정
+                    /////////////////////////////////////////////////////////////////////////////////////////////////
+                    // 마커 클릭 시 오버레이 출력
                     kakao.maps.event.addListener(marker, 'click', () => {
-                        // 이전 클릭된 마커가 있을 경우 해당 마커의 infowindow는 닫음
-                        if(this.clickedInfoWindow != ''){
-                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
-                            this.clickedInfoWindow.close();
-                            this.checkClickedMarker = false;
+                        // 맵 위치 클릭한 마커 중심으로 변경
+                        this.map.setCenter(new kakao.maps.LatLng(position[2], position[3]));
+
+                        // 이전에 클릭한 마커가 있는 경우 아이콘 기본값으로 변경
+                        if(this.clickedMarker !== ''){
+                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30)));
+                            this.clickedMarker = '';
                         }
-
-                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
-
-                        infowindow.open(this.map, marker);
-
-                        // 클릭된 마커 변수에 현재 클릭된 마커의 infowindow를 새로 넣어줌
+                        
+                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), new kakao.maps.Size(30, 30)));
+                        
                         this.clickedMarker = marker;
-                        this.clickedInfoWindow = infowindow;
-                        this.checkClickedMarker = true;
+
+                        this.setOverlay(marker, position[0]);
                     });
 
-                    kakao.maps.event.addListener(this.map, 'click', () => { 
-                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+                    /////////////////////////////////////////////////////////////////////////////////////////////////
+                    // 지도 클릭 시 아이콘 기본값 설정 및 오버레이 삭제
+                    kakao.maps.event.addListener(this.map, 'click', () => {
+                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30)));
 
-                        infowindow.close();
+                        if(this.activatedOverlay !== ''){
+                            this.activatedOverlay.setMap(null);
+                            this.activatedOverlay = '';
+                        }
 
-                        this.checkClickedMarker = false;
+                        this.clickedMarker = '';
                     });
                 }
             })
@@ -703,11 +796,11 @@ export default {
 
             axios.get(url)
             .then(response => {
-                this.facilityInfo = response.data.content;
+                this.facilityList = response.data.content;
 
                 this.$refs.scrollController.scrollTop = 0;
                 
-                this.map.setCenter(new kakao.maps.LatLng(this.facilityInfo[0].lat, this.facilityInfo[0].lng));
+                this.map.setCenter(new kakao.maps.LatLng(this.facilityList[0].lat, this.facilityList[0].lng));
                 
                 this.displayMarker(this.markerPositions);
             })
@@ -759,7 +852,7 @@ export default {
         if(typeof this.emd != 'undefined'){
             axios.get(`http://localhost:8090/api/facilities?emd=${this.emd}&page=0&size=10`)
             .then(response => {
-                this.facilityInfo = response.data.content;
+                this.facilityList = response.data.content;
                 this.totalPages = response.data.totalPages;
 
                 axios.get(`http://localhost:8090/api/facilities/locations?emd=${this.emd}`)
