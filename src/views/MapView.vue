@@ -14,19 +14,19 @@
             </form>
         </div>
         <div class="div-select-in-map">
-            <select class="form-select select-in-map" v-model="selectedCat" v-on:click="getCat()" aria-label="Default select example">
+            <select class="form-select select-in-map" v-model="selectedCat" @change="getCat()" aria-label="Default select example">
                 <option value="" selected>카테고리 선택</option>
                 <option v-for="item in optionCat" :value="item" :key="item">{{ item }}</option>
             </select>
-            <select class="form-select select-in-map" v-on:click="getSido()" v-model="selectedSido" aria-label="Default select example">
+            <select class="form-select select-in-map" v-model="selectedSido" @click="getSido()" @change="getFacilityBySido()" aria-label="Default select example">
                 <option value="" selected>시도 선택</option>
                 <option v-for="item in optionSido" :value="item" :key="item.sidoId">{{ item.sidoName }}</option>
             </select>
-            <select class="form-select select-in-map" v-on:click="getSigungu()" v-model="selectedSigungu" aria-label="Default select example">
+            <select class="form-select select-in-map" v-model="selectedSigungu" @click="getSigungu()" @change="getFacilityBySigungu()" aria-label="Default select example">
                 <option value="" selected>시군구 선택</option>
                 <option v-for="item in optionSigungu" :value="item" :key="item.sigunguId">{{ item.sigunguName }}</option>
             </select>
-            <select class="form-select select-in-map" v-on:click="getEmd()" v-model="selectedEmd" aria-label="Default select example">
+            <select class="form-select select-in-map" v-model="selectedEmd" @click="getEmd()" @change="getFacilityByEmd()" aria-label="Default select example">
                 <option value="" selected>읍면동 선택</option>
                 <option v-for="item in optionEmd" :value="item" :key="item.emdId">{{ item.emdName }}</option>
             </select>
@@ -96,6 +96,7 @@ import axios from 'axios'
 export default {
     data(){
         return {
+            size: 10,
             emd: '',
             cat: '', // MapView로 이동 시 카테고리 이름을 받을 변수, 이후 데이터를 받고 맵 설정을 하는 데 사용
             facilityList: [], // 리스트 출력을 위해 시설 정보를 받을 배열
@@ -135,6 +136,8 @@ export default {
             startNum: 0, // Pagination을 위해 현재 출력 페이지 배열의 시작 페이지 번호
             endNum: 0, // Pagination을 위해 현재 출력 페이지 배열의 마지막 페이지 번호
             contentUrl: '', // 유저의 선택에 맞는 리스트 출력을 위해 갱신 시 어떤 선택을 했는 지 구별을 위해 사용되는 변수
+            clusterer: '',
+            checkZoom: true,
         }
     },
     methods: {
@@ -222,12 +225,20 @@ export default {
                 const parser = new DOMParser();
                 const content = parser.parseFromString(contentString, 'text/html');
 
+                const imageSize = new kakao.maps.Size(8, 8);
                 const closeButton = content.getElementById('closeButton');
                 closeButton.addEventListener('click', () => {
                     this.activatedOverlay.setMap(null);
                     this.activatedOverlay = '';
 
-                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30)));
+                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+
+                    for(let i=0; i<this.facility.length; i++){
+                        if(this.clickedMarker.id === this.facilityList[i].facilityId){
+                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificdefault.png'), new kakao.maps.Size(30, 30)));
+                        }
+                    }
+
                     this.clickedMarker = '';
                 });
 
@@ -256,7 +267,7 @@ export default {
                     content: content.body,
                     clickable: true,
                     xAnchor: -0.1,
-                    zIndex: 1,
+                    zIndex: 3,
                 });
 
                 overlay.setMap(this.map);
@@ -274,9 +285,18 @@ export default {
             // 마커 다시 그리기
             this.displayMarker(this.markerPositions);
 
+            const imageSize = new kakao.maps.Size(8, 8);
+
             // 이전에 클릭한 마커가 있는 경우 아이콘 기본값으로 변경
             if(this.clickedMarker !== ''){
-                this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30)));
+                this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+
+                for(let i=0; i<this.facilityList.length; i++){
+                    if(this.clickedMarker.id === this.facilityList[i].facilityId){
+                        this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificdefault.png'), new kakao.maps.Size(30, 30)));
+                    }
+                }
+
                 this.clickedMarker = '';
             }
             
@@ -284,7 +304,13 @@ export default {
             const targetMarker = this.markers.find((marker) => marker.id === facilityList.facilityId);
             const marker = targetMarker;
 
-            marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), new kakao.maps.Size(30, 30)));
+            marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+
+            for(let i=0; i<this.facilityList.length; i++){
+                if(marker.id === this.facilityList[i].facilityId){
+                    marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificover.png'), new kakao.maps.Size(30, 30)));
+                }
+            }
             
             this.clickedMarker = marker;
 
@@ -347,6 +373,7 @@ export default {
 
                     this.emd = '';
                 }else{
+                    this.map.setMaxLevel(8);
                     this.map.setLevel(5);
 
                     this.selectedCat = '';
@@ -359,7 +386,7 @@ export default {
                     this.beforeSelectedEmd = '';
 
                     this.setListAndMarker(
-                        `http://localhost:8090/api/facilities?emd=${this.emd}&page=0&size=10`,
+                        `http://localhost:8090/api/facilities?emd=${this.emd}&page=0&size=${this.size}`,
                         `http://localhost:8090/api/facilities/locations?emd=${this.emd}`,
                         `http://localhost:8090/api/facilities?emd=${this.emd}`
                     );
@@ -370,7 +397,7 @@ export default {
             })
         },
         setMapByCat(lat, lng){
-            axios.get(`http://localhost:8090/api/facilities?cat=${this.cat}&lat=${lat}&lng=${lng}&page=0&size=10`)
+            axios.get(`http://localhost:8090/api/facilities?cat=${this.cat}&lat=${lat}&lng=${lng}&page=0&size=${this.size}`)
             .then(response => {
                 this.facilityList = response.data.content;
                 this.totalPages = response.data.totalPages;
@@ -412,8 +439,10 @@ export default {
 
             this.map = new kakao.maps.Map(container, options);
 
+            this.map.setMaxLevel(6);
+
             kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
-                if(this.map.getLevel() >= 1){
+                if(this.map.getLevel() >= 1 && this.checkZoom === true){
                     this.displayMarker(this.markerPositions);
                 }
             });
@@ -432,11 +461,27 @@ export default {
 
             this.map = new kakao.maps.Map(container, options);
 
+            this.map.setMaxLevel(6);
+
+            /////////////////////////////////////////////////////////////////////////////////////////////////
+            // 마커 클러스터러 생성 및 이벤트 추가
+            // this.clusterer = new kakao.maps.MarkerClusterer({
+            //     map: this.map,
+            //     averageCenter: true,
+            //     disableClickZoom: true,
+            //     minLevel: 12
+            // });
+
+            // kakao.maps.event.addListener(this.clusterer, 'clusterclick', () => {
+            //     this.map.setLevel(this.map.getLevel()-1);
+            // });
+
             this.displayMarker(this.markerPositions);
 
             kakao.maps.event.addListener(this.map, "zoom_changed", ()=> {
-                if(this.map.getLevel() >= 1){
+                if(this.map.getLevel() >= 1 && this.checkZoom === true){
                     this.displayMarker(this.markerPositions);
+                    //this.map.setMaxLevel(10);
                 }
             });
 
@@ -496,37 +541,74 @@ export default {
                 if((position[2] >= swLat && position[2] <= neLat) && (position[3] >= swLng && position[3] <= neLng)){
                     /////////////////////////////////////////////////////////////////////////////////////////////////
                     // 마커 생성
+                    const imageSize = new kakao.maps.Size(10, 10);
+
                     const marker = new kakao.maps.Marker({
                         map: this.map,
                         position: new kakao.maps.LatLng(position[2], position[3]),
                         title: position[1],
-                        image: new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30))
+                        image: new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize),
+                        zIndex: 1,
                     })
                     marker.id = position[0];
                     this.markers.push(marker);
+                    //this.clusterer.addMarkers(this.markers);
+
+                    const specificImageSize = new kakao.maps.Size(30, 30)
+                    for(let i=0; i<this.facilityList.length; i++){
+                        if(marker.id === this.facilityList[i].facilityId){
+                            marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificdefault.png'), specificImageSize));
+                            marker.setZIndex(2);
+                        }
+                    }
 
                     /////////////////////////////////////////////////////////////////////////////////////////////////
                     // 마커 아이콘 관련 설정 및 이벤트
                     // 줌, 드래그 시 이전에 클릭한 마커 아이콘을 유지하기 위해 id로 체크 후 같은 마커는 아이콘 유지 
                     if(this.clickedMarker !== ''){
                         if(marker.id === this.clickedMarker.id){
-                            marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), new kakao.maps.Size(30, 30)));
+                            marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+
+                            for(let i=0; i<this.facilityList.length; i++){
+                                if(marker.id === this.facilityList[i].facilityId){
+                                    marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificover.png'), specificImageSize));
+                                }
+                            }
+
                             this.clickedMarker = marker;
                         }
                     }
 
                     // 마우스오버 할 때마다 아이콘 변경 표시
                     kakao.maps.event.addListener(marker, 'mouseover', () => {
-                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), new kakao.maps.Size(30, 30)));
+                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+
+                        for(let i=0; i<this.facilityList.length; i++){
+                            if(marker.id === this.facilityList[i].facilityId){
+                                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificover.png'), specificImageSize));
+                            }
+                        }
                     });
 
                     // 마우스아웃 할 때는 다시 아이콘 기본값 표시
                     kakao.maps.event.addListener(marker, 'mouseout', () => {
-                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30)));
+                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+
+                        for(let i=0; i<this.facilityList.length; i++){
+                            if(marker.id === this.facilityList[i].facilityId){
+                                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificdefault.png'), specificImageSize));
+                            }
+                        }
 
                         // 단, 클릭한 마커가 있는 경우 아이콘 변경값 유지
                         if(this.clickedMarker !== ''){
-                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), new kakao.maps.Size(30, 30)));
+                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+
+                            for(let i=0; i<this.facilityList.length; i++){
+                                if(this.clickedMarker.id === this.facilityList[i].facilityId){
+                                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificover.png'), specificImageSize));
+                                }
+                            }
                         }
                     });
 
@@ -538,11 +620,24 @@ export default {
 
                         // 이전에 클릭한 마커가 있는 경우 아이콘 기본값으로 변경
                         if(this.clickedMarker !== ''){
-                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30)));
+                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+
+                            for(let i=0; i<this.facilityList.length; i++){
+                                if(this.clickedMarker.id === this.facilityList[i].facilityId){
+                                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificdefault.png'), specificImageSize));
+                                }
+                            }
+
                             this.clickedMarker = '';
                         }
                         
-                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), new kakao.maps.Size(30, 30)));
+                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+
+                        for(let i=0; i<this.facilityList.length; i++){
+                            if(marker.id === this.facilityList[i].facilityId){
+                                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificover.png'), specificImageSize));
+                            }
+                        }
                         
                         this.clickedMarker = marker;
 
@@ -552,7 +647,13 @@ export default {
                     /////////////////////////////////////////////////////////////////////////////////////////////////
                     // 지도 클릭 시 아이콘 기본값 설정 및 오버레이 삭제
                     kakao.maps.event.addListener(this.map, 'click', () => {
-                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), new kakao.maps.Size(30, 30)));
+                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+
+                        for(let i=0; i<this.facilityList.length; i++){
+                            if(marker.id === this.facilityList[i].facilityId){
+                                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificdefault.png'), specificImageSize));
+                            }
+                        }
 
                         if(this.activatedOverlay !== ''){
                             this.activatedOverlay.setMap(null);
@@ -565,107 +666,100 @@ export default {
             })
         },
         getCat(){
-            // selectedCat은 현재 선택된 카테고리 이름
-            // beforeSelectedCat은 이전에 선택한 카테고리 이름
-            // 선택된 카테고리가 있고 이전 선택 카테고리와 현재 선택 카테고리가 다르다면 카테고리를 새로 선택한 경우에 해당
-            if(this.selectedCat !== '' && this.beforeSelectedCat !== this.selectedCat){
-                this.beforeSelectedCat = this.selectedCat;
+            if(this.selectedCat.length !== 0){
+                if(navigator.geolocation){
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            this.map.setMaxLevel(6);
+                            this.map.setLevel(5);
 
-                // 선택된 시도, 시군구, 읍면동이 없는 경우는 카테고리만 선택한 경우
-                // 새로 카테고리 정보와, 위치 정보를 받아옴
-                if(this.selectedSido.length === 0 && this.selectedSigungu.length === 0 && this.selectedEmd.length === 0){
-                    if(navigator.geolocation){
-                        navigator.geolocation.getCurrentPosition(
-                            (position) => {
-                                this.map.setLevel(5);
+                            this.setListAndMarker(
+                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${position.coords.latitude}&lng=${position.coords.longitude}&page=0&size=${this.size}`,
+                                `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`,
+                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${position.coords.latitude}&lng=${position.coords.longitude}`
+                            );
+                        },
+                        (error) => {
+                            console.log(error);
 
-                                this.setListAndMarker(
-                                    `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${position.coords.latitude}&lng=${position.coords.longitude}&page=0&size=10`,
-                                    `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`,
-                                    `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${position.coords.latitude}&lng=${position.coords.longitude}`
-                                );
-                            },
-                            (error) => {
-                                console.log(error);
+                            this.map.setMaxLevel(6);
+                            this.map.setLevel(5);
 
-                                this.map.setLevel(5);
+                            this.setListAndMarker(
+                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}&page=0&size=${this.size}`,
+                                `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`,
+                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}`
+                            );
+                        }
+                    )
+                }else{
+                    this.map.setMaxLevel(6);
+                    this.map.setLevel(5);
 
-                                this.setListAndMarker(
-                                    `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}&page=0&size=10`,
-                                    `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`,
-                                    `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}`
-                                );
-                            }
-                        )
-                    }else{
-                        this.map.setLevel(5);
-
-                        this.setListAndMarker(
-                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}&page=0&size=10`,
-                            `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`,
-                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}`
-                        );
-                    }
-
-                    this.emd = '';
+                    this.setListAndMarker(
+                        `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}&page=0&size=${this.size}`,
+                        `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`,
+                        `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}`
+                    );
                 }
+
+                this.emd = '';
             }
         },
         getSido(){
-            // select 메뉴 클릭 후 getSido() 동작 경우의 수
-            // select 메뉴만 클릭하는 경우 -> this.selectedSido.length = 0
-            // select 메뉴에서 항목을 선택한 경우 1 -> this.selectedSido.length != 0 -> 처음 선택한 경우 또는 이전 선택한 항목과 다른 경우 -> api 호출
-            // select 메뉴에서 항목을 선택한 경우 2 -> this.selectedSido.length != 0 -> 이전 선택한 항목과 같은 경우 -> 재클릭한 경우
-            axios.get('http://localhost:8090/district/sido')
-            .then(response =>{
-                this.optionSido = response.data;
-            })
-            .catch(error =>{
-                console.log(error);
-            })
-
             if(this.selectedCat === ''){
                 alert("카테고리를 먼저 선택해주세요");
             }else{
-                // 이전에 선택한 항목(this.selectedSido.length != 0)과 
-                // 새로 선택한 항목이 다른 경우(this.beforeSelectedSido !== this.selectedSido.sidoName)만 api 호출
-                // 항목 선택 (this.selectedSido.length != 0) + 카테고리 선택 (강제)
-                if(this.selectedSido.length !== 0 && this.beforeSelectedSido !== this.selectedSido.sidoName){      
-                    axios.get('http://localhost:8090/api/facilities/availability', {
-                        params:{
-                            cat: this.selectedCat,
-                            sido: this.selectedSido.sidoName
-                        }
-                    })
-                    .then(response =>{
-                        const count = response.data;
+                axios.get('http://localhost:8090/district/sido')
+                .then(response =>{
+                    this.optionSido = response.data;
+                })
+                .catch(error =>{
+                    console.log(error);
+                })
+            }
+        },
+        getFacilityBySido(){
+            if(this.selectedSido.length !== 0){
+                axios.get('http://localhost:8090/api/facilities/availability', {
+                    params:{
+                        cat: this.selectedCat,
+                        sido: this.selectedSido.sidoName
+                    }
+                })
+                .then(response =>{
+                    const count = response.data;
 
-                        if(count === 0){
-                            alert("해당하는 시설이 없습니다.");
+                    if(count === 0){
+                        alert("해당하는 시설이 없습니다.");
 
-                            this.selectedSido = '';
-                        }else{
-                            this.beforeSelectedSido = this.selectedSido.sidoName;
+                        this.selectedSido = '';
+                    }else{
+                        this.beforeSelectedSido = this.selectedSido.sidoName;
 
-                            this.map.setLevel(7);
+                        this.checkZoom = false;
+                        this.map.setMaxLevel(8);
+                        this.map.setLevel(9);
+                        this.checkZoom = true;
 
-                            this.setListAndMarker(
-                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&page=0&size=10`,
-                                `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`,
-                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`
-                            );
-                        }
-                    })
-                    .catch(error =>{
-                        console.log(error);
-                    })
+                        this.setListAndMarker(
+                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&page=0&size=${this.size}`,
+                            `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`,
+                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`
+                        );
+                    }
+                })
+                .catch(error =>{
+                    console.log(error);
+                })
 
-                    this.emd = '';
-                }
+                this.emd = '';
             }
         },
         getSigungu(){
-            if(this.selectedSido.length !== 0){
+            if(this.selectedSido === ''){
+                alert("시도를 먼저 선택해주세요");
+            }else{
                 axios.get('http://localhost:8090/district/sigungu', {params:{sidoId: this.selectedSido.sidoId}})
                 .then(response =>{
                     this.optionSigungu = response.data;
@@ -674,47 +768,49 @@ export default {
                     console.log(error);
                 })
             }
+        },
+        getFacilityBySigungu(){
+            if(this.selectedSigungu.length !== 0){
+                axios.get('http://localhost:8090/api/facilities/availability', {
+                    params:{
+                        cat: this.selectedCat,
+                        sido: this.selectedSido.sidoName,
+                        sigungu: this.selectedSigungu.sigunguName
+                    }
+                })
+                .then(response =>{
+                    const count = response.data;
 
-            if(this.selectedSido === ''){
-                alert("시도를 먼저 선택해주세요");
-            }else{
-                if(this.selectedSigungu.length !== 0 && this.beforeSelectedSigungu !== this.selectedSigungu.sigunguName){
-                    axios.get('http://localhost:8090/api/facilities/availability', {
-                        params:{
-                            cat: this.selectedCat,
-                            sido: this.selectedSido.sidoName,
-                            sigungu: this.selectedSigungu.sigunguName
-                        }
-                    })
-                    .then(response =>{
-                        const count = response.data;
+                    if(count === 0){
+                        alert("해당하는 시설이 없습니다.");
 
-                        if(count === 0){
-                            alert("해당하는 시설이 없습니다.");
+                        this.selectedSigungu = '';
+                    }else{
+                        this.beforeSelectedSigungu = this.selectedSigungu.sigunguName;
 
-                            this.selectedSigungu = '';
-                        }else{
-                            this.beforeSelectedSigungu = this.selectedSigungu.sigunguName;
+                        this.checkZoom = false;
+                        this.map.setMaxLevel(8);
+                        this.map.setLevel(6);
+                        this.checkZoom = true;
 
-                            this.map.setLevel(6);
+                        this.setListAndMarker(
+                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&page=0&size=${this.size}`,
+                            `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`,
+                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`
+                        );
+                    }
+                })
+                .catch(error =>{
+                    console.log(error);
+                })
 
-                            this.setListAndMarker(
-                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&page=0&size=10`,
-                                `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`,
-                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`
-                            );
-                        }
-                    })
-                    .catch(error =>{
-                        console.log(error);
-                    })
-
-                    this.emd = '';
-                }
+                this.emd = '';
             }
         },
         getEmd(){
-            if(this.selectedSigungu.length !== 0){
+            if(this.selectedSigungu === ''){
+                alert("시군구를 먼저 선택해주세요");
+            }else{
                 axios.get('http://localhost:8090/district/emd', {params:{sigunguId: this.selectedSigungu.sigunguId}})
                 .then(response =>{
                     this.optionEmd = response.data;
@@ -723,44 +819,44 @@ export default {
                     console.log(error);
                 })
             }
+        },
+        getFacilityByEmd(){
+            if(this.selectedEmd.length !== 0){
+                axios.get('http://localhost:8090/api/facilities/availability', {
+                    params:{
+                        cat: this.selectedCat,
+                        sido: this.selectedSido.sidoName,
+                        sigungu: this.selectedSigungu.sigunguName,
+                        emd: this.selectedEmd.emdName
+                    }
+                })
+                .then(response =>{
+                    const count = response.data;
 
-            if(this.selectedSigungu === ''){
-                alert("시군구를 먼저 선택해주세요");
-            }else{
-                if(this.selectedEmd.length !== 0 && this.beforeSelectedEmd !== this.selectedEmd.emdName){
-                    axios.get('http://localhost:8090/api/facilities/availability', {
-                        params:{
-                            cat: this.selectedCat,
-                            sido: this.selectedSido.sidoName,
-                            sigungu: this.selectedSigungu.sigunguName,
-                            emd: this.selectedEmd.emdName
-                        }
-                    })
-                    .then(response =>{
-                        const count = response.data;
+                    if(count === 0){
+                        alert("해당하는 시설이 없습니다.");
 
-                        if(count === 0){
-                            alert("해당하는 시설이 없습니다.");
+                        this.selectedEmd = '';
+                    }else{
+                        this.beforeSelectedEmd = this.selectedEmd.emdName;
 
-                            this.selectedEmd = '';
-                        }else{
-                            this.beforeSelectedEmd = this.selectedEmd.emdName;
+                        this.checkZoom = false;
+                        this.map.setMaxLevel(8);
+                        this.map.setLevel(5);
+                        this.checkZoom = true;
 
-                            this.map.setLevel(5);
-
-                            this.setListAndMarker(
-                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}&page=0&size=10`,
-                                `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`,
-                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`
-                            );
-                        }
-                    })
-                    .catch(error =>{
-                        console.log(error);
-                    })   
-                    
-                    this.emd = '';
-                }
+                        this.setListAndMarker(
+                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}&page=0&size=${this.size}`,
+                            `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`,
+                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`
+                        );
+                    }
+                })
+                .catch(error =>{
+                    console.log(error);
+                })   
+                
+                this.emd = '';
             }
         },
         // 이전 버튼 클릭 시 startNum, endNum 재설정을 위한 메소드
@@ -792,7 +888,7 @@ export default {
         },
         // 리스트 재출력을 위해 다시 facility 정보를 받아오기 위한 메소드
         getFacilityContent(i){
-            let url = this.contentUrl + `&page=${i}&size=10`;
+            let url = this.contentUrl + `&page=${i}&size=${this.size}`;
 
             axios.get(url)
             .then(response => {
@@ -850,7 +946,7 @@ export default {
 
         // 동 이름을 파라미터로 받은 경우
         if(typeof this.emd != 'undefined'){
-            axios.get(`http://localhost:8090/api/facilities?emd=${this.emd}&page=0&size=10`)
+            axios.get(`http://localhost:8090/api/facilities?emd=${this.emd}&page=0&size=${this.size}`)
             .then(response => {
                 this.facilityList = response.data.content;
                 this.totalPages = response.data.totalPages;
@@ -903,7 +999,7 @@ export default {
         if(!window.kakao || !window.kakao.maps){
             const script = document.createElement("script");
             script.src = 
-                "//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=52ab0e36c22fd3c43884e5698628abe2";
+                "//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=52ab0e36c22fd3c43884e5698628abe2&libraries=clusterer";
 
             /* global kakao */
             script.addEventListener("load", () => {
