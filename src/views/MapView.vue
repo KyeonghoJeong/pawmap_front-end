@@ -710,7 +710,7 @@ export default {
             if(this.selectedCat === ''){
                 alert("카테고리를 먼저 선택해주세요");
             }else{
-                axios.get('http://localhost:8090/district/sido')
+                axios.get('http://localhost:8090/api/districts/sido')
                 .then(response =>{
                     this.optionSido = response.data;
                 })
@@ -760,7 +760,7 @@ export default {
             if(this.selectedSido === ''){
                 alert("시도를 먼저 선택해주세요");
             }else{
-                axios.get('http://localhost:8090/district/sigungu', {params:{sidoId: this.selectedSido.sidoId}})
+                axios.get('http://localhost:8090/api/districts/sigungu', {params:{sidoId: this.selectedSido.sidoId}})
                 .then(response =>{
                     this.optionSigungu = response.data;
                 })
@@ -811,7 +811,7 @@ export default {
             if(this.selectedSigungu === ''){
                 alert("시군구를 먼저 선택해주세요");
             }else{
-                axios.get('http://localhost:8090/district/emd', {params:{sigunguId: this.selectedSigungu.sigunguId}})
+                axios.get('http://localhost:8090/api/districts/emd', {params:{sigunguId: this.selectedSigungu.sigunguId}})
                 .then(response =>{
                     this.optionEmd = response.data;
                 })
