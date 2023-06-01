@@ -124,7 +124,11 @@ export default ({
                     console.log(error);
                 })
             }else{
-                alert("이메일 주소 형식을 확인해주세요.");
+                if(this.email === ''){
+                    alert("이메일 주소를 입력해주세요.");
+                }else{
+                    alert("이메일 주소 형식을 확인해주세요.");
+                }
             }
         },
         certifyEmail(){
@@ -163,6 +167,10 @@ export default ({
                 })
                 .then(response => {
                     console.log(response.data);
+
+                    alert("회원가입이 완료되었습니다.");
+
+                    this.$router.push('/');
                 })
                 .catch(error => {
                     console.log(error);

@@ -1,22 +1,52 @@
 <template>
     <div>
-        <form class="form-signin">
+        <form class="form-signin" @submit.prevent="signin">
             <div class="div-signin">
-                <h1 class="h3 mb-3 font-weight-normal">로그인</h1><br>
-                <p>서비스 이용을 위해 로그인해주세요.</p><br>
-                <label for="input-signup-id-id" class="sr-only label-singin-input-id">아이디</label>
-                <input type="text" pattern="[A-Za-z0-9]+" id="input-signup-id-id" class="form-control" placeholder="아이디 입력" required autofocus><br>
-                <label for="input-signup-id-pw" class="sr-only label-singin-input-pw">비밀번호</label>
-                <input type="password" id="input-signup-id-pw" class="form-control" placeholder="비밀번호 입력" required><br>
+                <div><h1 class="h3 mb-3 font-weight-normal">로그인</h1><br></div>
+                <div><p>서비스 이용을 위해 로그인해주세요.</p><br></div>
+                <div><label for="input-signin-id-id" class="sr-only label-singin-input-id">아이디</label></div>
+                <div><input type="text" id="input-signin-id-id" v-model="memberId" class="form-control" placeholder="아이디 입력" required autofocus><br></div>
+                <div><label for="input-signin-id-pw" class="sr-only label-singin-input-pw">비밀번호</label></div>
+                <div><input type="password" id="input-signin-id-pw" v-model="pw" class="form-control" placeholder="비밀번호 입력" required><br></div>
                 <div class="checkbox mb-3 checkbox-signin-saveid">
                     <label style="margin-right: auto;"><input type="checkbox" value="remember-me"> 아이디 저장</label>
                     <router-link to="/signup" class="router-link-signin-signup">회원가입</router-link>
                 </div>
-                <button class="btn btn-lg btn-primary btn-block" type="submit" style="width:100%">로그인</button>
+                <div><button class="btn btn-lg btn-primary btn-block btn-signin-signin" type="submit" style="width:100%">로그인</button></div>
             </div>
         </form>
   </div>
 </template>
+
+<script>
+import axios from 'axios';
+
+export default{
+    data(){
+        return{
+            memberId: '',
+            pw: '',
+        }
+    },
+    methods:{
+        signin(){
+            axios.post('http://localhost:8090/api/member/signin', {
+                memberId: this.memberId,
+                pw: this.pw
+            })
+            .then(response => {
+                const jwtToken = response.data;
+                console.log(jwtToken);
+            })
+            .catch(error => {
+                if(error.response.status === 401){
+                    console.log("Invalid username or password");
+                }
+            })
+        }
+    }
+}
+</script>
 
 <style>
 .form-signin{
@@ -48,6 +78,15 @@
 }
 .label-singin-input-id, .label-singin-input-pw{
     font-weight: bold;
+}
+.btn-signin-signin{
+    background-color: #fd7e14;
+    border-color: #fd7e14;
+}
+.btn-signin-signin:hover{
+    background-color: white;
+    border-color: white;
+    color: #fd7e14;
 }
 
 @media screen and (max-width: 992px){
