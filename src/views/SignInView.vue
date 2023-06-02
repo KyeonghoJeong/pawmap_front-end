@@ -35,8 +35,9 @@ export default{
                 pw: this.pw
             })
             .then(response => {
-                const jwtToken = response.data;
-                console.log(jwtToken);
+                localStorage.setItem("accessToken", response.data.accessToken);
+                console.log(document.cookie);
+                window.location.href = "/";
             })
             .catch(error => {
                 if(error.response.status === 401){

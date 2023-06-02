@@ -55,7 +55,7 @@
                         <div style="color:green">{{facility.phoneNum}}</div>
                     </div>
                     <div style="display: flex; justify-content: flex-end;">
-                        <button style="background:white; color:blue; border:none; padding:0px; margin-right:15px; font-size: 12px;">북마크</button>
+                        <button style="background:white; color:blue; border:none; padding:0px; margin-right:15px; font-size: 12px;" @click="addBookmark(facility.facilityId)">북마크</button>
                         <button style="background:white; color:blue; border:none; padding:0px; font-size: 12px;" @click="showOverlay(facility)">상세보기</button>
                     </div>
                 </div>
@@ -141,6 +141,29 @@ export default {
         }
     },
     methods: {
+        addBookmark(facilityId){
+            if(localStorage.getItem("accessToken") !== null){
+                axios.get('http://localhost:8090/api/member/bookmark', {
+                    params:{
+                        facilityId: facilityId
+                    },
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+                    }
+                })
+                .then(response => {
+                    console.log(response);
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+            }else{
+                alert("로그인 해주세요.");
+            }
+        },
+        closeOverlay(){
+            console.log("Hello World");
+        },
         setOverlay(marker, facilityId){
             /////////////////////////////////////////////////////////////////////////////////////////////////
             // 데이터 가져오기
@@ -187,7 +210,7 @@ export default {
                                 `<div>${facility.admissionFee}</div>`+
                             '</div>'+
                             '<div style="display :flex; justify-content: flex-end;">'+
-                                '<button style="background:white; color:blue; border:none; padding:0px; margin-right:15px; font-size: 12px;">북마크</button>'+
+                                '<button id="addBookmark" style="background:white; color:blue; border:none; padding:0px; margin-right:15px; font-size: 12px;">북마크</button>'+
                                 '<button id="closeButton" style="background:white; color:blue; border:none; padding:0px; font-size: 12px;">닫기</button>'+
                             '</div>'+
                         '</div>'+
@@ -225,15 +248,20 @@ export default {
                 const parser = new DOMParser();
                 const content = parser.parseFromString(contentString, 'text/html');
 
+                const addBookmark = content.getElementById("addBookmark");
+                addBookmark.addEventListener('click', () => {
+                    console.log("Hello World");
+                });
+
                 const imageSize = new kakao.maps.Size(8, 8);
-                const closeButton = content.getElementById('closeButton');
+                const closeButton = content.getElementById("closeButton");
                 closeButton.addEventListener('click', () => {
                     this.activatedOverlay.setMap(null);
                     this.activatedOverlay = '';
 
                     this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
 
-                    for(let i=0; i<this.facility.length; i++){
+                    for(let i=0; i<this.facilityList.length; i++){
                         if(this.clickedMarker.id === this.facilityList[i].facilityId){
                             this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificdefault.png'), new kakao.maps.Size(30, 30)));
                         }
