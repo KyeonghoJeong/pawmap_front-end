@@ -143,16 +143,17 @@ export default {
     methods: {
         addBookmark(facilityId){
             if(localStorage.getItem("accessToken") !== null){
-                axios.get('http://localhost:8090/api/member/bookmark', {
-                    params:{
-                        facilityId: facilityId
-                    },
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-                    }
+                axios.post('http://localhost:8090/api/bookmark', {
+                    facilityId: facilityId
+                },{
+                    headers:{'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                 })
                 .then(response => {
-                    console.log(response);
+                    if(response.data === 'Duplicated'){
+                        alert("이미 북마크에 추가되어있습니다.");
+                    }else if(response.data === 'Success'){
+                        alert("북마크에 추가되었습니다.")
+                    }
                 })
                 .catch(error => {
                     console.log(error);

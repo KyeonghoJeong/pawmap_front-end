@@ -33,10 +33,12 @@ export default{
             axios.post('http://localhost:8090/api/member/signin', {
                 memberId: this.memberId,
                 pw: this.pw
+            }, {
+                withCredentials: true
             })
             .then(response => {
                 localStorage.setItem("accessToken", response.data.accessToken);
-                console.log(document.cookie);
+
                 window.location.href = "/";
             })
             .catch(error => {

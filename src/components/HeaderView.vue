@@ -53,7 +53,6 @@ export default{
   },
   created() {
     this.accessToken = localStorage.getItem("accessToken");
-    console.log(this.accessToken);
   },
   methods:{
     toHome(){
