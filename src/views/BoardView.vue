@@ -135,7 +135,11 @@
         },
         methods:{
             goToWriting(){
-                this.$router.push('/writing');
+                if(localStorage.getItem("accessToken") !== null){
+                    this.$router.push('/writing');
+                }else{
+                    alert("로그인 해주세요.");
+                }
             },
             goToPosting(){
                 this.$router.push('/posting');

@@ -150,9 +150,31 @@ export default {
                 })
                 .then(response => {
                     if(response.data === 'Duplicated'){
-                        alert("이미 북마크에 추가되어있습니다.");
+                        alert("이미 북마크에 추가했습니다.");
                     }else if(response.data === 'Success'){
-                        alert("북마크에 추가되었습니다.")
+                        alert("북마크에 추가했습니다.");
+                    }else if(response.data === 'Invalid'){ // accessToken 만료
+                        // refreshToken 전송
+                        axios.post('http://localhost:8090/api/member/reissuance', null, {
+                            withCredentials: true
+                        })
+                        .then(response => {
+                            if(response.data){
+                                if(response.data === 'Invalid'){
+                                    alert("재로그인 해주세요.");
+                                    localStorage.removeItem("accessToken");
+                                    window.location.href = "/signin";
+                                }else{
+                                    localStorage.removeItem("accessToken");
+                                    localStorage.setItem("accessToken", response.data.accessToken);
+                                    
+                                    this.addBookmark(facilityId);
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        })
                     }
                 })
                 .catch(error => {
