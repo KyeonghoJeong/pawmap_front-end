@@ -6,9 +6,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state:{
     emd: '',
-    cat: '',
-    member: false,
-    accessToken: '',
+    cat: ''
   },
   mutations:{
     updateEmd(state, data){
@@ -16,12 +14,6 @@ export default new Vuex.Store({
     },
     updateCat(state, data){
       state.cat = data;
-    },
-    updateMember(state, data){
-      state.member = data;
-    },
-    updateAccessToken(state, data){
-      state.accessToken = data;
     }
   }
 })

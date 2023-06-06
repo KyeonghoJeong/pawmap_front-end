@@ -82,7 +82,7 @@ export default{
     },
     toMyPage(){
       if(window.location.href !== 'http://localhost:8080/mypage'){
-        this.$router.push({ path: "/mypage"});
+        this.$router.push({ path: "/mypage", query:{tab: "bookmark"}});
       }
     },
     signOut(){

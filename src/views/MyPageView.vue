@@ -7,13 +7,13 @@
         <div class="mp-nav">
             <ul class="nav nav-tabs mp-tabs">
                 <li class="nav-item mp-tab">
-                    <a class="nav-link mp-link" href="#" v-bind:class="{ active: activeTab === 'BookmarkView' }" v-on:click.prevent="activeTab = 'BookmarkView'">관심목록</a>
+                    <p class="nav-link mp-link p-mypage-bookmark" v-bind:class="{ active: activeTab === 'BookmarkView' }" @click="setPath('bookmark')">북마크</p>
                 </li>
                 <li class="nav-item mp-tab">
-                    <a class="nav-link mp-link" href="#" v-bind:class="{ active: activeTab === 'MyWritingView' }" v-on:click.prevent="activeTab = 'MyWritingView'">내가 쓴 글</a>
+                    <p class="nav-link mp-link p-mypage-posting" v-bind:class="{ active: activeTab === 'MyPostingView' }" @click="setPath('posting')">내가 쓴 글</p>
                 </li>
                 <li class="nav-item mp-tab">
-                    <a class="nav-link mp-link" href="#" v-bind:class="{ active: activeTab === 'EditInfoView' }" v-on:click.prevent="activeTab = 'EditInfoView'">내 정보</a>
+                    <p class="nav-link mp-link p-mypage-info" v-bind:class="{ active: activeTab === 'InfoView' }" @click="setPath('info')">내 정보</p>
                 </li>
             </ul>
         </div>
@@ -25,22 +25,48 @@
 </template>
 
 <script>
-    import BookmarkView from '../components/BookmarkView.vue'
-    import MyWritingView from '../components/MyWritingView.vue'
-    import EditInfoView from '../components/EditInfoView.vue'
+import BookmarkView from '../components/BookmarkView.vue'
+import MyPostingView from '../components/MyPostingView.vue'
+import InfoView from '../components/InfoView.vue'
 
-    export default {
-        data(){
-            return{
-                activeTab: "BookmarkView",
+export default {
+    data(){
+        return{
+            activeTab: '',
+        }
+    },
+    methods:{
+        setPath(query){
+            if(query === 'bookmark'){
+                this.activeTab = 'BookmarkView';
+            }else if(query === 'posting'){
+                this.activeTab = 'MyPostingView';
+            }else if(query === 'info'){
+                this.activeTab = 'InfoView';
             }
-        },
-        components:{
-            BookmarkView,
-            MyWritingView,
-            EditInfoView,
+
+            if(this.$route.fullPath === `/mypage?tab=${query}`){
+                this.$router.go(this.$router.currentRoute);
+            }else{
+                this.$router.push({path: "/mypage", query: {tab: query}});
+            }
+        }
+    },
+    components:{
+        BookmarkView,
+        MyPostingView,
+        InfoView,
+    },
+    created(){
+        if(this.$route.query.tab === 'bookmark'){
+            this.activeTab = 'BookmarkView';
+        }else if(this.$route.query.tab === 'posting'){
+            this.activeTab = 'MyPostingView';
+        }else if(this.$route.query.tab === 'info'){
+            this.activeTab = 'InfoView';
         }
     }
+}
 
 </script>
 
@@ -78,10 +104,11 @@
         background-color: #fd7e14; 
         color: white;
     }
-
     .nav-link:hover {
         background-color: #fd7e14;
         color: white;
+    }.p-mypage-bookmark:hover, .p-mypage-posting:hover, .p-mypage-info:hover {
+        cursor:pointer;
     }
 
     @media screen and (max-width: 992px){

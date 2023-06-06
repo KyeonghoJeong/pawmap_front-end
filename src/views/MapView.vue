@@ -154,8 +154,8 @@ export default {
                     }else if(response.data === 'Success'){
                         alert("북마크에 추가했습니다.");
                     }else if(response.data === 'Invalid'){ // accessToken 만료
-                        // refreshToken 전송
-                        axios.post('http://localhost:8090/api/member/reissuance', null, {
+                        // accessToken 재발급을 위해 refreshToken 전송
+                        axios.get('http://localhost:8090/api/member/reissuance', {
                             withCredentials: true
                         })
                         .then(response => {

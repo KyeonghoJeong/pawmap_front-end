@@ -1,6 +1,6 @@
 <template>
     <div>
-        <form class="form-signup" @submit.prevent="signin">
+        <form class="form-signup" @submit.prevent="confirm">
             <div class="div-signup">
                 <div><h1 class="h3 mb-3 font-weight-normal">회원정보 입력</h1><br></div>
                 <div><p>회원가입을 위해 정보를 입력해주세요.</p><br></div>
@@ -149,7 +149,7 @@ export default ({
                 return false;
             }
         },
-        signin(){
+        confirm(){
             if(this.validMemberId === false){
                 alert("아이디 중복을 확인해주세요.");
             }else if(this.checkPassword() === false){

@@ -40,7 +40,7 @@ const routes = [
     },
     {
         path: '/writing',
-        name: 'WritingView',
+        name: 'writing',
         component: WritingView
     },
     {

@@ -118,17 +118,21 @@
             </ul>
             </nav>
         </div>
+        <div><button type="button" @click="test">테스트</button></div>
     </div>
 </template>
 
 <script>
-    export default {
-        methods:{
-            goToPosting(){
-                this.$router.push('/posting');
-            }
+export default {
+    methods:{
+        goToPosting(){
+            this.$router.push('/posting');
+        },
+        test(){
+            this.$router.go(this.$router.currentRoute);
         }
     }
+}
 </script>
 
 <style>
