@@ -7,7 +7,7 @@ import BoardView from './views/BoardView.vue'
 import SignInView from './views/SignInView.vue'
 import SignUpView from './views/SignUpView.vue'
 import WritingView from './views/WritingView.vue'
-import PostingView from './views/PostingView.vue'
+import ArticleView from './views/ArticleView.vue'
 import MyPageView from './views/MyPageView.vue'
 
 Vue.use(VueRouter)
@@ -39,14 +39,14 @@ const routes = [
         component: SignUpView
     },
     {
-        path: '/writing',
+        path: '/board/writing',
         name: 'writing',
         component: WritingView
     },
     {
-        path: '/posting',
-        name: 'posting',
-        component: PostingView
+        path: '/board/article',
+        name: 'article',
+        component: ArticleView
     },
     {
         path: '/mypage',

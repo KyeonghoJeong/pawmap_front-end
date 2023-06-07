@@ -1,68 +1,118 @@
 <template>
-    <div class="writing">
+    <div class="div-writing">
         <BoardTitleView></BoardTitleView>
-
-        <div class="writing-group">
-            <div class="mb-3 writing-group-title">
-                <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="제목을 입력하세요.">
+        <form @submit.prevent="post" class="form-writing">
+            <div class="div-writing-menu">
+                <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="제목을 입력하세요." maxlength="40" required v-model="title" >
+                </div>
+                <div class="mb-3 div-writing-menu-writing">
+                    <textarea class="form-control textarea-writing-menu-writing" placeholder="내용을 입력하세요." maxlength="1000" required v-model="writing"></textarea>
+                </div>
+                <div class="div-writing-menu-btn">
+                    <button type="submit" class="btn btn-writing-menu-confirm">등록</button>
+                </div>
             </div>
-            <div class="mb-3">
-                <input class="form-control" type="file" id="formFile">
-            </div>
-            <div class="mb-3">
-                <textarea class="form-control writing-group-content" id="exampleFormControlTextarea1" rows="3" placeholder="내용을 입력하세요."></textarea>
-            </div>
-            <div class="writing-group-add">
-                <button type="button" class="btn writing-group-add-btn">등록</button>
-            </div>
-        </div>
+        </form>
     </div>
 </template>
 
 <script>
-    import BoardTitleView from '../components/BoardTitleView.vue'
+import BoardTitleView from '../components/BoardTitleView.vue'
 
-    export default {
-        components:{
-            BoardTitleView
+import axios from 'axios'
+
+export default {
+    components:{
+        BoardTitleView
+    },
+    data(){
+        return{
+            title: '',
+            writing: '',
+        }
+    },
+    methods:{
+        post(){
+            axios.post('http://localhost:8090/api/board/article', {
+                title: this.title, 
+                writing: this.writing
+            }, {
+                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+            })
+            .then(response => {
+                if(response.data === 'Invalid'){
+                    axios.get('http://localhost:8090/api/member/reissuance', {
+                        withCredentials: true
+                    })
+                    .then(response => {
+                        if(response.data === 'Invalid'){
+                            alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+                            
+                            localStorage.removeItem("accessToken");
+                            window.location.href = "/signin";
+                        }else{
+                            localStorage.removeItem("accessToken");
+                            localStorage.setItem("accessToken", response.data.accessToken);
+
+                            this.post();
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
+                }else{
+                    this.$router.push({path: '/board'});
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            })
         }
     }
+}
 </script>
 
 <style>
-    .writing{
-        padding-top: 7%;
-        padding-left: 10%;
-        padding-right: 10%;
-        padding-bottom: 2%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+.div-writing{
+    padding-top: 7%;
+    padding-left: 10%;
+    padding-right: 10%;
+    padding-bottom: 2%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-    .writing-group{
-        width: 60%;
-        border-style: solid;
-        border-width: 1px;
-        border-color: rgb(203, 204, 206);
-        padding: 1%;
-    }
-    .writing-group-content{
-        height: 30vh;
-    }
-    .writing-group-add{
-        display: flex;
-        flex-direction: row-reverse;
-    }
-    .writing-group-add-btn{
-        background-color: #fd7e14;
-        color: white;
-        width: 80px;
-    }
+.form-writing{
+    width: 60%;
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgb(203, 204, 206);
+    padding: 1%;
+}
 
-    @media screen and (max-width: 992px){
-        .writing-group{
-            width: 100%;
-        }
-    }
+.div-writing-menu{
+    display: flex;
+    flex-direction: column;
+}
+
+.div-writing-menu-writing{
+    height: 30vh;
+}
+
+.textarea-writing-menu-writing{
+    height: 30vh;
+    resize: none;
+}
+
+.div-writing-menu-btn{
+    display: flex;
+    flex-direction: row-reverse;
+}
+.btn-writing-menu-confirm{
+    background-color: #fd7e14;
+    color: white;
+    width: 80px;
+}
 </style>

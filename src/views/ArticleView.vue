@@ -8,7 +8,7 @@
                     제목
                 </div>
                 <div class="div-posting-title-second">
-                    안녕하세요
+                    {{this.article.title}}
                 </div>
             </div>
             <div class="div-posting-date">
@@ -16,7 +16,7 @@
                     작성일
                 </div>
                 <div class="div-posting-date-second">
-                    2023-04-19 00:11:33
+                     {{this.article.postDate}}
                 </div>
             </div>
             <div class="div-posting-nickname">
@@ -24,22 +24,20 @@
                     닉네임
                 </div>
                 <div class="div-posting-nickname-second">
-                    해리 케인
+                     {{this.article.nickname}}
                 </div>
             </div>
             <div class="div-posting-content">
-                해리 에드워드 케인 MBE는 잉글랜드의 축구 선수이다. 포지션은 스트라이커이다. 현재 토트넘 홋스퍼에서 활약하고 있다. 그는 플레이 메이커이자 토트넘의 중심축으로 토트넘이 가장 필요한 선수 중 한 명이다. 그는 현재 잉글랜드 내의 최고의 선수 중 한 명으로 꼽히고있다.
+                 {{this.article.writing}}
             </div>
             <div class="div-posting-mnd">
                 <div class="div-posting-mnd-mnd">
-                    <a href="#" class="div-posting-mnd-m">수정</a>&nbsp;&nbsp;
-                    <a href="#" class="div-posting-mnd-d">삭제</a>
+                    <p class="p-posting-mnd-m" @click="modifyArticle">수정</p>&nbsp;&nbsp;
+                    <p class="p-posting-mnd-d" @click="deleteArticle">삭제</p>
                 </div>
             </div>
             <div class="div-posting-btns">
-                <button type="button" class="btn div-posting-btns-btn">이전</button>
-                <button type="button" class="btn div-posting-btns-btn">목록</button>
-                <button type="button" class="btn div-posting-btns-btn">다음</button>
+                <button type="button" class="btn div-posting-btns-btn" @click="toBoard">목록</button>
             </div>
             <div class="div-posting-inc">
                 <div class="div-posting-inc-cmt">
@@ -66,13 +64,83 @@
 </template>
 
 <script>
-    import BoardTitleView from '../components/BoardTitleView.vue'
+import BoardTitleView from '../components/BoardTitleView.vue'
 
-    export default {
-        components:{
-            BoardTitleView
+import axios from 'axios'
+
+export default {
+    components:{
+        BoardTitleView
+    },
+    data(){
+        return{
+            articleId: '',
+            article: '',
+            isItsMember: false,
         }
+    },
+    methods:{  
+        mounted(){
+            this.isItsMember = this.checkMember();
+        },
+        toBoard(){
+            this.$router.push({path:'/board'});
+        },
+        modifyArticle(){
+            
+        },
+        deleteArticle(){
+            if(localStorage.getItem("accessToken") === null){
+                alert("로그인 해주세요.");
+            }else{
+                if(confirm("정말 삭제하시겠습니까?")){
+                    axios.delete(`http://localhost:8090/api/board/article?articleId=${this.articleId}`, {
+                        headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                    })
+                    .then(response => {
+                        if(response.data === 'Invalid'){
+                            axios.get('http://localhost:8090/api/member/reissuance', {
+                                withCredentials: true
+                            })
+                            .then(response => {
+                                if(response.data === 'Invalid'){
+                                    alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+                                    
+                                    localStorage.removeItem("accessToken");
+                                    window.location.href = "/signin";
+                                }else{
+                                    localStorage.removeItem("accessToken");
+                                    localStorage.setItem("accessToken", response.data.accessToken);
+
+                                    this.deleteArticle();
+                                }
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            })
+                        }else{
+                            this.$router.push({path:'/board'});
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
+                }   
+            }
+        },
+    },
+    created(){
+        this.articleId = this.$route.query.articleid;
+
+        axios.get('http://localhost:8090/api/board/article', {params:{articleId: this.articleId}})
+        .then(response => {
+            this.article = response.data;
+        })
+        .catch(error => {
+            console.log(error);
+        })
     }
+}
 </script>
 
 <style>
@@ -142,6 +210,7 @@
     .div-posting-content{
         height: 20vh;
         padding: 1%;
+        overflow-y: auto;
     }
 
     .div-posting-mnd{
@@ -150,7 +219,20 @@
         flex-direction: row-reverse;
     }
     .div-posting-mnd-mnd{
+        display: flex;
         font-weight: bold;
+    }
+    .p-posting-mnd-m{
+        text-decoration: underline;
+    }
+    .p-posting-mnd-m:hover{
+        cursor:pointer;
+    }
+    .p-posting-mnd-d{
+        text-decoration: underline;
+    }
+    .p-posting-mnd-d:hover{
+        cursor:pointer;
     }
     .div-posting-mnd a{
         color: black;

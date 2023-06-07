@@ -13,65 +13,11 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <th scope="row" class="num-in-board">10</th>
-                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
-                    <td class="nickname-in-board">Otto</td>
-                    <td class="date-in-board">@mdo</td>
-                </tr>
-                <tr>
-                    <th scope="row" class="num-in-board">9</th>
-                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
-                    <td class="nickname-in-board">Thornton</td>
-                    <td class="date-in-board">@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row" class="num-in-board">8</th>
-                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
-                    <td class="nickname-in-board">Thornton</td>
-                    <td class="date-in-board">@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row" class="num-in-board">7</th>
-                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
-                    <td class="nickname-in-board">Thornton</td>
-                    <td class="date-in-board">@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row" class="num-in-board">6</th>
-                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
-                    <td class="nickname-in-board">Thornton</td>
-                    <td class="date-in-board">@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row" class="num-in-board">5</th>
-                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
-                    <td class="nickname-in-board">Thornton</td>
-                    <td class="date-in-board">@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row" class="num-in-board">4</th>
-                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
-                    <td class="nickname-in-board">Thornton</td>
-                    <td class="date-in-board">@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row" class="num-in-board">3</th>
-                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
-                    <td class="nickname-in-board">Thornton</td>
-                    <td class="date-in-board">@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row" class="num-in-board">2</th>
-                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
-                    <td class="nickname-in-board">Thornton</td>
-                    <td class="date-in-board">@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row" class="num-in-board">1</th>
-                    <td><span class="board-title" @click="goToPosting">Mark</span></td>
-                    <td class="nickname-in-board">Thornton</td>
-                    <td class="date-in-board">@fat</td>
+                <tr v-for="article in articles" :key="article.articleId">
+                    <th scope="row" class="num-in-board">{{article.articleId}}</th>
+                    <td><span class="board-title" @click="toArticle(article.articleId)">{{article.title}}</span></td>
+                    <td class="nickname-in-board">{{article.nickname}}</td>
+                    <td class="date-in-board">{{article.postDate}}</td>
                 </tr>
             </tbody>
             </table>
@@ -99,7 +45,7 @@
                 </div>
             </div>
             <div class="div-board-bottom-btn">
-                <button type="button" class="btn div-board-bottom-btn-btn" @click="goToWriting">글쓰기</button>
+                <button type="button" class="btn div-board-bottom-btn-btn" @click="toWriting">글쓰기</button>
             </div>
         </div>
         <div class="div-board-paging">
@@ -127,25 +73,45 @@
 </template>
 
 <script>
-    import BoardTitleView from '../components/BoardTitleView.vue'
+import BoardTitleView from '../components/BoardTitleView.vue'
 
-    export default {
-        components:{
-            BoardTitleView
-        },
-        methods:{
-            goToWriting(){
-                if(localStorage.getItem("accessToken") !== null){
-                    this.$router.push('/writing');
-                }else{
-                    alert("로그인 해주세요.");
-                }
-            },
-            goToPosting(){
-                this.$router.push('/posting');
-            }
+import axios from 'axios'
+
+export default {
+    components:{
+        BoardTitleView
+    },
+    data(){
+        return{
+            articles: [],
+            totalPages: '',
         }
+    },
+    methods:{
+        toWriting(){
+            if(localStorage.getItem("accessToken") !== null){
+                this.$router.push('/board/writing');
+            }else{
+                alert("로그인 해주세요.");
+            }
+        },
+        toArticle(articleId){
+            this.$router.push({ path: '/board/article', query: {articleid: articleId}});
+        }
+    },
+    created(){
+        axios.get('http://localhost:8090/api/board/articles', {
+            params: {page: 0, size: 10}
+        })
+        .then(response => {
+            this.articles = response.data.content;
+            this.totalPages = response.data.totalPages;
+        })
+        .catch(error => {
+            console.log(error);
+        })
     }
+}
 </script>
 
 <style>
@@ -206,7 +172,7 @@
         text-align: center;
     }
     .writing-title{
-        width: 55%;
+        width: 50%;
         text-align: center;
     }
     .writing-nickname{
@@ -214,7 +180,7 @@
         text-align: center;
     }
     .writing-date{
-        width: 15%;
+        width: 20%;
         text-align: center;
     }
     .num-in-board{
