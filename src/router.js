@@ -7,6 +7,7 @@ import BoardView from './views/BoardView.vue'
 import SignInView from './views/SignInView.vue'
 import SignUpView from './views/SignUpView.vue'
 import WritingView from './views/WritingView.vue'
+import ModifyingView from './views/ModifyingView.vue'
 import ArticleView from './views/ArticleView.vue'
 import MyPageView from './views/MyPageView.vue'
 
@@ -42,6 +43,11 @@ const routes = [
         path: '/board/writing',
         name: 'writing',
         component: WritingView
+    },
+    {
+        path: '/board/modifying',
+        name: 'modifying',
+        component: ModifyingView
     },
     {
         path: '/board/article',

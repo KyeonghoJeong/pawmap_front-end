@@ -96,7 +96,7 @@ export default {
             }
         },
         toArticle(articleId){
-            this.$router.push({ path: '/board/article', query: {articleid: articleId}});
+            this.$router.push({ path: '/board/article', query: {articleId: articleId}});
         }
     },
     created(){

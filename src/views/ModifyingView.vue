@@ -1,7 +1,7 @@
 <template>
     <div class="div-writing">
         <BoardTitleView></BoardTitleView>
-        <form @submit.prevent="postArticle" class="form-writing">
+        <form @submit.prevent="putArticle" class="form-writing">
             <div class="div-writing-menu">
                 <div class="mb-3">
                     <input type="text" class="form-control" placeholder="제목을 입력하세요." maxlength="40" required v-model="title" >
@@ -28,16 +28,15 @@ export default {
     },
     data(){
         return{
+            articleId: '',
             title: '',
             writing: '',
-            settedTitle: '',
-            settedWriting: '',
-            settedArticleId: '',
         }
     },
     methods:{
-        postArticle(){
-            axios.post('http://localhost:8090/api/board/article', {
+        putArticle(){
+            axios.put('http://localhost:8090/api/board/article', {
+                articleId: this.articleId,
                 title: this.title, 
                 writing: this.writing
             }, {
@@ -58,13 +57,17 @@ export default {
                             localStorage.removeItem("accessToken");
                             localStorage.setItem("accessToken", response.data.accessToken);
 
-                            this.postArticle();
+                            this.putArticle();
                         }
                     })
                     .catch(error => {
                         console.log(error);
                     })
                 }else{
+                    this.$store.commit('updateTitle', '');
+                    this.$store.commit('updateWriting', '');
+                    this.$store.commit('updateArticleId', '');
+
                     this.$router.push({path: '/board'});
                 }
             })
@@ -72,6 +75,11 @@ export default {
                 console.log(error);
             })
         }
+    },
+    created(){
+        this.articleId = this.$route.query.articleId;
+        this.title = this.$store.getters.getTitle;
+        this.writing = this.$store.getters.getWriting;
     }
 }
 </script>

@@ -1,6 +1,6 @@
 <template>
     <div class="div-posting">
-        <BoardTitleView></BoardTitleView>
+        <BoardTitleView/>
         
         <div class="div-posting-group">
             <div class="div-posting-title">
@@ -40,43 +40,37 @@
                 <button type="button" class="btn div-posting-btns-btn" @click="toBoard">목록</button>
             </div>
             <div class="div-posting-inc">
-                <div class="div-posting-inc-cmt">
+                <div v-for="comment in comments" :key="comment.cmtId" class="div-posting-inc-cmt">
                     <div class="div-posting-inc-cmt-i">
-                        <span class="div-posting-inc-cmt-i-nickname">홀란드</span>
-                        <span>2023-04-19 01:21:00</span>
+                        <span class="div-posting-inc-cmt-i-nickname">{{comment.nickname}}</span>
+                        <span>{{comment.writingDate}}</span>
                     </div>
-                    <div class="div-posting-inc-cmt-c">
-                        잘 읽었습니다.
-                    </div>
+                    <div class="div-posting-inc-cmt-c">{{comment.writing}}</div>
                 </div>
             </div>
-            <div class="div-posting-cmtbox">
-                <div class="form-floating div-posting-cmtbox-input">
-                    <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2" style="height: 100px"></textarea>
-                    <label for="floatingTextarea2">댓글을 남겨보세요.</label>
-                </div>
-                <div class="div-posting-cmtbox-btn">
-                    <button type="button" class="btn div-posting-cmtbox-btn-btn">등록</button>
-                </div>
-            </div>
+            <WritingCommentView :articleId="articleId"/>
         </div>
     </div>
 </template>
 
 <script>
 import BoardTitleView from '../components/BoardTitleView.vue'
+import WritingCommentView from '../components/WritingCommentView.vue'
 
 import axios from 'axios'
 
 export default {
     components:{
-        BoardTitleView
+        BoardTitleView,
+        WritingCommentView,
     },
     data(){
         return{
             articleId: '',
             article: '',
             isItsMember: false,
+            comments: [],
+            totalPages: '',
         }
     },
     methods:{  
@@ -91,6 +85,18 @@ export default {
             .catch(error => {
                 console.log(error);
             })
+        },
+        getComments(articleId){
+            axios.get('http://localhost:8090/api/board/article/comments', {
+                params: {articleId: articleId, page: 0, size: 10}
+            })
+            .then(response => {
+                this.comments = response.data.content;
+                this.totalPages = response.data.totalPages;
+            })
+            .catch(error => {
+                console.log(error);
+            })          
         },
         checkMember(articleId){
             return new Promise((resolve, reject) => {
@@ -144,9 +150,8 @@ export default {
         modifyArticle(){
             this.$store.commit('updateTitle', this.article.title);
             this.$store.commit('updateWriting', this.article.writing);
-            this.$store.commit('updateArticleId', this.articleId);
 
-            this.$router.push({path: '/board/writing'});
+            this.$router.push({path: '/board/modifying', query: {articleId: this.articleId}});
         },
         deleteArticle(){
             if(confirm("정말 삭제하시겠습니까?")){
@@ -185,8 +190,9 @@ export default {
         },
     },
     created(){
-        this.articleId = this.$route.query.articleid;
+        this.articleId = this.$route.query.articleId;
         this.getArticle(this.articleId);
+        this.getComments(this.articleId);
 
         if(localStorage.getItem("accessToken") !== null){
             this.setIsItsMember(this.articleId);
@@ -322,6 +328,7 @@ export default {
         border-style: solid;
         border-width: 1px;
         border-color: rgb(203, 204, 206);
+        overflow: auto;
     }
     .div-posting-inc-cmt-i{
         padding: 1%;
@@ -342,24 +349,6 @@ export default {
         padding: 1%;
         display: flex;
         height: 8vh;
-    }
-
-    .div-posting-cmtbox{
-        height: 15%;
-        padding: 1%;
-        display: flex;
-        flex-direction: column;
-    }
-    .div-posting-cmtbox-btn{
-        margin-top: 1%;
-        width: 100%;
-        display: flex;
-        flex-direction: row-reverse;
-    }
-    .div-posting-cmtbox-btn-btn{
-        background-color: #fd7e14;
-        color: white;
-        width: 80px;
     }
 
     @media screen and (max-width: 992px){
