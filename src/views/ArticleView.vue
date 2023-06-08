@@ -30,7 +30,7 @@
             <div class="div-posting-content">
                  {{this.article.writing}}
             </div>
-            <div class="div-posting-mnd">
+            <div v-if="isItsMember === true" class="div-posting-mnd">
                 <div class="div-posting-mnd-mnd">
                     <p class="p-posting-mnd-m" @click="modifyArticle">수정</p>&nbsp;&nbsp;
                     <p class="p-posting-mnd-d" @click="deleteArticle">삭제</p>
@@ -80,65 +80,117 @@ export default {
         }
     },
     methods:{  
-        mounted(){
-            this.isItsMember = this.checkMember();
-        },
         toBoard(){
             this.$router.push({path:'/board'});
         },
+        getArticle(articleId){
+            axios.get('http://localhost:8090/api/board/article', {params:{articleId: articleId}})
+            .then(response => {
+                this.article = response.data;
+            })
+            .catch(error => {
+                console.log(error);
+            })
+        },
+        checkMember(articleId){
+            return new Promise((resolve, reject) => {
+                axios.get('http://localhost:8090/api/board/article/membercheck', {
+                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
+                    params: {articleId: articleId}
+                })
+                .then(response => {
+                    if(response.data === 'Invalid'){
+                        axios.get('http://localhost:8090/api/member/reissuance', {
+                            withCredentials: true
+                        })
+                        .then(response => {
+                            if(response.data === 'Invalid'){
+                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+                                
+                                localStorage.removeItem("accessToken");
+                                window.location.href = "/signin";
+                            }else{
+                                localStorage.removeItem("accessToken");
+                                localStorage.setItem("accessToken", response.data.accessToken);
+
+                                this.checkMember(articleId)
+                                .then(() => {
+                                    resolve();
+                                })
+                                .catch(error => {
+                                    console.log(error);
+                                    reject(error);
+                                })
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error);
+                            reject(error);
+                        })
+                    }else{
+                        this.isItsMember = true;
+                        resolve();
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                    reject(error);
+                })
+            })
+        },
+        async setIsItsMember(articleId){
+            await this.checkMember(articleId);
+        },
         modifyArticle(){
-            
+            this.$store.commit('updateTitle', this.article.title);
+            this.$store.commit('updateWriting', this.article.writing);
+            this.$store.commit('updateArticleId', this.articleId);
+
+            this.$router.push({path: '/board/writing'});
         },
         deleteArticle(){
-            if(localStorage.getItem("accessToken") === null){
-                alert("로그인 해주세요.");
-            }else{
-                if(confirm("정말 삭제하시겠습니까?")){
-                    axios.delete(`http://localhost:8090/api/board/article?articleId=${this.articleId}`, {
-                        headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                    })
-                    .then(response => {
-                        if(response.data === 'Invalid'){
-                            axios.get('http://localhost:8090/api/member/reissuance', {
-                                withCredentials: true
-                            })
-                            .then(response => {
-                                if(response.data === 'Invalid'){
-                                    alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-                                    
-                                    localStorage.removeItem("accessToken");
-                                    window.location.href = "/signin";
-                                }else{
-                                    localStorage.removeItem("accessToken");
-                                    localStorage.setItem("accessToken", response.data.accessToken);
+            if(confirm("정말 삭제하시겠습니까?")){
+                axios.delete(`http://localhost:8090/api/board/article?articleId=${this.articleId}`, {
+                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                })
+                .then(response => {
+                    if(response.data === 'Invalid'){
+                        axios.get('http://localhost:8090/api/member/reissuance', {
+                            withCredentials: true
+                        })
+                        .then(response => {
+                            if(response.data === 'Invalid'){
+                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+                                
+                                localStorage.removeItem("accessToken");
+                                window.location.href = "/signin";
+                            }else{
+                                localStorage.removeItem("accessToken");
+                                localStorage.setItem("accessToken", response.data.accessToken);
 
-                                    this.deleteArticle();
-                                }
-                            })
-                            .catch(error => {
-                                console.log(error);
-                            })
-                        }else{
-                            this.$router.push({path:'/board'});
-                        }
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    })
-                }   
-            }
+                                this.deleteArticle();
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        })
+                    }else{
+                        this.$router.push({path:'/board'});
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+            }   
         },
     },
     created(){
         this.articleId = this.$route.query.articleid;
+        this.getArticle(this.articleId);
 
-        axios.get('http://localhost:8090/api/board/article', {params:{articleId: this.articleId}})
-        .then(response => {
-            this.article = response.data;
-        })
-        .catch(error => {
-            console.log(error);
-        })
+        if(localStorage.getItem("accessToken") !== null){
+            this.setIsItsMember(this.articleId);
+        }
     }
 }
 </script>
