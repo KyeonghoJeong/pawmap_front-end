@@ -10,7 +10,7 @@
                     <p class="nav-link mp-link p-mypage-bookmark" v-bind:class="{ active: activeTab === 'BookmarkView' }" @click="setPath('bookmark')">북마크</p>
                 </li>
                 <li class="nav-item mp-tab">
-                    <p class="nav-link mp-link p-mypage-posting" v-bind:class="{ active: activeTab === 'MyPostingView' }" @click="setPath('posting')">내가 쓴 글</p>
+                    <p class="nav-link mp-link p-mypage-posting" v-bind:class="{ active: activeTab === 'MyArticleView' }" @click="setPath('posting')">내가 쓴 글</p>
                 </li>
                 <li class="nav-item mp-tab">
                     <p class="nav-link mp-link p-mypage-info" v-bind:class="{ active: activeTab === 'InfoView' }" @click="setPath('info')">내 정보</p>
@@ -26,7 +26,7 @@
 
 <script>
 import BookmarkView from '../components/BookmarkView.vue'
-import MyPostingView from '../components/MyPostingView.vue'
+import MyArticleView from '../components/MyArticleView.vue'
 import InfoView from '../components/InfoView.vue'
 
 export default {
@@ -40,7 +40,7 @@ export default {
             if(query === 'bookmark'){
                 this.activeTab = 'BookmarkView';
             }else if(query === 'posting'){
-                this.activeTab = 'MyPostingView';
+                this.activeTab = 'MyArticleView';
             }else if(query === 'info'){
                 this.activeTab = 'InfoView';
             }
@@ -54,14 +54,14 @@ export default {
     },
     components:{
         BookmarkView,
-        MyPostingView,
+        MyArticleView,
         InfoView,
     },
     created(){
         if(this.$route.query.tab === 'bookmark'){
             this.activeTab = 'BookmarkView';
         }else if(this.$route.query.tab === 'posting'){
-            this.activeTab = 'MyPostingView';
+            this.activeTab = 'MyArticleView';
         }else if(this.$route.query.tab === 'info'){
             this.activeTab = 'InfoView';
         }

@@ -1,7 +1,5 @@
 <template>
-    <div class="div-board">
-        <BoardTitleView></BoardTitleView>
-
+    <div class="div-board-mine">
         <div class="div-board-table">
             <table class="table table-hover table-bordered table-sm div-board-table-table">
             <thead class="table-secondary">
@@ -22,9 +20,9 @@
             </tbody>
             </table>
         </div>
-        <div class="div-board-bottom-set">
-            <div class="div-board-bottom-scset">
-                <div class="div-board-bottom-search">
+        <div class="div-board-bottom-set-mywriting">
+            <div class="div-board-bottom-scset-mywriting">
+                <div class="div-board-bottom-search-mywriting">
                     <form @submit.prevent="setValues">
                         <div class="input-group">
                             <input type="text" class="form-control" aria-label="keyword" aria-describedby="basic-addon1" v-model="searchQuery">
@@ -36,15 +34,12 @@
                         </div>
                     </form>
                 </div>
-                <div class="div-board-bottom-category">
+                <div class="div-board-bottom-category-mywriting">
                     <select class="form-select" aria-label="Default select example" v-model="selectedOption">
                         <option :value="'제목+내용'">제목+내용</option>
                         <option v-for="option in searchOptions" :value="option" :key="option">{{ option }}</option>
                     </select>
                 </div>
-            </div>
-            <div class="div-board-bottom-btn">
-                <button type="button" class="btn div-board-bottom-btn-btn" @click="toWriting">글쓰기</button>
             </div>
         </div>
         <div class="div-board-paging">
@@ -72,14 +67,9 @@
 </template>
 
 <script>
-import BoardTitleView from '../components/BoardTitleView.vue'
-
 import axios from 'axios'
 
 export default {
-    components:{
-        BoardTitleView
-    },
     data(){
         return{
             articles: [],
@@ -89,7 +79,7 @@ export default {
             endNum: 0,
             articleIds: [],
             commentNumbers: [],
-            searchOptions: ['제목', '내용', '닉네임'],
+            searchOptions: ['제목', '내용'],
             selectedOption: '제목+내용',
             searchQuery: '',
             title: '',
@@ -99,16 +89,6 @@ export default {
         }
     },
     methods:{
-        toWriting(){
-            if(localStorage.getItem("accessToken") !== null){
-                this.$router.push('/board/writing');
-            }else{
-                alert("로그인 해주세요.");
-            }
-        },
-        toArticle(articleId){
-            this.$router.push({ path: '/board/article', query: {articleId: articleId}});
-        },
         setPrevPageNum(){
             // isPrevDisabled()에 의해 startNum이 5 이하인 경우는 신경 X
             this.startNum = this.startNum - 5; // 시작 번호는 현재 시작 번호 - 5
@@ -173,28 +153,59 @@ export default {
                 this.writing = this.searchQuery;
 
                 this.nickname = '';
-                this.memberId = '';
             }else if(this.selectedOption === '제목'){
                 this.title = this.searchQuery;
 
                 this.writing = '';
                 this.nickname = '';
-                this.memberId = '';
             }else if(this.selectedOption === '내용'){
                 this.writing = this.searchQuery;
 
                 this.title = '';
                 this.nickname = '';
-                this.memberId = '';
             }else if(this.selectedOption === '닉네임'){
                 this.nickname = this.searchQuery;
 
                 this.title = '';
                 this.writing = '';
-                this.memberId = '';
             }
 
             this.getArticles(0);
+        },
+        getMember(){
+            axios.get('http://localhost:8090/api/member', {
+                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+            })
+            .then(response => {
+                if(response.data === 'Invalid'){
+                    axios.get('http://localhost:8090/api/member/reissuance', {
+                        withCredentials: true
+                    })
+                    .then(response => {
+                        if(response.data === 'Invalid'){
+                            alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+                            
+                            localStorage.removeItem("accessToken");
+                            window.location.href = "/signin";
+                        }else{
+                            localStorage.removeItem("accessToken");
+                            localStorage.setItem("accessToken", response.data.accessToken);
+
+                            this.getMember();
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
+                }else{
+                    this.memberId = response.data.memberId;
+
+                    this.getArticles(0);
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            })
         },
     },
     computed:{
@@ -232,14 +243,14 @@ export default {
         }
     },
     created(){
-        this.getArticles(0);
-    }
+        this.getMember();
+    },
 }
 </script>
 
 <style>
-    .div-board{
-        padding-top: 7%;
+    .div-board-mine{
+        padding-top: 4.3%;
         padding-left: 10%;
         padding-right: 10%;
         padding-bottom: 2%;
@@ -248,112 +259,42 @@ export default {
         align-items: center;
     }
 
-    .div-board-table{
-        width: 60%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    .div-board-bottom-set{
+    .div-board-bottom-set-mywriting{
         width: 60%;
         display:flex;
+        flex-direction: row-reverse;
         margin-bottom: 1.5%;
     }
-    .div-board-paging{
-        width: 60%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .div-board-table-table{
-        width: 100%;
-    }
-    .div-board-bottom-scset{
+    .div-board-bottom-scset-mywriting{
         width: 50%;
         display:flex;
     }
-    .div-board-bottom-search{
+    .div-board-bottom-search-mywriting{
         width: 60%;
         margin-right: 2%;
     }
-    .div-board-bottom-category{
+    .div-board-bottom-category-mywriting{
         width: 40%;
-    }
-    .div-board-bottom-btn{
-        width: 50%;
-        display: flex;
-        flex-direction: row-reverse;
-    }
-    .div-board-bottom-btn-btn{
-        background-color: #fd7e14;
-        color: white;
-        width: 80px;
-    }
-    .writing-num{
-        width: 15%;
-        text-align: center;
-    }
-    .writing-title{
-        width: 45%;
-        text-align: center;
-    }
-    .writing-nickname{
-        width: 15%;
-        text-align: center;
-    }
-    .writing-date{
-        width: 25%;
-        text-align: center;
-    }
-    .num-in-board{
-        text-align: center;
-    }
-    .date-in-board{
-        text-align: center;
-    }
-    .nickname-in-board{
-        text-align: center;
-    }
-    .page-link{
-        color: black;
-    }
-    .pagination .page-item.active .page-link {
-        background-color: #fd7e14;
-        border-color: rgb(225, 228, 232);
-    }
-    td .board-title:hover{
-        text-decoration: underline;
-        cursor: pointer;
     }
 
     @media screen and (max-width: 992px){
-        .div-board-table{
-            width: 100%;
-        }
-        .div-board-bottom-set{
+        .div-board-bottom-set-mywriting{
             width: 100%;
             display: flex;
             flex-direction: column;
             margin-bottom: 3%;
         }
 
-        .div-board-bottom-scset{
+        .div-board-bottom-scset-mywriting{
             width: 100%;
             margin-bottom: 3%;
         }
-        .div-board-bottom-btn{
-            width: 100%;
-        }
-        .div-board-bottom-search{
+        .div-board-bottom-search-mywriting{
             width: 70%;
         }
-        .div-board-bottom-category{
+        .div-board-bottom-category-mywriting{
             width: 30%;
             margin-top: 0%;
-        }
-        .div-board-table-table{
-            width: 100%;
         }
     }
 </style>
