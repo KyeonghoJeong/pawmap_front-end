@@ -10,6 +10,7 @@ import WritingView from './views/WritingView.vue'
 import ModifyingView from './views/ModifyingView.vue'
 import ArticleView from './views/ArticleView.vue'
 import MyPageView from './views/MyPageView.vue'
+import DeletingAccountView from './views/DeletingAccountView.vue'
 
 Vue.use(VueRouter)
 
@@ -58,7 +59,12 @@ const routes = [
         path: '/mypage',
         name: 'mypage',
         component: MyPageView
-    }
+    },
+    {
+        path: '/deletingAccount',
+        name: 'deletingAccount',
+        component: DeletingAccountView
+    },
 ]
 
 const router = new VueRouter(

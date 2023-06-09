@@ -42,8 +42,8 @@ export default{
                 window.location.href = "/";
             })
             .catch(error => {
-                if(error.response.status === 401){
-                    console.log("Invalid username or password");
+                if(error.response.status === 403){
+                    alert("잘못된 비밀번호입니다.");
                 }
             })
         }

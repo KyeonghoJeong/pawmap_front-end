@@ -1,9 +1,9 @@
 <template>
     <div>
-        <form class="form-signin form-info" @submit.prevent="confirm" >
+        <form class="form-signin form-info" @submit.prevent="deleteAccount" >
             <div class="div-info">
-                <div><h1 class="h3 mb-3 font-weight-normal">회원정보 수정</h1><br></div>
-                <div><p>비밀번호를 변경할 수 있습니다.</p><br></div>
+                <div><h1 class="h3 mb-3 font-weight-normal">회원탈퇴</h1><br></div>
+                <div><p>회원탈퇴를 위해 비밀번호를 입력해주세요.</p><br></div>
                 <div class="div-info-id">
                     <label for="p-info-id-id" class="sr-only label-info-id">아이디</label>
                     <p id="p-info-id-id">&nbsp;{{this.member.memberId}}</p><br><br>
@@ -16,16 +16,12 @@
                     <label for="p-info-id-email" class="sr-only label-info-email">이메일</label>
                     <p id="p-info-id-email">&nbsp;{{this.member.email}}</p><br><br>
                 </div>
-                <label for="div-info-id-pw" class="sr-only label-info-pw">비밀번호 변경</label><br><br>
+                <label for="div-info-id-pw" class="sr-only label-info-pw">비밀번호</label><br><br>
                 <div id="div-info-id-pw">
-                    <input v-model="tempPassword1" type="password" class="form-control" pattern="(?=.*[0-9])(?=.*[!@#$%^&amp;*()_+=\[\]{}~?:;`|/]).*" oninvalid="setCustomValidity('비밀번호는 8글자 이상으로 숫자와 특수문자를 반드시 포함시켜주세요.')" oninput="setCustomValidity('')" placeholder="신규 비밀번호" required><br>
+                    <input v-model="tempPassword1" type="password" class="form-control" pattern="(?=.*[0-9])(?=.*[!@#$%^&amp;*()_+=\[\]{}~?:;`|/]).*" oninvalid="setCustomValidity('비밀번호는 8글자 이상으로 숫자와 특수문자를 반드시 포함시켜주세요.')" oninput="setCustomValidity('')" placeholder="비밀번호 입력" required><br>
                     <input v-model="tempPassword2" type="password" class="form-control" pattern="(?=.*[0-9])(?=.*[!@#$%^&amp;*()_+=\[\]{}~?:;`|/]).*" oninvalid="setCustomValidity('비밀번호는 8글자 이상으로 숫자와 특수문자를 반드시 포함시켜주세요.')" oninput="setCustomValidity('')" placeholder="비밀번호 확인" required><br>
-                    <input v-model="password" type="password" class="form-control" placeholder="현재 비밀번호" required><br>
-                    <div style="display:flex; justify-content: flex-end;">
-                        <router-link to="/deletingAccount" class="router-info-deleteAcc">회원탈퇴</router-link>
-                    </div><br>
                 </div>
-                <div><button class="btn btn-lg btn-primary btn-block btn-info-confirm" type="submit" style="width:100%">수정</button></div>
+                <div><button class="btn btn-lg btn-primary btn-block btn-info-confirm" type="submit" style="width:100%">회원탈퇴</button></div>
             </div>
         </form>
     </div>
@@ -78,48 +74,27 @@ export default{
                 console.log(error);
             })
         },
-        confirm(){
+        deleteAccount(){
             if(this.tempPassword1 !== this.tempPassword2){
                 alert("비밀번호가 같지 않습니다.");
             }else{
                 this.newPassword = this.tempPassword1;
 
-                axios.put('http://localhost:8090/api/member', {
-                    memberId: this.member.memberId,
-                    pw: this.newPassword
-                },{
-                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                axios.delete('http://localhost:8090/api/member', {
+                    data:{
+                        memberId: this.member.memberId,
+                        pw: this.newPassword
+                    }
                 })
                 .then(response => {
-                    if(response.data === 'Invalid'){
-                        axios.get('http://localhost:8090/api/member/reissuance', {
-                            withCredentials: true
-                        })
-                        .then(response => {
-                            if(response.data === 'Invalid'){
-                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-                                
-                                localStorage.removeItem("accessToken");
-                                window.location.href = "/signin";
-                            }else{
-                                localStorage.removeItem("accessToken");
-                                localStorage.setItem("accessToken", response.data.accessToken);
-                                
-                                this.confirm();
-                            }
-                        })
-                        .catch(error => {
-                            console.log(error);
-                        })
-                    }else{
-                        alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
-                        
-                        localStorage.removeItem("accessToken");
-                        window.location.href = "/signin";
+                    if(response.data === 'Success'){
+                        alert("회원탈퇴가 완료되었습니다.");
                     }
                 })
                 .catch(error => {
-                    console.log(error);
+                    if(error.response.status === 403){
+                        alert("잘못된 비밀번호입니다.");
+                    }
                 })
             }
         }
