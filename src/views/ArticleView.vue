@@ -32,22 +32,14 @@
             </div>
             <div v-if="isItsMember === true" class="div-posting-mnd">
                 <div class="div-posting-mnd-mnd">
-                    <p class="p-posting-mnd-m" @click="modifyArticle">수정</p>&nbsp;&nbsp;
-                    <p class="p-posting-mnd-d" @click="deleteArticle">삭제</p>
+                    <span class="p-posting-mnd-m" @click="modifyArticle">수정</span>&nbsp;&nbsp;
+                    <span class="p-posting-mnd-d" @click="deleteArticle">삭제</span>
                 </div>
             </div>
             <div class="div-posting-btns">
                 <button type="button" class="btn div-posting-btns-btn" @click="toBoard">목록</button>
             </div>
-            <div class="div-posting-inc">
-                <div v-for="comment in comments" :key="comment.cmtId" class="div-posting-inc-cmt">
-                    <div class="div-posting-inc-cmt-i">
-                        <span class="div-posting-inc-cmt-i-nickname">{{comment.nickname}}</span>
-                        <span>{{comment.writingDate}}</span>
-                    </div>
-                    <div class="div-posting-inc-cmt-c">{{comment.writing}}</div>
-                </div>
-            </div>
+            <CommentView :articleId="articleId" :memberId="memberId" />
             <WritingCommentView :articleId="articleId"/>
         </div>
     </div>
@@ -55,6 +47,7 @@
 
 <script>
 import BoardTitleView from '../components/BoardTitleView.vue'
+import CommentView from '../components/CommentView.vue'
 import WritingCommentView from '../components/WritingCommentView.vue'
 
 import axios from 'axios'
@@ -62,12 +55,14 @@ import axios from 'axios'
 export default {
     components:{
         BoardTitleView,
+        CommentView,
         WritingCommentView,
     },
     data(){
         return{
             articleId: '',
             article: '',
+            memberId: '',
             isItsMember: false,
             comments: [],
             totalPages: '',
@@ -86,66 +81,43 @@ export default {
                 console.log(error);
             })
         },
-        getComments(articleId){
-            axios.get('http://localhost:8090/api/board/article/comments', {
-                params: {articleId: articleId, page: 0, size: 10}
+        checkMember(articleId){
+            axios.get('http://localhost:8090/api/board/article/membercheck', {
+                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
+                params: {articleId: articleId}
             })
             .then(response => {
-                this.comments = response.data.content;
-                this.totalPages = response.data.totalPages;
+                if(response.data === 'Invalid'){
+                    axios.get('http://localhost:8090/api/member/reissuance', {
+                        withCredentials: true
+                    })
+                    .then(response => {
+                        if(response.data === 'Invalid'){
+                            alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+                            
+                            localStorage.removeItem("accessToken");
+                            window.location.href = "/signin";
+                        }else{
+                            localStorage.removeItem("accessToken");
+                            localStorage.setItem("accessToken", response.data.accessToken);
+
+                            this.checkMember(articleId)
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
+                }else {
+                    this.memberId = response.data.memberId;
+                    
+                    if(response.data.count === 1){
+                        this.isItsMember = true;
+                    }
+                }
             })
             .catch(error => {
                 console.log(error);
-            })          
-        },
-        checkMember(articleId){
-            return new Promise((resolve, reject) => {
-                axios.get('http://localhost:8090/api/board/article/membercheck', {
-                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
-                    params: {articleId: articleId}
-                })
-                .then(response => {
-                    if(response.data === 'Invalid'){
-                        axios.get('http://localhost:8090/api/member/reissuance', {
-                            withCredentials: true
-                        })
-                        .then(response => {
-                            if(response.data === 'Invalid'){
-                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-                                
-                                localStorage.removeItem("accessToken");
-                                window.location.href = "/signin";
-                            }else{
-                                localStorage.removeItem("accessToken");
-                                localStorage.setItem("accessToken", response.data.accessToken);
-
-                                this.checkMember(articleId)
-                                .then(() => {
-                                    resolve();
-                                })
-                                .catch(error => {
-                                    console.log(error);
-                                    reject(error);
-                                })
-                            }
-                        })
-                        .catch(error => {
-                            console.log(error);
-                            reject(error);
-                        })
-                    }else{
-                        this.isItsMember = true;
-                        resolve();
-                    }
-                })
-                .catch(error => {
-                    console.log(error);
-                    reject(error);
-                })
             })
-        },
-        async setIsItsMember(articleId){
-            await this.checkMember(articleId);
         },
         modifyArticle(){
             this.$store.commit('updateTitle', this.article.title);
@@ -192,10 +164,9 @@ export default {
     created(){
         this.articleId = this.$route.query.articleId;
         this.getArticle(this.articleId);
-        this.getComments(this.articleId);
 
         if(localStorage.getItem("accessToken") !== null){
-            this.setIsItsMember(this.articleId);
+            this.checkMember(this.articleId);
         }
     }
 }
@@ -312,43 +283,6 @@ export default {
         background-color: #fd7e14;
         color: white;
         width: 80px;
-    }
-
-    .div-posting-inc{
-        height: 15%;
-        border-top: 0px;
-        border-bottom: 1px;
-        border-left: 0px;
-        border-right: 0px;
-        border-style: solid;
-        border-color: rgb(203, 204, 206);
-    }
-    .div-posting-inc-cmt{
-        margin: 1%;
-        border-style: solid;
-        border-width: 1px;
-        border-color: rgb(203, 204, 206);
-        overflow: auto;
-    }
-    .div-posting-inc-cmt-i{
-        padding: 1%;
-        display: flex;
-        justify-content: space-between;
-        border-top: 0px;
-        border-bottom: 1px;
-        border-left: 0px;
-        border-right: 0px;
-        border-style: solid;
-        border-color: rgb(203, 204, 206);
-    }
-    .div-posting-inc-cmt-i-nickname{
-        font-weight: bold;
-        color: rgb(81, 145, 195);
-    }
-    .div-posting-inc-cmt-c{
-        padding: 1%;
-        display: flex;
-        height: 8vh;
     }
 
     @media screen and (max-width: 992px){

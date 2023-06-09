@@ -28,41 +28,45 @@ export default{
     },
     methods:{
         postComment(){
-            axios.post('http://localhost:8090/api/board/article/comment', {
-                articleId: this.articleId,
-                title: this.title, 
-                writing: this.writing
-            }, {
-                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-            })
-            .then(response => {
-                if(response.data === 'Invalid'){
-                    axios.get('http://localhost:8090/api/member/reissuance', {
-                        withCredentials: true
-                    })
-                    .then(response => {
-                        if(response.data === 'Invalid'){
-                            alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-                            
-                            localStorage.removeItem("accessToken");
-                            window.location.href = "/signin";
-                        }else{
-                            localStorage.removeItem("accessToken");
-                            localStorage.setItem("accessToken", response.data.accessToken);
+            if(localStorage.getItem("accessToken") === null){
+                alert("로그인 해주세요.");
+            }else{
+                axios.post('http://localhost:8090/api/board/article/comment', {
+                    articleId: this.articleId,
+                    title: this.title, 
+                    writing: this.writing
+                }, {
+                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                })
+                .then(response => {
+                    if(response.data === 'Invalid'){
+                        axios.get('http://localhost:8090/api/member/reissuance', {
+                            withCredentials: true
+                        })
+                        .then(response => {
+                            if(response.data === 'Invalid'){
+                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+                                
+                                localStorage.removeItem("accessToken");
+                                window.location.href = "/signin";
+                            }else{
+                                localStorage.removeItem("accessToken");
+                                localStorage.setItem("accessToken", response.data.accessToken);
 
-                            this.postComment();
-                        }
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    })
-                }else{
-                    this.$router.go(this.$router.currentRoute);
-                }
-            })
-            .catch(error => {
-                console.log(error);
-            })
+                                this.postComment();
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        })
+                    }else{
+                        this.$router.go(this.$router.currentRoute);
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+            }
         }
     }
 }

@@ -4,7 +4,7 @@
         <form @submit.prevent="postArticle" class="form-writing">
             <div class="div-writing-menu">
                 <div class="mb-3">
-                    <input type="text" class="form-control" placeholder="제목을 입력하세요." maxlength="40" required v-model="title" >
+                    <input type="text" class="form-control" placeholder="제목을 입력하세요." maxlength="40" required v-model="title" autofocus>
                 </div>
                 <div class="mb-3 div-writing-menu-writing">
                     <textarea class="form-control textarea-writing-menu-writing" placeholder="내용을 입력하세요." maxlength="1000" required v-model="writing"></textarea>

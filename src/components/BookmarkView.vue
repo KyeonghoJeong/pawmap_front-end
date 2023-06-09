@@ -210,7 +210,7 @@ export default {
       },
       // startNum + 5를 하면 다음 페이지 배열의 시작 페이지 번호인데 총 페이지 수를 넘을 경우 false 리턴
       isNextDisabled(){
-        return this.startNum+5 >= this.totalPages;
+        return this.startNum+5 > this.totalPages;
       },
       // 페이지 5개 단위로 출력을 위해 numbers 배열에 5개씩 담아 리턴
       pageNumbers(){

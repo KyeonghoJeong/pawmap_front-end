@@ -13,9 +13,9 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="article in articles" :key="article.articleId">
+                <tr v-for="(article, index) in articles" :key="article.articleId">
                     <th scope="row" class="num-in-board">{{article.articleId}}</th>
-                    <td><span class="board-title" @click="toArticle(article.articleId)">{{article.title}}</span></td>
+                    <td><span class="board-title" @click="toArticle(article.articleId)">{{article.title}} <span style="color:red" v-if="commentNumbers[index] !== 0">[{{commentNumbers[index]}}]</span></span></td>
                     <td class="nickname-in-board">{{article.nickname}}</td>
                     <td class="date-in-board">{{article.postDate}}</td>
                 </tr>
@@ -50,23 +50,23 @@
         </div>
         <div class="div-board-paging">
             <nav aria-label="Page navigation example">
-            <ul class="pagination">
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                    </li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item"><a class="page-link" href="#">4</a></li>
-                    <li class="page-item"><a class="page-link" href="#">5</a></li>
+                <ul class="pagination">
                     <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-            </ul>
+                        <button :class="['page-link', isPrevDisabled ? 'disabled' : '']" aria-label="Previous" @click="setPrevPageNum">
+                            <span aria-hidden="true">&laquo;</span>
+                        </button>
+                    </li>
+
+                    <li v-for="i in pageNumbers" :key="i" :class="['page-item', pageActive === i ? 'active' : '']" @click="pageActive = i">
+                        <button class="page-link" @click="getBoardInfos(i-1)">{{i}}</button>
+                    </li>
+
+                    <li class="page-item">
+                        <button :class="['page-link', isNextDisabled ? 'disabled' : '']" aria-label="Next" @click="setNextPageNum">
+                            <span aria-hidden="true">&raquo;</span>
+                        </button>
+                    </li>
+                </ul>
             </nav>
         </div>
     </div>
@@ -85,6 +85,11 @@ export default {
         return{
             articles: [],
             totalPages: '',
+            pageActive: 1,
+            startNum: 0,
+            endNum: 0,
+            articleIds: [],
+            commentNumbers: [],
         }
     },
     methods:{
@@ -97,6 +102,91 @@ export default {
         },
         toArticle(articleId){
             this.$router.push({ path: '/board/article', query: {articleId: articleId}});
+        },
+        setPrevPageNum(){
+            // isPrevDisabled()에 의해 startNum이 5 이하인 경우는 신경 X
+            this.startNum = this.startNum - 5; // 시작 번호는 현재 시작 번호 - 5
+            this.endNum = this.startNum + 4; // 마지막 번호는 현재 시작 번호 + 4
+            this.pageActive = this.endNum; // 이전 버튼 클릭 시 선택 중인 페이지 표시를 위해 선택한 페이지 번호 리턴
+            this.getBoardInfos(this.endNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
+        },
+        // 다음 버튼 클릭 시 startNum, endNum 재설정을 위한 메소드
+        setNextPageNum(){
+            // 페이지를 처음 띄우는 경우 startNum은 0, endNum은 0이므로 startNum은 startNum + 6으로 설정
+            // 페이지를 처음 띄우는 경우가 아닌 경우는 startNum은 endNum + 1
+            if(this.endNum === 0){
+                this.startNum = this.startNum + 6;
+            }else{
+                this.startNum = this.endNum + 1;
+            }
+            
+            this.endNum = this.startNum + 4; // endNum은 startNum + 4
+            // 마지막 페이지로 설정한 번호가 총 페이지 수를 넘는 경우 마지막 페이지 번호를 총 페이지 수로 설정
+            if(this.endNum > this.totalPages){
+                this.endNum = this.totalPages;
+            }
+
+            this.pageActive = this.startNum; // 다음 버튼을 누르면 첫 페이지 번호를 active
+            this.getBoardInfos(this.startNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
+        },
+        getBoardInfos(i){
+            axios.get('http://localhost:8090/api/board/articles', {
+                params: {page: i, size: 10}
+            })
+            .then(response => {
+                this.articles = response.data.content;
+                this.totalPages = response.data.totalPages;
+
+                this.articleIds = [];
+                for(let i=0; i<this.articles.length; i++){
+                    this.articleIds.push(this.articles[i].articleId);
+                }
+
+                axios.post('http://localhost:8090/api/board/article/comment/numbers', this.articleIds)
+                .then(response => {
+                    this.commentNumbers = response.data;
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+            })
+            .catch(error => {
+                console.log(error);
+            })
+        },
+    },
+    computed:{
+        // 맨 첫 페이지 이전 버튼 동작 중지를 위해 startNum이 5 이하인 경우 false 리턴
+        isPrevDisabled(){
+            return this.startNum <= 5;
+        },
+        // startNum + 5를 하면 다음 페이지 배열의 시작 페이지 번호인데 총 페이지 수를 넘을 경우 false 리턴
+        isNextDisabled(){
+            return this.startNum+5 > this.totalPages;
+        },
+        // 페이지 5개 단위로 출력을 위해 numbers 배열에 5개씩 담아 리턴
+        pageNumbers(){
+            // startNum = 0, endNum = 0인 경우 고려
+            // 이후 같은 패턴 반복
+
+            let numbers = [];
+            let start = this.startNum;
+            let end = this.endNum;
+
+            // startNum이 0이면 맨 처음 페이지 배열에 해당
+            if(this.startNum === 0){
+                start = 1; // 맨 처음 페이지 배열 시작 페이지 번호를 1로 설정
+                end = this.totalPages; // 총 페이지 배열의 수가 하나를 넘지 않는 경우 시작 페이지의 마지막 번호를 총 페이지 수로 설정
+                if(end > 5){ // 총 페이지 배열의 수가 하나 이상인 경우 시작 페이지의 마지막 번호를 첫 번째 페이지 배열의 마지막 번호인 5로 설정
+                    end = 5;
+                }
+            }
+
+            for(let i=start; i<=end; i++){
+                numbers.push(i);
+            }
+
+            return numbers;
         }
     },
     created(){
@@ -106,6 +196,18 @@ export default {
         .then(response => {
             this.articles = response.data.content;
             this.totalPages = response.data.totalPages;
+
+            for(let i=0; i<this.articles.length; i++){
+                this.articleIds.push(this.articles[i].articleId);
+            }
+
+            axios.post('http://localhost:8090/api/board/article/comment/numbers', this.articleIds)
+            .then(response => {
+                this.commentNumbers = response.data;
+            })
+            .catch(error => {
+                console.log(error);
+            })
         })
         .catch(error => {
             console.log(error);
@@ -172,7 +274,7 @@ export default {
         text-align: center;
     }
     .writing-title{
-        width: 50%;
+        width: 45%;
         text-align: center;
     }
     .writing-nickname{
@@ -180,7 +282,7 @@ export default {
         text-align: center;
     }
     .writing-date{
-        width: 20%;
+        width: 25%;
         text-align: center;
     }
     .num-in-board{
