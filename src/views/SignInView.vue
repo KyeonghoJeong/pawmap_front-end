@@ -43,7 +43,7 @@ export default{
             })
             .catch(error => {
                 if(error.response.status === 403){
-                    alert("잘못된 비밀번호입니다.");
+                    alert("아이디 또는 비밀번호가 잘못되었거나 존재하지 않는 회원입니다.");
                 }
             })
         }

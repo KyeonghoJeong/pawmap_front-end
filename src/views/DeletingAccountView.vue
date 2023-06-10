@@ -78,24 +78,35 @@ export default{
             if(this.tempPassword1 !== this.tempPassword2){
                 alert("비밀번호가 같지 않습니다.");
             }else{
-                this.newPassword = this.tempPassword1;
+                if(confirm("정말 회원탈퇴 하시겠습니까?")){
+                    this.newPassword = this.tempPassword1;
 
-                axios.delete('http://localhost:8090/api/member', {
-                    data:{
+                    axios.put('http://localhost:8090/api/member/deletion', {
                         memberId: this.member.memberId,
                         pw: this.newPassword
-                    }
-                })
-                .then(response => {
-                    if(response.data === 'Success'){
-                        alert("회원탈퇴가 완료되었습니다.");
-                    }
-                })
-                .catch(error => {
-                    if(error.response.status === 403){
-                        alert("잘못된 비밀번호입니다.");
-                    }
-                })
+                    })
+                    .then(response => {
+                        if(response.data === 'Success'){
+                            axios.delete(`http://localhost:8090/api/bookmarks?memberId=${this.member.memberId}`)
+                            .then(response => {
+                                if(response.data === 'Success'){
+                                    alert("회원탈퇴가 완료되었습니다.");
+
+                                    localStorage.removeItem("accessToken");
+                                    window.location.href = "/";
+                                }
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            })
+                        }
+                    })
+                    .catch(error => {
+                        if(error.response.status === 403){
+                            alert("잘못된 비밀번호입니다.");
+                        }
+                    })
+                }
             }
         }
     },

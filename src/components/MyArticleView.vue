@@ -207,6 +207,9 @@ export default {
                 console.log(error);
             })
         },
+        toArticle(articleId){
+            this.$router.push({ path: '/board/article', query: {articleId: articleId}});
+        },
     },
     computed:{
         // 맨 첫 페이지 이전 버튼 동작 중지를 위해 startNum이 5 이하인 경우 false 리턴
