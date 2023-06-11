@@ -273,7 +273,7 @@ export default {
 
                 const addBookmark = content.getElementById("addBookmark");
                 addBookmark.addEventListener('click', () => {
-                    console.log("Hello World");
+                    this.addBookmark(facility.facilityId);
                 });
 
                 const imageSize = new kakao.maps.Size(8, 8);
