@@ -84,7 +84,7 @@ export default {
             endNum: 0,
             articleIds: [],
             commentNumbers: [],
-            searchOptions: ['제목', '내용'],
+            searchOptions: ['제목', '내용', '닉네임'],
             selectedOption: '제목+내용',
             searchQuery: '',
             title: '',
@@ -232,41 +232,6 @@ export default {
 
             this.getArticles(0);
         },
-        getMember(){
-            axios.get('http://localhost:8090/api/member', {
-                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-            })
-            .then(response => {
-                if(response.data === 'Invalid'){
-                    axios.get('http://localhost:8090/api/member/reissuance', {
-                        withCredentials: true
-                    })
-                    .then(response => {
-                        if(response.data === 'Invalid'){
-                            alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-                            
-                            localStorage.removeItem("accessToken");
-                            window.location.href = "/signin";
-                        }else{
-                            localStorage.removeItem("accessToken");
-                            localStorage.setItem("accessToken", response.data.accessToken);
-
-                            this.getMember();
-                        }
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    })
-                }else{
-                    this.memberId = response.data.memberId;
-
-                    this.getArticles(0);
-                }
-            })
-            .catch(error => {
-                console.log(error);
-            })
-        },
     },
     computed:{
         // 맨 첫 페이지 이전 버튼 동작 중지를 위해 startNum이 5 이하인 경우 false 리턴
@@ -308,7 +273,7 @@ export default {
         }
     },
     created(){
-        this.getMember();
+        this.getArticles(0);
     }
 }
 </script>

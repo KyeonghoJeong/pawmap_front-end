@@ -161,6 +161,8 @@ export default {
             })
         },
         deleteBookmark(){
+            this.checkedFacilities = [];
+
             for(let i=0; i<this.bookmarkInfos.length; i++){
                 if(this.checkedBookmarks[i] === true){
                     this.checkedFacilities.push(this.bookmarkInfos[i].facilityId);
@@ -200,7 +202,7 @@ export default {
             })
             .catch(error => {
                 console.log(error);
-            })            
+            })   
         }
     },
     computed:{
@@ -210,7 +212,11 @@ export default {
       },
       // startNum + 5를 하면 다음 페이지 배열의 시작 페이지 번호인데 총 페이지 수를 넘을 경우 false 리턴
       isNextDisabled(){
-        return this.startNum+5 > this.totalPages;
+        if(this.startNum == 0){
+            return this.startNum+6 > this.totalPages;
+        }else{
+            return this.startNum+5 > this.totalPages;
+        }
       },
       // 페이지 5개 단위로 출력을 위해 numbers 배열에 5개씩 담아 리턴
       pageNumbers(){
@@ -244,6 +250,15 @@ export default {
 </script>
 
 <style>
+    .div-board-mine{
+        padding-top: 4.3%;
+        padding-left: 10%;
+        padding-right: 10%;
+        padding-bottom: 2%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
     .writing-category{
         width: 20%;
         text-align: center;

@@ -40,6 +40,7 @@ export default{
                 localStorage.setItem("accessToken", response.data.accessToken);
 
                 window.location.href = "/";
+                //this.$router.go(this.$router.currentRoute);
             })
             .catch(error => {
                 if(error.response.status === 403){

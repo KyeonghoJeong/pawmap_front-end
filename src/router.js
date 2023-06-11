@@ -11,6 +11,7 @@ import ModifyingView from './views/ModifyingView.vue'
 import ArticleView from './views/ArticleView.vue'
 import MyPageView from './views/MyPageView.vue'
 import DeletingAccountView from './views/DeletingAccountView.vue'
+import AdminPageView from './views/AdminPageView.vue'
 
 Vue.use(VueRouter)
 
@@ -64,6 +65,11 @@ const routes = [
         path: '/deletingAccount',
         name: 'deletingAccount',
         component: DeletingAccountView
+    },
+    {
+        path: '/admin',
+        name: 'admin',
+        component: AdminPageView
     },
 ]
 
