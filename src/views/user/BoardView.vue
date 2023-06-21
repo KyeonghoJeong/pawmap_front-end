@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import BoardTitleView from '../components/BoardTitleView.vue'
+import BoardTitleView from '../../components/BoardTitleView.vue'
 
 import axios from 'axios'
 

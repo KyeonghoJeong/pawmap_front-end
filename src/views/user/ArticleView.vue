@@ -46,9 +46,9 @@
 </template>
 
 <script>
-import BoardTitleView from '../components/BoardTitleView.vue'
-import CommentView from '../components/CommentView.vue'
-import WritingCommentView from '../components/WritingCommentView.vue'
+import BoardTitleView from '../../components/BoardTitleView.vue'
+import CommentView from '../../components/CommentView.vue'
+import WritingCommentView from '../../components/WritingCommentView.vue'
 
 import axios from 'axios'
 

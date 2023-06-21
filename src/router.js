@@ -1,17 +1,17 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-import HomeView from './views/HomeView.vue'
-import MapView from './views/MapView.vue'
-import BoardView from './views/BoardView.vue'
-import SignInView from './views/SignInView.vue'
-import SignUpView from './views/SignUpView.vue'
-import WritingView from './views/WritingView.vue'
-import ModifyingView from './views/ModifyingView.vue'
-import ArticleView from './views/ArticleView.vue'
-import MyPageView from './views/MyPageView.vue'
-import DeletingAccountView from './views/DeletingAccountView.vue'
-import AdminPageView from './views/AdminPageView.vue'
+import HomeView from './views/user/HomeView.vue'
+import MapView from './views/user/MapView.vue'
+import BoardView from './views/user/BoardView.vue'
+import SignInView from './views/member/SignInView.vue'
+import SignUpView from './views/user/SignUpView.vue'
+import WritingView from './views/member/WritingView.vue'
+import ModifyingView from './views/member/ModifyingView.vue'
+import ArticleView from './views/user/ArticleView.vue'
+import MyPageView from './views/member/MyPageView.vue'
+import DeletingAccountView from './views/member/DeletingAccountView.vue'
+import AdminPageView from './views/admin/AdminPageView.vue'
 
 Vue.use(VueRouter)
 

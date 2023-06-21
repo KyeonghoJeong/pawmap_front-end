@@ -1,7 +1,8 @@
 <template>
 <!-- footer를 담을 div -->
-<div class="container-fluid">
+<div class="container-fluid div-footer-footer">
     <!-- 아이콘 -->
+    <!-- 순서대로 페이스북, 인스타그램, 카카오톡 -->
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
         <symbol id="facebook" viewBox="0 0 16 16">
             <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/>
@@ -15,12 +16,15 @@
     </svg>
     <!-- footer -->
     <div>
-        <div class="py-3 my-4 border-top div-footer">
+        <!-- footer 내용 배치를 위한 div -->
+        <div class="py-3 my-4 border-top div-footer-item">
+            <!-- 문구 배치 -->
             <div>
                 <span class="mb-3 mb-md-0 text-muted">Developed by Kyeongho Jeong</span>
             </div>
+            <!-- 아이콘 배치 -->
             <div>
-                <ul class="ul-footer">
+                <ul class="ul-footer-icon">
                     <li><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#kakao"/></svg></a></li>
                     <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#instagram"/></svg></a></li>
                     <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#facebook"/></svg></a></li>
@@ -32,24 +36,27 @@
 </template>
 
 <style>
-.div-footer{
+.div-footer-footer{
+    flex-shrink: 0; /* wrapper에 따른 비율 조정 X */
+}
+.div-footer-item{
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* 문구와 아이콘 리스트를 양끝에 배치 */
 }
-.ul-footer{
+.ul-footer-icon{
     display: flex;
-    list-style: none;
+    list-style: none; /* 각 아이콘 앞에 오는 점 없애기 */
     padding-left: 0;
     margin-bottom: 0;
 }
-/* 너비 576px 이하 시 footer 내용 가운데 정렬 */
+/* 너비 992px 이하 시 footer 내용 가운데 정렬 */
 @media (max-width: 992px) {
-    .div-footer {
+    .div-footer-item {
         flex-direction: column;
         align-items: center;
     }
-    .ul-footer{
+    .ul-footer-icon{
         margin-top: 15%;
     }
 }

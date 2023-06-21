@@ -5,37 +5,16 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state:{
-    emd: '',
-    cat: '',
-    title: '',
-    writing: '',
+    beforePage: '',
   },
   mutations:{
-    updateEmd(state, data){
-      state.emd = data;
+    updateBeforePage(state, data){
+      state.beforePage = data;
     },
-    updateCat(state, data){
-      state.cat = data;
-    },
-    updateArticleId(state, data){
-      state.articleId = data;
-    },
-    updateTitle(state, data){
-      state.title = data;
-    },
-    updateWriting(state, data){
-      state.writing = data;
-    }
   },
   getters:{
-    getArticleId: (state) => {
-      return state.articleId;
+    getBeforePage: (state) => {
+      return state.beforePage;
     },
-    getTitle: (state) => {
-      return state.title;
-    },
-    getWriting: (state) => {
-      return state.writing;
-    }
   }
 })

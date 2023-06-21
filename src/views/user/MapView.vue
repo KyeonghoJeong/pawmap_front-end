@@ -282,11 +282,11 @@ export default {
                     this.activatedOverlay.setMap(null);
                     this.activatedOverlay = '';
 
-                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/default.png'), imageSize));
 
                     for(let i=0; i<this.facilityList.length; i++){
                         if(this.clickedMarker.id === this.facilityList[i].facilityId){
-                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificdefault.png'), new kakao.maps.Size(30, 30)));
+                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificdefault.png'), new kakao.maps.Size(30, 30)));
                         }
                     }
 
@@ -340,11 +340,11 @@ export default {
 
             // 이전에 클릭한 마커가 있는 경우 아이콘 기본값으로 변경
             if(this.clickedMarker !== ''){
-                this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+                this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/default.png'), imageSize));
 
                 for(let i=0; i<this.facilityList.length; i++){
                     if(this.clickedMarker.id === this.facilityList[i].facilityId){
-                        this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificdefault.png'), new kakao.maps.Size(30, 30)));
+                        this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificdefault.png'), new kakao.maps.Size(30, 30)));
                     }
                 }
 
@@ -355,11 +355,11 @@ export default {
             const targetMarker = this.markers.find((marker) => marker.id === facilityList.facilityId);
             const marker = targetMarker;
 
-            marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+            marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/over.png'), imageSize));
 
             for(let i=0; i<this.facilityList.length; i++){
                 if(marker.id === this.facilityList[i].facilityId){
-                    marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificover.png'), new kakao.maps.Size(30, 30)));
+                    marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificover.png'), new kakao.maps.Size(30, 30)));
                 }
             }
             
@@ -598,7 +598,7 @@ export default {
                         map: this.map,
                         position: new kakao.maps.LatLng(position[2], position[3]),
                         title: position[1],
-                        image: new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize),
+                        image: new kakao.maps.MarkerImage(require('/src/assets/marker/default.png'), imageSize),
                         zIndex: 1,
                     })
                     marker.id = position[0];
@@ -608,7 +608,7 @@ export default {
                     const specificImageSize = new kakao.maps.Size(30, 30)
                     for(let i=0; i<this.facilityList.length; i++){
                         if(marker.id === this.facilityList[i].facilityId){
-                            marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificdefault.png'), specificImageSize));
+                            marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificdefault.png'), specificImageSize));
                             marker.setZIndex(2);
                         }
                     }
@@ -618,11 +618,11 @@ export default {
                     // 줌, 드래그 시 이전에 클릭한 마커 아이콘을 유지하기 위해 id로 체크 후 같은 마커는 아이콘 유지 
                     if(this.clickedMarker !== ''){
                         if(marker.id === this.clickedMarker.id){
-                            marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+                            marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/over.png'), imageSize));
 
                             for(let i=0; i<this.facilityList.length; i++){
                                 if(marker.id === this.facilityList[i].facilityId){
-                                    marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificover.png'), specificImageSize));
+                                    marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificover.png'), specificImageSize));
                                 }
                             }
 
@@ -632,32 +632,32 @@ export default {
 
                     // 마우스오버 할 때마다 아이콘 변경 표시
                     kakao.maps.event.addListener(marker, 'mouseover', () => {
-                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+                        marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/over.png'), imageSize));
 
                         for(let i=0; i<this.facilityList.length; i++){
                             if(marker.id === this.facilityList[i].facilityId){
-                                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificover.png'), specificImageSize));
+                                marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificover.png'), specificImageSize));
                             }
                         }
                     });
 
                     // 마우스아웃 할 때는 다시 아이콘 기본값 표시
                     kakao.maps.event.addListener(marker, 'mouseout', () => {
-                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+                        marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/default.png'), imageSize));
 
                         for(let i=0; i<this.facilityList.length; i++){
                             if(marker.id === this.facilityList[i].facilityId){
-                                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificdefault.png'), specificImageSize));
+                                marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificdefault.png'), specificImageSize));
                             }
                         }
 
                         // 단, 클릭한 마커가 있는 경우 아이콘 변경값 유지
                         if(this.clickedMarker !== ''){
-                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/over.png'), imageSize));
 
                             for(let i=0; i<this.facilityList.length; i++){
                                 if(this.clickedMarker.id === this.facilityList[i].facilityId){
-                                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificover.png'), specificImageSize));
+                                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificover.png'), specificImageSize));
                                 }
                             }
                         }
@@ -671,22 +671,22 @@ export default {
 
                         // 이전에 클릭한 마커가 있는 경우 아이콘 기본값으로 변경
                         if(this.clickedMarker !== ''){
-                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/default.png'), imageSize));
 
                             for(let i=0; i<this.facilityList.length; i++){
                                 if(this.clickedMarker.id === this.facilityList[i].facilityId){
-                                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificdefault.png'), specificImageSize));
+                                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificdefault.png'), specificImageSize));
                                 }
                             }
 
                             this.clickedMarker = '';
                         }
                         
-                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/over.png'), imageSize));
+                        marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/over.png'), imageSize));
 
                         for(let i=0; i<this.facilityList.length; i++){
                             if(marker.id === this.facilityList[i].facilityId){
-                                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificover.png'), specificImageSize));
+                                marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificover.png'), specificImageSize));
                             }
                         }
                         
@@ -698,11 +698,11 @@ export default {
                     /////////////////////////////////////////////////////////////////////////////////////////////////
                     // 지도 클릭 시 아이콘 기본값 설정 및 오버레이 삭제
                     kakao.maps.event.addListener(this.map, 'click', () => {
-                        marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/default.png'), imageSize));
+                        marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/default.png'), imageSize));
 
                         for(let i=0; i<this.facilityList.length; i++){
                             if(marker.id === this.facilityList[i].facilityId){
-                                marker.setImage(new kakao.maps.MarkerImage(require('../assets/marker/specificdefault.png'), specificImageSize));
+                                marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificdefault.png'), specificImageSize));
                             }
                         }
 

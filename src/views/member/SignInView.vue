@@ -39,8 +39,15 @@ export default{
             .then(response => {
                 localStorage.setItem("accessToken", response.data.accessToken);
 
-                window.location.href = "/";
-                //this.$router.go(this.$router.currentRoute);
+                console.log(this.$store.getters.getBeforePage);
+
+                if(this.$store.getters.getBeforePage === '' || this.$store.getters.getBeforePage === '/signup'){
+                    this.$router.push({path: '/'});
+                }else{
+                    this.$router.push({path: this.$store.getters.getBeforePage});
+                }
+
+                this.$router.go(this.$router.currentRoute);
             })
             .catch(error => {
                 if(error.response.status === 403){
