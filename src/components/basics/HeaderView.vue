@@ -28,25 +28,25 @@
           <!-- 메뉴를 클릭 시 해당하는 라우터 링크로 이동 -->
           <!-- 로그인, 로그아웃 메뉴는 signIn, signOut 메소드 실행 -->
           <li v-if="this.authority === 'ROLE_USER' || this.authority === 'ROLE_MEMBER' || this.authority === 'ROLE_ADMIN'" class="nav-item">
-            <router-link to="/map" class="nav-link active router-header-menu">지도</router-link>
+            <span @click="toMap" class="nav-link active router-header-menu">지도</span>
           </li>
           <li v-if="this.authority === 'ROLE_USER' || this.authority === 'ROLE_MEMBER' || this.authority === 'ROLE_ADMIN'" class="nav-item">
-            <router-link to="/board" class="nav-link active router-header-menu">게시판</router-link>
+            <span @click="toBoard" class="nav-link active router-header-menu">게시판</span>
           </li>
           <li v-if="this.authority === 'ROLE_USER'" class="nav-item">
-            <span @click="signIn" class="nav-link active router-header-menu">로그인</span>
+            <span @click="toSignIn" class="nav-link active router-header-menu">로그인</span>
           </li>
           <li v-if="this.authority === 'ROLE_MEMBER' || this.authority === 'ROLE_ADMIN'" class="nav-item">
             <span @click="signOut" class="nav-link active router-header-menu">로그아웃</span>
           </li>
           <li v-if="this.authority === 'ROLE_USER'" class="nav-item">
-            <router-link to="/signup" class="nav-link active router-header-menu">가입</router-link>
+            <span @click="toSignUp" class="nav-link active router-header-menu">가입</span>
           </li>
           <li v-if="this.authority === 'ROLE_MEMBER' || this.authority === 'ROLE_ADMIN'" class="nav-item">
-            <router-link to="/mypage?tab=bookmark" class="nav-link active router-header-menu">마이페이지</router-link>
+            <span @click="toMyPage" class="nav-link active router-header-menu">마이페이지</span>
           </li>
           <li v-if="this.authority === 'ROLE_ADMIN'" class="nav-item">
-            <router-link to="/admin?tab=members" class="nav-link active router-header-menu">관리페이지</router-link>
+            <span @click="toAdmin" class="nav-link active router-header-menu">관리페이지</span>
           </li>
         </ul>
       </div>
@@ -111,14 +111,34 @@ export default{
         console.log(error);
       })
     },
+    // 지도 메뉴 이동 메소드
+    toMap(){
+      // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /map인 경우 이동 X
+      if(this.$route.path !== '/map'){
+        this.$router.push({path: '/map'});
+      }else{
+        this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
+      }
+    },
+    // 게시판 메뉴 이동 메소드
+    toBoard(){
+      // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /board인 경우 이동 X
+      if(this.$route.path !== '/board'){
+        this.$router.push({path: '/board'});
+      }else{
+        this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
+      }
+    },
     // 로그인 메소드
-    signIn(){
+    toSignIn(){
       // 로그인 후 이전 페이지로 돌아가기 위해 store에 path 저장
       this.$store.commit('updateBeforePage', this.$route.path);
 
       // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /signin인 경우 이동 X
       if(this.$route.path !== '/signin'){
-        this.$router.push({path: 'signin'});
+        this.$router.push({path: '/signin'});
+      }else{
+        this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
       }
     },
     // 로그아웃 메소드
@@ -131,6 +151,33 @@ export default{
       // 새로고침
       this.$router.go(this.$router.currentRoute);
     },
+    // 회원가입 메뉴 이동 메소드
+    toSignUp(){
+      // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /signup인 경우 이동 X
+      if(this.$route.path !== '/signup'){
+        this.$router.push({path: '/signup'});
+      }else{
+        this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
+      }
+    },
+    // 마이페이지 메뉴 이동 메소드
+    toMyPage(){
+      // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /mypage인 경우 이동 X
+      if(this.$route.path !== '/mypage'){
+        this.$router.push({path: '/mypage', query:{tab: 'bookmark'}});
+      }else{
+        this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
+      }
+    },
+    // 관리페이지 메뉴 이동 메소드
+    toAdmin(){
+      // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /admin인 경우 이동 X
+      if(this.$route.path !== '/admin'){
+        this.$router.push({path: '/admin', query:{tab: 'members'}});
+      }else{
+        this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
+      }
+    }
   },
   created() {
     // 로그인 되어 있는 경우 (회원 또는 관리자)

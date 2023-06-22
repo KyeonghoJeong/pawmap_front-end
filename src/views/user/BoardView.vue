@@ -1,31 +1,45 @@
 <template>
-    <div class="div-board">
+    <!-- div-board-container는 게시판 구성 요소를 담기 위한 div -->
+    <div class="div-board-container">
+        <!-- 게시판 위에 메시지 출력을 위한 컴포넌트 -->
         <BoardTitleView></BoardTitleView>
 
+        <!-- 게시판 구성요소 중 테이블을 담을 div -->
         <div class="div-board-table">
-            <table class="table table-hover table-bordered table-sm div-board-table-table">
+            <!-- table-board-board는 table 사이즈를 부모 div에 맞게 하도록 지정하기 위한 클래스 -->
+            <table class="table table-hover table-bordered table-sm table-board-board">
             <thead class="table-secondary">
+                <!-- 게시판 헤더 설정 -->
+                <!-- 각 클래스는 테이블 헤더 비율 설정 및 정렬을 위한 클래스 -->
                 <tr>
-                    <th scope="col" class="writing-num">#</th>
-                    <th scope="col" class="writing-title">제목</th>
-                    <th scope="col" class="writing-nickname">닉네임</th>
-                    <th scope="col" class="writing-date">날짜</th>
+                    <th scope="col" class="th-col-board-num">#</th>
+                    <th scope="col" class="th-col-board-title">제목</th>
+                    <th scope="col" class="th-col-board-nickname">닉네임</th>
+                    <th scope="col" class="th-col-board-date">날짜</th>
                 </tr>
             </thead>
             <tbody>
+                <!-- 테이블 row 반복문으로 출력 -->
+                <!-- articles는 백엔드로부터 받은 게시글 데이터 -->
                 <tr v-for="(article, index) in articles" :key="article.articleId">
-                    <th scope="row" class="num-in-board">{{article.articleId}}</th>
-                    <td><span class="board-title" @click="toArticle(article.articleId)">{{article.title}} <span style="color:red" v-if="commentNumbers[index] !== 0">[{{commentNumbers[index]}}]</span></span></td>
-                    <td class="nickname-in-board">{{article.nickname}}</td>
-                    <td class="date-in-board">{{article.postDate}}</td>
+                    <th scope="row" class="th-row-board-num">{{article.articleId}}</th>
+                    <!-- row에서 제목 부분은 클릭 시 게시글의 내용을 출력해야 하므로 toArticle을 호출 -->
+                    <!-- commentNumbers의 index는 articles의 index와 일치, 해당 게시글의 댓글 수를 백엔드에서 받아와서 제목 옆에 출력 -->
+                    <td><span class="td-board-title" @click="toArticle(article.articleId)">{{article.title}} <span style="color:#fd7e14">[{{commentNumbers[index]}}]</span></span></td>
+                    <td class="td-board-nickname">{{article.nickname}}</td>
+                    <td class="td-board-date">{{article.postDate}}</td>
                 </tr>
             </tbody>
             </table>
         </div>
-        <div class="div-board-bottom-set">
-            <div class="div-board-bottom-scset">
-                <div class="div-board-bottom-search">
-                    <form @submit.prevent="setValues">
+        <!-- div-board-bottom-search는 테이블 하단 검색바, 셀렉트, 글쓰기 버튼을 담을 div -->
+        <div class="div-board-bottom-menu">
+            <!-- div-board-bottom-search는 검색바 div와 셀렉트 div를 담고 정렬을 하기 위한 div -->
+            <div class="div-board-bottom-search">
+                <!-- div-board-bottom-bar는 검색바 비율(사이즈) 지정을 위한 div -->
+                <div class="div-board-bottom-bar">
+                    <!-- 검색 시 setParams 메소드 호출 -->
+                    <form @submit.prevent="setParams">
                         <div class="input-group">
                             <input type="text" class="form-control" aria-label="keyword" aria-describedby="basic-addon1" v-model="searchQuery">
                             <span class="input-group-text" id="basic-addon1"  style="background-color:white">
@@ -36,30 +50,44 @@
                         </div>
                     </form>
                 </div>
-                <div class="div-board-bottom-category">
+                <!-- div-board-bottom-select는 셀렉트 비율(사이즈) 지정을 위한 div -->
+                <div class="div-board-bottom-select">
+                    <!-- selectedOption은 셀렉트에서 선택된 옵션값을 저장 -->
                     <select class="form-select" aria-label="Default select example" v-model="selectedOption">
+                        <!-- select 메뉴 기본값 설정 -->
                         <option :value="'제목+내용'">제목+내용</option>
+                        <!-- v-for을 사용하여 searchOptions에서 검색 옵션을 반복문으로 출력, 제목+내용 포함 X -->
                         <option v-for="option in searchOptions" :value="option" :key="option">{{ option }}</option>
                     </select>
                 </div>
             </div>
+            <!-- div-board-bottom-btn 버튼의 비율(사이즈) 및 위치 지정을 위한 div -->
+            <!-- 버튼 클릭 시 toWriting 메소드 호출 -->
             <div class="div-board-bottom-btn">
-                <button type="button" class="btn div-board-bottom-btn-btn" @click="toWriting">글쓰기</button>
+                <button type="button" class="btn button-board-writing" @click="toWriting">글쓰기</button>
             </div>
         </div>
-        <div class="div-board-paging">
+        <!-- div-board-pagination은 페이지네이션 메뉴를 담고 정렬하기 위한 div -->
+        <div class="div-board-pagination">
             <nav aria-label="Page navigation example">
                 <ul class="pagination">
+                    <!-- computed에서 isPrevDisabled 계산 후 true면 비활성화, false면 활성화 -->
+                    <!-- 클릭 시 setPrevPageNum 메소드 호출하여 새로 page 번호를 만들어 출력하고 해당하는 페이지의 게시글 출력 -->
                     <li class="page-item">
                         <button :class="['page-link', isPrevDisabled ? 'disabled' : '']" aria-label="Previous" @click="setPrevPageNum">
                             <span aria-hidden="true">&laquo;</span>
                         </button>
                     </li>
 
+                    <!-- computed에서 pageNumbers 메소드로 만든 페이지 번호를 반복문으로 출력 -->
+                    <!-- 페이지 번호 클릭 시 pageActive = i로 저장하고 둘이 같을 때 active 즉, 선택한 페이지 번호는 active로 출력 -->
+                    <!-- 페이지 번호 클릭 시 getArticles 메소드에 해당하는 페이지 번호(i-1)의 게시글 데이터를 백엔드로부터 받아와 출력 -->
                     <li v-for="i in pageNumbers" :key="i" :class="['page-item', pageActive === i ? 'active' : '']" @click="pageActive = i">
                         <button class="page-link" @click="getArticles(i-1)">{{i}}</button>
                     </li>
 
+                    <!-- computed에서 isNextDisabled 계산 후 true면 비활성화, false면 활성화 -->
+                    <!-- 클릭 시 setNextPageNum 메소드 호출하여 새로 page 번호를 만들어 출력하고 해당하는 페이지의 게시글 출력 -->
                     <li class="page-item">
                         <button :class="['page-link', isNextDisabled ? 'disabled' : '']" aria-label="Next" @click="setNextPageNum">
                             <span aria-hidden="true">&raquo;</span>
@@ -72,7 +100,7 @@
 </template>
 
 <script>
-import BoardTitleView from '../../components/BoardTitleView.vue'
+import BoardTitleView from '../../components/board/BoardTitleView.vue'
 
 import axios from 'axios'
 
@@ -82,31 +110,40 @@ export default {
     },
     data(){
         return{
-            articles: [],
-            totalPages: '',
-            pageActive: 1,
-            startNum: 0,
-            endNum: 0,
-            articleIds: [],
-            commentNumbers: [],
-            searchOptions: ['제목', '내용', '닉네임'],
-            selectedOption: '제목+내용',
-            searchQuery: '',
-            title: '',
-            writing: '',
-            nickname: '',
-            memberId: '',
+            articles: [], // 해당 페이지에 해당하는 게시글 데이터를 백엔드에서 받아와서 저장할 배열
+            totalPages: '', // pagination을 위해 총 페이지 수를 백엔드에서 받아와서 저장할 변수
+            pageActive: 1, // 첫 활성화 페이지 번호는 1로 초기화
+            startNum: 0, // pagination 시 첫 페이지 출력인 경우 0
+            endNum: 0, // pagination 시 첫 페이지 출력인 경우 0
+            articleIds: [], // 제목 옆에 댓글 수 출력을 위해 각 게시글의 ID를 저장할 배열 
+            commentNumbers: [], // 각 게시글의 댓글 수를 저장할 배열
+            searchOptions: ['제목', '내용', '닉네임'], // select 옵션
+            selectedOption: '제목+내용', // 제목+내용은 기본값으로 선택된 옵션으로 지정
+            searchQuery: '', // 검색바에 검색한 내용을 저장할 변수
+            title: '', // 백엔드에서 게시글 조회 시 쿼리를 위한 제목 변수
+            writing: '', // 백엔드에서 게시글 조회 시 쿼리를 위한 내용 변수
+            nickname: '', // 백엔드에서 게시글 조회 시 쿼리를 위한 닉네임 변수
+            memberId: '', // 백엔드에서 특정 회원의 게시글만 조회 시 쿼리를 위한 아이디 변수
         }
     },
     methods:{
+        // 글쓰기 버튼 클릭 시 호출 메소드
         toWriting(){
+            // 로컬 스토리지의 accessToken이 있는지 확인하여 있는 경우(로그인한 경우)만 글쓰기 페이지로 이동
             if(localStorage.getItem("accessToken") !== null){
                 this.$router.push('/board/writing');
             }else{
-                alert("로그인 해주세요.");
+                // 로그인 상태가 아닌 경우 로그인 요청
+                alert("게시글 등록을 위해서는 로그인하셔야 합니다.");
+                
+                if(confirm("로그인 하시겠습니까?")){
+                    this.$router.push('/signin');
+                }
             }
         },
+        // 테이블에서 제목 클릭 시 호출 메소드
         toArticle(articleId){
+            // 매개변수로 게시글 id를 받아서 쿼리와 같이 보냄
             this.$router.push({ path: '/board/article', query: {articleId: articleId}});
         },
         setPrevPageNum(){
@@ -135,6 +172,7 @@ export default {
             this.pageActive = this.startNum; // 다음 버튼을 누르면 첫 페이지 번호를 active
             this.getArticles(this.startNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
         },
+        // 페이지 번호에 맞는 게시글 목록을 조회하기 위한 메소드
         getArticles(page){
             axios.get('http://localhost:8090/api/board/articles', {
                 params: {
@@ -147,17 +185,24 @@ export default {
                 }
             })
             .then(response => {
-                this.articles = response.data.content;
-                this.totalPages = response.data.totalPages;
+                this.articles = response.data.content; // 게시글 목록 저장
+                this.totalPages = response.data.totalPages; // 총 페이지수 저장
 
-                this.articleIds = [];
+                // 댓글수 표기를 위한 코드
+                this.articleIds = []; // 초기화
+                //articles에 들어있는 게시글 아이디를 articleIds의 동일한 인덱스에 저장
                 for(let i=0; i<this.articles.length; i++){
                     this.articleIds.push(this.articles[i].articleId);
                 }
 
-                axios.post('http://localhost:8090/api/board/article/comment/numbers', this.articleIds)
+                // get 요청에 array을 같이 보내기 위해서 배열 내의 값들을 콤마로 결합
+                const articleIdsString = this.articleIds.join(',');
+
+                axios.get('http://localhost:8090/api/board/articles/comments/numbers', {
+                    params: {articleIds: articleIdsString}
+                })
                 .then(response => {
-                    this.commentNumbers = response.data;
+                    this.commentNumbers = response.data; // 각 게시글의 댓글수 저장
                 })
                 .catch(error => {
                     console.log(error);
@@ -167,7 +212,11 @@ export default {
                 console.log(error);
             })
         },
-        setValues(){
+        // 검색 시 게시판 하단의 검색바와 셀렉트의 값에 따라 게시글 요청을 위한 파라미터의 값을 설정하는 메소드
+        setParams(){
+            // selectedOption은 현재 선택한 셀렉트 옵션
+            // searchQuery는 검색바에 검색한 내용
+
             if(this.selectedOption === '제목+내용'){
                 this.title = this.searchQuery;
                 this.writing = this.searchQuery;
@@ -194,7 +243,9 @@ export default {
                 this.memberId = '';
             }
 
-            this.getArticles(0);
+            this.pageActive = 1; // 검색 시 pagination의 첫 페이지 버튼 활성화
+
+            this.getArticles(0); // 설정한 파라미터 대로 게시글 목록을 요청하기 위한 메소드 호출
         },
     },
     computed:{
@@ -242,121 +293,111 @@ export default {
 </script>
 
 <style>
-    .div-board{
-        padding-top: 7%;
+    .div-board-container{
+        /* padding으로 게시판 간격 조절 */
+        padding-top: 6.5%;
         padding-left: 10%;
         padding-right: 10%;
         padding-bottom: 2%;
+        /* 게시판 구성 요소 (테이블, 검색바+셀렉트+글쓰기 버튼, 페이지네이션) 정렬 */
         display: flex;
         flex-direction: column;
         align-items: center;
     }
-
     .div-board-table{
-        width: 60%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        width: 80%;  /* 화면 비율 지정 */
     }
-    .div-board-bottom-set{
-        width: 60%;
-        display:flex;
-        margin-bottom: 1.5%;
+    .table-board-board{
+        width: 100%; /* 부모 div-board-table에 맞게 100%로 지정 */
     }
-    .div-board-paging{
-        width: 60%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+    /* 테이블 헤더 비율 설정 및 정렬 */
+    .th-col-board-num{
+        width: 15%;
+        text-align: center;
     }
-
-    .div-board-table-table{
-        width: 100%;
+    .th-col-board-title{
+        width: 45%;
+        text-align: center;
     }
-    .div-board-bottom-scset{
-        width: 50%;
-        display:flex;
+    .th-col-board-nickname{
+        width: 15%;
+        text-align: center;
+    }
+    .th-col-board-date{
+        width: 25%;
+        text-align: center;
+    }
+    /* 테이블 로우 마우스오버 효과 및 정렬 */
+    .td-board-title:hover{
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    .th-row-board-num{
+        text-align: center;
+    }
+    .td-board-date{
+        text-align: center;
+    }
+    .td-board-nickname{
+        text-align: center;
+    }
+    /* 테이블 하단 검색바, 셀렉트, 글쓰기 버튼을 담는 div */
+    .div-board-bottom-menu{
+        width: 80%;
+        display:flex; /* 하단 메뉴 div 정렬 */
+        margin-top: 1%;
+        margin-bottom: 2.5%;
     }
     .div-board-bottom-search{
-        width: 60%;
-        margin-right: 2%;
+        width: 50%; /* 검색 메뉴 50% + 글쓰기 버튼 50% */
+        display:flex;
     }
-    .div-board-bottom-category{
-        width: 40%;
+    .div-board-bottom-bar{
+        width: 57%; /* 검색바 70% + 셀렉트 30% */
+        margin-right: 3%; /* 검색바와 셀렉트 사이의 간격 */
+    }
+    .div-board-bottom-select{
+        width: 40%; /* 검색바 70% + 셀렉트 30% */
     }
     .div-board-bottom-btn{
-        width: 50%;
+        width: 50%; /* 검색 메뉴 50% + 글쓰기 버튼 50% */
         display: flex;
-        flex-direction: row-reverse;
+        flex-direction: row-reverse; /* 버튼 우측 끝에 배치 */
     }
-    .div-board-bottom-btn-btn{
+    .button-board-writing{ /* 버튼 색, 비율(사이즈) 지정 */
         background-color: #fd7e14;
         color: white;
         width: 80px;
     }
-    .writing-num{
-        width: 15%;
-        text-align: center;
+    .div-board-pagination{
+        width: 80%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
-    .writing-title{
-        width: 45%;
-        text-align: center;
-    }
-    .writing-nickname{
-        width: 15%;
-        text-align: center;
-    }
-    .writing-date{
-        width: 25%;
-        text-align: center;
-    }
-    .num-in-board{
-        text-align: center;
-    }
-    .date-in-board{
-        text-align: center;
-    }
-    .nickname-in-board{
-        text-align: center;
-    }
-    .page-link{
-        color: black;
-    }
-    .pagination .page-item.active .page-link {
-        background-color: #fd7e14;
-        border-color: rgb(225, 228, 232);
-    }
-    td .board-title:hover{
-        text-decoration: underline;
-        cursor: pointer;
-    }
-
+    /* width가 992px 이하면 div 재조정 */
     @media screen and (max-width: 992px){
         .div-board-table{
             width: 100%;
         }
-        .div-board-bottom-set{
+        .div-board-bottom-menu{
             width: 100%;
             display: flex;
             flex-direction: column;
             margin-bottom: 3%;
         }
-
-        .div-board-bottom-scset{
+        .div-board-bottom-search{
             width: 100%;
             margin-bottom: 3%;
         }
-        .div-board-bottom-btn{
-            width: 100%;
-        }
-        .div-board-bottom-search{
+        .div-board-bottom-bar{
             width: 70%;
         }
-        .div-board-bottom-category{
+        .div-board-bottom-select{
             width: 30%;
             margin-top: 0%;
         }
-        .div-board-table-table{
+        .div-board-bottom-btn{
             width: 100%;
         }
     }

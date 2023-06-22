@@ -1,7 +1,7 @@
 <template>
-    <div class="BoardTitle">
-        <div class="BoardTitle-top">
-            <div class="BoardTitle-message">
+    <div class="div-BoardTitle-BoardTitle">
+        <div>
+            <div>
                 <figure>
                     <blockquote class="blockquote">
                         <p>게시판</p>
@@ -16,12 +16,12 @@
 </template>
 
 <style>
-    .BoardTitle{
-        width: 60%;
+    .div-BoardTitle-BoardTitle{
+        width: 80%;
     }
     
     @media screen and (max-width: 992px){
-        .BoardTitle{
+        .div-BoardTitle-BoardTitle{
             width: 100%;
         }
     }

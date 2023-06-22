@@ -191,7 +191,7 @@ export default {
                     this.articleIds.push(this.articles[i].articleId);
                 }
 
-                axios.post('http://localhost:8090/api/board/article/comment/numbers', this.articleIds)
+                axios.post('http://localhost:8090/api/board/articles/comments/numbers', this.articleIds)
                 .then(response => {
                     this.commentNumbers = response.data;
                 })
@@ -209,26 +209,24 @@ export default {
                 this.writing = this.searchQuery;
 
                 this.nickname = '';
-                this.memberId = '';
             }else if(this.selectedOption === '제목'){
                 this.title = this.searchQuery;
 
                 this.writing = '';
                 this.nickname = '';
-                this.memberId = '';
             }else if(this.selectedOption === '내용'){
                 this.writing = this.searchQuery;
 
                 this.title = '';
                 this.nickname = '';
-                this.memberId = '';
             }else if(this.selectedOption === '닉네임'){
                 this.nickname = this.searchQuery;
 
                 this.title = '';
                 this.writing = '';
-                this.memberId = '';
             }
+
+            this.pageActive = 1;
 
             this.getArticles(0);
         },

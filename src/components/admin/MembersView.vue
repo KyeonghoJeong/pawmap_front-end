@@ -150,6 +150,8 @@ export default {
                 this.nickname = '';
             }
 
+            this.pageActive = 1;
+
             this.getMembers(0);
         },
         updateBanDate(memberId, order){
