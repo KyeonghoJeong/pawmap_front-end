@@ -32,7 +32,7 @@
         <div class="col" v-for="(category, index) in categories" :key="index">
             <!-- 카드 클릭 시 라우터로 이동하고 쿼리를 통해 카테고리명 전달 -->
             <router-link :to="{ path: '/map', query: {cat: category}}" class="nav-link active navbar-link">
-                <div class="card">
+                <div class="card div-home-card">
                     <!-- 카테고리명과 사진 파일 이름을 일치시켜서 출력 -->
                     <img :src="require(`/src/assets/images/${category}.jpg`)" class="card-img-top" alt="...">
                     <div class="card-body">
@@ -114,6 +114,9 @@ export default{
     margin-left: 23%;
     margin-right: 23%;
     margin-bottom: 4%;
+}
+.div-home-card:hover{
+    background-color: #fd7e14;
 }
 /* 카드 내부 폰트 크기 설정 */
 .h5-home-category{
