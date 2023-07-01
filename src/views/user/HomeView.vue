@@ -113,16 +113,28 @@ export default{
     margin-top: 2%;
     margin-left: 23%;
     margin-right: 23%;
-    margin-bottom: 4%;
+    margin-bottom: 2%;
+}
+.div-home-card {
+    border-color: rgb(219, 219, 219);
+
+    background-color: #fd7e14;
+    color: white;
+
+    /* background-color: white;
+    color: black; */
 }
 .div-home-card:hover{
-    background-color: #fd7e14;
+    background-color: white;
+    color: #fd7e14;
+
+    /* background-color: #fd7e14;
+    color: white; */
 }
-/* 카드 내부 폰트 크기 설정 */
+/* 카드 내부 폰트 설정 */
 .h5-home-category{
     font-size: 1.1rem;
     text-align: center;
-    font-weight: bold;
 }
 /* 너비 992px 이하 시 컴포넌트 설정 변경 */
 @media screen and (max-width: 992px){

@@ -31,5 +31,6 @@ export default {
 }
 .content{
   flex: 1; /* wrapper에 따른 비율 조정 */
+  padding-bottom: 0px;
 }
 </style>

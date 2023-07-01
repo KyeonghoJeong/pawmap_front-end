@@ -14,7 +14,7 @@
                         </svg>
                     </span>
                     <!-- 검색바 input type text, 검색 시 emd 변수에 데이터 전달 -->
-                    <input type="text" v-model="emd" class="form-control input-map-search" placeholder="동 이름을 검색하세요" aria-label="keyword" aria-describedby="basic-addon1">
+                    <input type="text" v-model="emd" class="form-control" placeholder="동 이름을 검색하세요" aria-label="keyword" aria-describedby="basic-addon1">
                 </div>
             </form>
         </div>
@@ -45,10 +45,10 @@
     <!-- div-map-main는 시설 리스트 div 및 카카오맵 api 출력을 위한 div를 담기 위한 div -->
     <div class="div-map-main">
         <!-- div-map-list는 시설 리스트 div -->
-        <div class="div-map-list">
-            <!-- div-map-card는 card를 반복 출력할 div와 pagination div를 담을 div -->
+        <div class="div-map-list" ref="scrollController" >
             <!-- facilities 리스트에 데이터가 있는 경우만 리스트 출력 -->
-            <div class="card div-map-card" ref="scrollController" v-if="facilities && facilities[0]">
+            <!-- div-map-card는 card를 반복 출력할 div와 pagination div를 담을 div -->
+            <div class="card div-map-card" v-if="facilities.length > 0">
                 <!-- div-map-card-body는 facilities 리스트에서 들어있는 시설 갯수만큼 반복해서 출력 -->
                 <!-- 이하 자식 div는 facility의 데이터 출력 -->
                 <div class="card-body div-map-card-body" v-for="(facility, index) in facilities" :key="index">
@@ -72,14 +72,14 @@
                     </div>
                     <!-- 북마크, 상세보기 클릭 시 각각 addBookmark, showDetails 메소드 호출 -->
                     <div class="div-map-card-body-buttons">
-                        <button class="button-map-card-body-bookmark" @click="addBookmark(facility.facilityId)">북마크</button>
                         <button class="button-map-card-body-detail" @click="showDetails(facility)">상세보기</button>
+                        <button class="button-map-card-body-bookmark" @click="addBookmark(facility.facilityId)">북마크</button>
                     </div>
                 </div>
 
                 <!-- div-map-pagination은 pagination을 위한 div -->
                 <div class="div-map-pagination">
-                    <nav aria-label="Page navigation example" class="nav-map-pagination">
+                    <nav aria-label="Page navigation example">
                         <ul class="pagination pagination-sm">
                             <!-- computed에서 isPrevDisabled 계산 후 true면 비활성화, false면 활성화 -->
                             <!-- 클릭 시 setPrevPageNum 메소드 호출하여 새로 page 번호를 만들어 출력하고 해당하는 페이지의 게시글 출력 -->
@@ -339,12 +339,12 @@ export default {
                         // 이후 리스트에 있는 마커 인지 검사 => 기본값으로
 
                         // 작은 마커 이미지 사이즈 설정
-                        const smallMarkerSize = new kakao.maps.Size(10, 10);
+                        const smallMarkerSize = new kakao.maps.Size(8, 8);
                         // 리스트 기준 마커 이미지 사이즈 설정
                         const listMarkerSize = new kakao.maps.Size(30, 30);
                         
                         // 오버레이 출력 시 마커의 이미지가 바뀌는데 리스트 기준 마커 외 작은 마커 중 클릭 상태의 마커 또한 기본 아이콘으로 변경
-                        this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/default.png'), smallMarkerSize));
+                        this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/smallMarker.png'), smallMarkerSize));
 
                         // 오버레이 출력 시 마커의 이미지가 바뀌는데 닫기 버튼 클릭 시 리스트 기준 마커 다시 기본 이미지로 변경
                         // facilities(시설 리스트)에서 찾기
@@ -352,7 +352,7 @@ export default {
                             // 마커 마다 id가 할당되어 있음
                             // 해당 마커 id와 리스트에 출력 중인 시설들의 id 중 일치하는 경우 => 리스트 마커 아이콘 적용
                             if(this.clickedMarker.id === this.facilities[i].facilityId){
-                                this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificdefault.png'), listMarkerSize));
+                                this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/listMarker.png'), listMarkerSize));
                             }
                         }
 
@@ -410,14 +410,14 @@ export default {
             this.displayMarkers();
 
             // 작은 마커 이미지 사이즈 설정
-            const smallMarkerSize = new kakao.maps.Size(10, 10);
+            const smallMarkerSize = new kakao.maps.Size(8, 8);
             // 리스트 기준 마커 이미지 사이즈 설정
             const listMarkerSize = new kakao.maps.Size(30, 30);
 
             // 이전에 클릭한 마커가 있는 경우 해제
             if(this.clickedMarker !== ''){
                 // 작은 마커라고 가정하고 먼저 기본 마커 아이콘으로 변경
-                this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/default.png'), smallMarkerSize));
+                this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/smallMarker.png'), smallMarkerSize));
 
                 // 이후 리스트 마커인 경우 기본 리스트 마커 아이콘으로 변경
                 // facilities(시설 리스트)에서 찾기
@@ -425,7 +425,7 @@ export default {
                     // 마커 마다 id가 할당되어 있음
                     // 해당 마커 id와 리스트에 출력 중인 시설들의 id 중 일치하는 경우 => 리스트 마커 아이콘 적용
                     if(this.clickedMarker.id === this.facilities[i].facilityId){
-                        this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificdefault.png'), listMarkerSize));
+                        this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/listMarker.png'), listMarkerSize));
                     }
                 }
 
@@ -442,7 +442,7 @@ export default {
                 // 마커 마다 id가 할당되어 있음
                 // 상세보기 클릭한 시설의 마커 id와 리스트에 출력 중인 시설들의 id 중 일치하는 경우 => 리스트 마커 클릭 아이콘 적용
                 if(marker.id === this.facilities[i].facilityId){
-                    marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificover.png'), listMarkerSize));
+                    marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/clickedListMarker.png'), listMarkerSize));
                 }
             }
             
@@ -725,7 +725,7 @@ export default {
                 // 위도 및 경도가 현재 맵 내부 범위 안에 있는 경우만
                 if((position[2] >= swLat && position[2] <= neLat) && (position[3] >= swLng && position[3] <= neLng)){
                     // 작은 마커 이미지 사이즈 설정
-                    const smallMarkerSize = new kakao.maps.Size(10, 10);
+                    const smallMarkerSize = new kakao.maps.Size(8, 8);
                     // 리스트 기준 마커 이미지 사이즈 설정
                     const listMarkerSize = new kakao.maps.Size(30, 30);
 
@@ -734,7 +734,7 @@ export default {
                         map: this.map, // 마커를 출력할 맵 객체 지정
                         position: new kakao.maps.LatLng(position[2], position[3]), // 마커를 출력할 위치 지정 (시설의 위도/경도)
                         title: position[1], // 마커 마우스오버 시 출력할 이름 지정
-                        image: new kakao.maps.MarkerImage(require('/src/assets/marker/default.png'), smallMarkerSize), // 기본 마커 이미지 지정
+                        image: new kakao.maps.MarkerImage(require('/src/assets/marker/smallMarker.png'), smallMarkerSize), // 기본 마커 이미지 지정
                         zIndex: 1, // 항상위 우선순위 지정
                     })
                     marker.id = position[0]; // 해당 마커의 id 속성 추가
@@ -747,7 +747,7 @@ export default {
                         // 시설 목록에 출력된 시설 중 id가 현재 생성한 마커의 id와 일치하는 경우
                         if(marker.id === this.facilities[i].facilityId){
                             // 마커 이미지 변경 및 항상위 우선순위 변경
-                            marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificdefault.png'), listMarkerSize));
+                            marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/listMarker.png'), listMarkerSize));
                             marker.setZIndex(2);
                         }
                     }
@@ -759,12 +759,12 @@ export default {
                         // 생성한 마커와 이전 클릭한 마커가 같은 경우
                         if(marker.id === this.clickedMarker.id){
                             // 먼저 기본 마커(작은 마커)인 경우 기본(작은) 마커 클릭 이미지로 변경
-                            marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/over.png'), smallMarkerSize));
+                            marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/clickedSmallMarker.png'), smallMarkerSize));
 
                             // 이후 시설 목록에 있는 시설의 마커인 경우 리스트 마커 클릭 이미지로 변경
                             for(let i=0; i<this.facilities.length; i++){
                                 if(marker.id === this.facilities[i].facilityId){
-                                    marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificover.png'), listMarkerSize));
+                                    marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/clickedListMarker.png'), listMarkerSize));
                                 }
                             }
 
@@ -775,12 +775,12 @@ export default {
                     // 마커 마우스오버 이벤트 리스너 추가
                     kakao.maps.event.addListener(marker, 'mouseover', () => {
                         // 마커 마우스오버 시 마커 클릭 이미지로 변경
-                        marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/over.png'), smallMarkerSize));
+                        marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/clickedSmallMarker.png'), smallMarkerSize));
 
                         // 시설 목록에 있는 시설의 마커인 경우 리스트 마커 클릭 이미지로 변경
                         for(let i=0; i<this.facilities.length; i++){
                             if(marker.id === this.facilities[i].facilityId){
-                                marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificover.png'), listMarkerSize));
+                                marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/clickedListMarker.png'), listMarkerSize));
                             }
                         }
                     });
@@ -788,24 +788,24 @@ export default {
                     // 마커 마우스아웃 이벤트 리스너 추가 => 마우스오버 시 마커 이미지가 변경 되는데 이를 다시 기본 이미지로 바꾸기 위함
                     kakao.maps.event.addListener(marker, 'mouseout', () => {
                         // 마커 마우스아웃 시 작은 마커 기본 이미지로 변경
-                        marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/default.png'), smallMarkerSize));
+                        marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/smallMarker.png'), smallMarkerSize));
 
                         // 시설 목록에 있는 시설의 마커인 경우 리스트 마커 기본 이미지로 변경 
                         for(let i=0; i<this.facilities.length; i++){
                             if(marker.id === this.facilities[i].facilityId){
-                                marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificdefault.png'), listMarkerSize));
+                                marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/listMarker.png'), listMarkerSize));
                             }
                         }
 
                         // 단, 클릭한 마커가 있는 경우 해당 마커는 이미지 유지
                         if(this.clickedMarker !== ''){
                             // 먼저 작은 마커 클릭 이미지로 변경
-                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/over.png'), smallMarkerSize));
+                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/clickedSmallMarker.png'), smallMarkerSize));
 
                             // 시설 목록에 있는 시설의 마커인 경우 리스트 마커 클릭 이미지로 변경
                             for(let i=0; i<this.facilities.length; i++){
                                 if(this.clickedMarker.id === this.facilities[i].facilityId){
-                                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificover.png'), listMarkerSize));
+                                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/clickedListMarker.png'), listMarkerSize));
                                 }
                             }
                         }
@@ -819,12 +819,12 @@ export default {
                         // 이전에 클릭한 마커가 있는 경우 클릭 마커는 기본 이미지로 변경
                         if(this.clickedMarker !== ''){
                             // 먼저 작은 마커 기본 이미지로 변경
-                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/default.png'), smallMarkerSize));
+                            this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/smallMarker.png'), smallMarkerSize));
 
                             // 시설 목록에 있는 시설의 마커인 경우 리스트 마커 기본 이미지로 변경
                             for(let i=0; i<this.facilities.length; i++){
                                 if(this.clickedMarker.id === this.facilities[i].facilityId){
-                                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificdefault.png'), listMarkerSize));
+                                    this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/listMarker.png'), listMarkerSize));
                                 }
                             }
 
@@ -832,12 +832,12 @@ export default {
                         }
                         
                         // 먼저 작은 마커 클릭 이미지로 변경
-                        marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/over.png'), smallMarkerSize));
+                        marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/clickedSmallMarker.png'), smallMarkerSize));
 
                         // 시설 목록에 있는 시설의 마커인 경우 리스트 마커 클릭 이미지로 변경
                         for(let i=0; i<this.facilities.length; i++){
                             if(marker.id === this.facilities[i].facilityId){
-                                marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificover.png'), listMarkerSize));
+                                marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/clickedListMarker.png'), listMarkerSize));
                             }
                         }
                         
@@ -849,12 +849,12 @@ export default {
                     // 지도 클릭 이벤트 리스너 추가 => 마커 이미지 기본값으로 설정 및 오버레이 삭제
                     kakao.maps.event.addListener(this.map, 'click', () => {
                         // 먼저 작은 마커 기본 이미지로 변경
-                        marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/default.png'), smallMarkerSize));
+                        marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/smallMarker.png'), smallMarkerSize));
 
                         // 시설 목록에 있는 시설의 마커인 경우 리스트 마커 기본 이미지로 변경
                         for(let i=0; i<this.facilities.length; i++){
                             if(marker.id === this.facilities[i].facilityId){
-                                marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/specificdefault.png'), listMarkerSize));
+                                marker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/listMarker.png'), listMarkerSize));
                             }
                         }
 
@@ -919,173 +919,185 @@ export default {
         },
         // select 메뉴에서 카테고리 선택 시 실행되는 메소드 => 카테고리에 맞는 시설 목록/마커 출력
         getFacilitiesByCat(){
-            this.map.setMaxLevel(6); // 지도 줌 변경 최대 레벨 설정
-            this.map.setLevel(5); // 지도 줌 레벨 설정
+            // select 디폴트 값 선택한 경우 제외
+            if(this.selectedCat !== ''){
+                this.map.setMaxLevel(6); // 지도 줌 변경 최대 레벨 설정
+                this.map.setLevel(5); // 지도 줌 레벨 설정
 
-            // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
-            // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url
+                // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
+                // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url
 
-            // 위치 액세스 사용 가능한 경우
-            if(navigator.geolocation){
-                navigator.geolocation.getCurrentPosition(
-                    // 현재 위치를 가져올 수 있는 경우
-                    (position) => {
-                        this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${position.coords.latitude}&lng=${position.coords.longitude}`;
+                // 위치 액세스 사용 가능한 경우
+                if(navigator.geolocation){
+                    navigator.geolocation.getCurrentPosition(
+                        // 현재 위치를 가져올 수 있는 경우
+                        (position) => {
+                            this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${position.coords.latitude}&lng=${position.coords.longitude}`;
 
-                        this.setListAndMarker(
-                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${position.coords.latitude}&lng=${position.coords.longitude}&page=0&size=${this.size}`,
-                            `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`
-                        );
-                    },
-                    (error) => {
-                        // 현재 위치를 가져올 수 없는 경우
-                        console.log(error);
+                            this.setListAndMarker(
+                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${position.coords.latitude}&lng=${position.coords.longitude}&page=0&size=${this.size}`,
+                                `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`
+                            );
+                        },
+                        (error) => {
+                            // 현재 위치를 가져올 수 없는 경우
+                            console.log(error);
 
-                        this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}`;
+                            this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}`;
 
-                        this.setListAndMarker(
-                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}&page=0&size=${this.size}`,
-                            `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`
-                        );
-                    }
-                )
-            }else{
-                // 위치 액세스 사용 불가한 경우
-                this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}`;
+                            this.setListAndMarker(
+                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}&page=0&size=${this.size}`,
+                                `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`
+                            );
+                        }
+                    )
+                }else{
+                    // 위치 액세스 사용 불가한 경우
+                    this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}`;
 
-                this.setListAndMarker(
-                    `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}&page=0&size=${this.size}`,
-                    `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`
-                );
+                    this.setListAndMarker(
+                        `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}&page=0&size=${this.size}`,
+                        `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`
+                    );
+                }
+
+                this.emd = ''; // 동 이름 검색 변수 초기화
             }
-
-            this.emd = ''; // 동 이름 검색 변수 초기화
         },
         // select 메뉴에서 시도 선택(변경) 시 실행되는 메소드 => 해당 시도에 맞는 시설 목록/마커 출력
         getFacilitiesBySido(){
-            // 먼저 카테고리 + 선택 시도에 해당하는 시설의 수 요청
-            axios.get('http://localhost:8090/api/facilities/availability', {
-                params:{
-                    cat: this.selectedCat,
-                    sido: this.selectedSido.sidoName
-                }
-            })
-            .then(response =>{
-                const count = response.data;
+            // select 디폴트 값 선택한 경우 제외
+            if(this.selectedSido !== ''){
+                // 먼저 카테고리 + 선택 시도에 해당하는 시설의 수 요청
+                axios.get('http://localhost:8090/api/facilities/availability', {
+                    params:{
+                        cat: this.selectedCat,
+                        sido: this.selectedSido.sidoName
+                    }
+                })
+                .then(response =>{
+                    const count = response.data;
 
-                // 해당하는 시설의 수가 0인 경우
-                if(count === 0){
-                    alert("해당하는 시설이 없습니다.");
+                    // 해당하는 시설의 수가 0인 경우
+                    if(count === 0){
+                        alert("해당하는 시설이 없습니다.");
 
-                    this.selectedSido = ''; // 시도 선택 초기화
-                }else{
-                    // 해당하는 시설이 있는 경우
-                    this.zoomByWheel = false; // 줌 레벨 변경 전 줌 레벨 변경에 의한 displayMarkers 메소드 호출을 방지하기 위해 false로 설정
-                    this.map.setMaxLevel(8); // 줌 최대 레벨 변경
-                    this.map.setLevel(9); // 줌 레벨 변경
-                    this.zoomByWheel = true; // 줌 레벨 변경에 의한 displayMarkers 메소드 호출 허용
+                        this.selectedSido = ''; // 시도 선택 초기화
+                    }else{
+                        // 해당하는 시설이 있는 경우
+                        this.zoomByWheel = false; // 줌 레벨 변경 전 줌 레벨 변경에 의한 displayMarkers 메소드 호출을 방지하기 위해 false로 설정
+                        this.map.setMaxLevel(8); // 줌 최대 레벨 변경
+                        this.map.setLevel(9); // 줌 레벨 변경
+                        this.zoomByWheel = true; // 줌 레벨 변경에 의한 displayMarkers 메소드 호출 허용
 
-                    // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
-                    // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url
+                        // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
+                        // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url
 
-                    this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`;
+                        this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`;
 
-                    this.setListAndMarker(
-                        `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&page=0&size=${this.size}`,
-                        `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`
-                    );
-                }
-            })
-            .catch(error =>{
-                console.log(error);
-            })
+                        this.setListAndMarker(
+                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&page=0&size=${this.size}`,
+                            `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`
+                        );
+                    }
+                })
+                .catch(error =>{
+                    console.log(error);
+                })
 
-            this.emd = ''; // 동 이름 검색 변수 초기화
+                this.emd = ''; // 동 이름 검색 변수 초기화
+            }
         },
         // select 메뉴에서 시군구 선택(변경) 시 실행되는 메소드 => 해당 시군구에 맞는 시설 목록/마커 출력
         getFacilitiesBySigungu(){
-            // 먼저 카테고리 + 선택 시도 + 선택 시군구에 해당하는 시설의 수 요청
-            axios.get('http://localhost:8090/api/facilities/availability', {
-                params:{
-                    cat: this.selectedCat,
-                    sido: this.selectedSido.sidoName,
-                    sigungu: this.selectedSigungu.sigunguName
-                }
-            })
-            .then(response =>{
-                const count = response.data;
+            // select 디폴트 값 선택한 경우 제외
+            if(this.selectedSigungu !== ''){
+                // 먼저 카테고리 + 선택 시도 + 선택 시군구에 해당하는 시설의 수 요청
+                axios.get('http://localhost:8090/api/facilities/availability', {
+                    params:{
+                        cat: this.selectedCat,
+                        sido: this.selectedSido.sidoName,
+                        sigungu: this.selectedSigungu.sigunguName
+                    }
+                })
+                .then(response =>{
+                    const count = response.data;
 
-                // 해당하는 시설의 수가 0인 경우
-                if(count === 0){
-                    alert("해당하는 시설이 없습니다.");
+                    // 해당하는 시설의 수가 0인 경우
+                    if(count === 0){
+                        alert("해당하는 시설이 없습니다.");
 
-                    this.selectedSigungu = '';
-                }else{
-                    // 해당하는 시설이 있는 경우
-                    this.zoomByWheel = false; // 줌 레벨 변경 전 줌 레벨 변경에 의한 displayMarkers 메소드 호출을 방지하기 위해 false로 설정
-                    this.map.setMaxLevel(8); // 줌 최대 레벨 변경
-                    this.map.setLevel(6); // 줌 레벨 변경
-                    this.zoomByWheel = true; // 줌 레벨 변경에 의한 displayMarkers 메소드 호출 허용
+                        this.selectedSigungu = '';
+                    }else{
+                        // 해당하는 시설이 있는 경우
+                        this.zoomByWheel = false; // 줌 레벨 변경 전 줌 레벨 변경에 의한 displayMarkers 메소드 호출을 방지하기 위해 false로 설정
+                        this.map.setMaxLevel(8); // 줌 최대 레벨 변경
+                        this.map.setLevel(6); // 줌 레벨 변경
+                        this.zoomByWheel = true; // 줌 레벨 변경에 의한 displayMarkers 메소드 호출 허용
 
-                    // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
-                    // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url
+                        // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
+                        // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url
 
-                    this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`;
+                        this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`;
 
-                    this.setListAndMarker(
-                        `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&page=0&size=${this.size}`,
-                        `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`
-                    );
-                }
-            })
-            .catch(error =>{
-                console.log(error);
-            })
+                        this.setListAndMarker(
+                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&page=0&size=${this.size}`,
+                            `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`
+                        );
+                    }
+                })
+                .catch(error =>{
+                    console.log(error);
+                })
 
-            this.emd = ''; // 동 이름 검색 변수 초기화
+                this.emd = ''; // 동 이름 검색 변수 초기화
+            }
         },
         // select 메뉴에서 읍면동 선택(변경) 시 실행되는 메소드 => 해당 읍면동에 맞는 시설 목록/마커 출력
         getFacilityByEmd(){
-            // 먼저 카테고리 + 선택 시도 + 선택 시군구 + 선택 읍면동에 해당하는 시설의 수 요청
-            axios.get('http://localhost:8090/api/facilities/availability', {
-                params:{
-                    cat: this.selectedCat,
-                    sido: this.selectedSido.sidoName,
-                    sigungu: this.selectedSigungu.sigunguName,
-                    emd: this.selectedEmd.emdName
-                }
-            })
-            .then(response =>{
-                const count = response.data;
+            // select 디폴트 값 선택한 경우 제외
+            if(this.selectedEmd !== ''){
+                // 먼저 카테고리 + 선택 시도 + 선택 시군구 + 선택 읍면동에 해당하는 시설의 수 요청
+                axios.get('http://localhost:8090/api/facilities/availability', {
+                    params:{
+                        cat: this.selectedCat,
+                        sido: this.selectedSido.sidoName,
+                        sigungu: this.selectedSigungu.sigunguName,
+                        emd: this.selectedEmd.emdName
+                    }
+                })
+                .then(response =>{
+                    const count = response.data;
 
-                // 해당하는 시설의 수가 0인 경우
-                if(count === 0){
-                    alert("해당하는 시설이 없습니다.");
+                    // 해당하는 시설의 수가 0인 경우
+                    if(count === 0){
+                        alert("해당하는 시설이 없습니다.");
 
-                    this.selectedEmd = '';
-                }else{
-                    // 해당하는 시설이 있는 경우
-                    this.zoomByWheel = false; // 줌 레벨 변경 전 줌 레벨 변경에 의한 displayMarkers 메소드 호출을 방지하기 위해 false로 설정
-                    this.map.setMaxLevel(8); // 줌 최대 레벨 변경
-                    this.map.setLevel(5); // 줌 레벨 변경
-                    this.zoomByWheel = true; // 줌 레벨 변경에 의한 displayMarkers 메소드 호출 허용
+                        this.selectedEmd = '';
+                    }else{
+                        // 해당하는 시설이 있는 경우
+                        this.zoomByWheel = false; // 줌 레벨 변경 전 줌 레벨 변경에 의한 displayMarkers 메소드 호출을 방지하기 위해 false로 설정
+                        this.map.setMaxLevel(8); // 줌 최대 레벨 변경
+                        this.map.setLevel(5); // 줌 레벨 변경
+                        this.zoomByWheel = true; // 줌 레벨 변경에 의한 displayMarkers 메소드 호출 허용
 
-                    // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
-                    // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url
+                        // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
+                        // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url
 
-                    this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`;
+                        this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`;
 
-                    this.setListAndMarker(
-                        `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}&page=0&size=${this.size}`,
-                        `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`
-                    );
-                }
-            })
-            .catch(error =>{
-                console.log(error);
-            })   
-            
-            this.emd = ''; // 동 이름 검색 변수 초기화
+                        this.setListAndMarker(
+                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}&page=0&size=${this.size}`,
+                            `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`
+                        );
+                    }
+                })
+                .catch(error =>{
+                    console.log(error);
+                })   
+                
+                this.emd = ''; // 동 이름 검색 변수 초기화
+            }
         },
         // 이전 버튼 클릭 시 startNum, endNum 재설정을 위한 메소드
         setPrevPageNum(){
@@ -1304,69 +1316,57 @@ export default {
 </script>
 
 <style>
-    .div-map-top{
-        display: flex;
-        width: 100%;
+    /* 상단 메뉴 */
+    .div-map-top{ /* 검색바 + select 메뉴의 부모 div */
+        display: flex; /* 내부 div 정렬 */
+        width: 100%; /* 너비 100% 차지 */
+        border: 1px solid rgb(219, 219, 219); /* 테두리 굵기, 색 설정 */
     }
-    .div-map-search{
-        border-style: solid;
-        border-width: 1px;
-        border-color: rgb(219, 219, 219);
-        width: 20%;
+    .div-map-search{ /* 검색바 div */
+        width: 20%; /* 검색바 너비 20% 차지 */
+        border-right: 1px solid rgb(219, 219, 219); /* 테두리 굵기, 색 설정 */
     }
-    .form-map-search{
-        margin-top: 3%;
-        margin-bottom: 3%;
-        margin-left: 3%;
-        margin-right: 3%;
+    .form-map-search{ /* 검색바 내부 form */
+        margin: 3%; /* form과 div 사이에 margin 설정 */
     }
-    .input-map-search{
-        height:50px;
+    .div-map-select{ /* select 메뉴 div */
+        width: 80%; /* select 메뉴 너비 80% 차지 */
+        display: flex; /* select 메뉴 정렬 */
+        align-items: center; /* select 메뉴 가운데 정렬 */
+        justify-content: flex-start; /* select 메뉴 왼쪽부터 나열 */
+        padding-left: 1%; /* 왼쪽 padding 추가 */
     }
-    .div-map-select{
-        border-style: solid;
-        border-width: 1px;
-        border-color: rgb(219, 219, 219);
-        width: 80%;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        padding-left: 1%;
+    .select-map{ /* 각 select */
+        width: 20%; /* 너비 설정 */
+        margin-right: 1%; /* 각 select 메뉴 간 간격 설정 */
     }
-    .select-map{
-        height: 50%;
-        width: 20%;
-        margin-right: 1%;
+    /* 리스트 메뉴 + 지도 */
+    .div-map-main{ /* 시설 목록 div + 카카오맵 div를 담는 div */
+        display: flex; /* 시설 목록, 맵 정렬 */
+        height: 74vh; /* viewport 기준 높이 지정 */
+        border-bottom: 1px solid rgb(219, 219, 219); /* 밑에 테두리 추가 */
     }
-    .div-map-main{
-        display: flex;
-        height: 65vh
+    .div-map-list{ /* 시설 목록 출력 div */
+        width: 20%; /* 너비 지정 */
+        border-right: 1px solid rgb(219, 219, 219);
+        overflow: scroll; /* 스크롤 추가 */
     }
-    .div-map-list{
-        border-style: solid;
-        border-width: 1px;
-        border-color: rgb(219, 219, 219);
-        width: 20%; 
+    /* 시설 정보 출력 부분 */
+    .div-map-card{ /* 카드 컴포넌트 담을 div */
+        width: 100%; /* 너비 지정 */
+        border-top: 0px; /* 상단 테두리 제거 */
     }
-    .div-map-card{
-        width: 100%;
-        border-width: 1px;
-        border-color: rgb(219, 219, 219);
-        border-top-color: white;
-        border-right-color: white;
-        overflow:scroll;
-        max-height: 100%
+    .div-map-card-body{ /* 카드 컴포넌트 div */
+        border-bottom: 1px solid rgb(219, 219, 219); /* 하단 테두리 추가 */
     }
-    .div-map-card-body{
-        border: 1px solid #EBEBFF;
-    }
+    /* 아래부터는 카드 컴포넌트 내부 요소 디테일에 관한 스타일 */
     .div-map-card-body-title{
         display: flex; 
         align-items: center; 
-        margin-bottom:8px;
+        margin-bottom: 8px;
     }
     .div-map-card-body-title-facilityname{
-        font-weight:bold; 
+        font-weight: bold; 
         font-size: 18px;
     }
     .div-map-card-body-title-cat{
@@ -1384,126 +1384,102 @@ export default {
         font-size: 11px;  
     }
     .div-map-card-body-basicinfo-title{
-        font-weight:bold;
+        font-weight: bold;
     }
     .div-map-card-body-businesshr{
         display: flex; 
         font-size: 11px;
     }
     .div-map-card-body-businesshr-title{
-        font-weight:bold;
+        font-weight: bold;
     }
     .div-map-card-body-phonenum{
         display: flex; 
         font-size: 11px;
     }
     .div-map-card-body-phonenum-title{
-        font-weight:bold;
+        font-weight: bold;
     }
     .div-map-card-body-buttons{
         display: flex; 
         justify-content: flex-end;
     }
-    .div-map-pagination{
-        display:flex; 
-        flex-direction: column; 
-        align-items: center
+    .button-map-card-body-detail{ /* 카드 컴포넌트 내부 상세보기 버튼 */
+        background:white; /* 버튼 배경색 지정 */
+        color:blue; /* 버튼 내부 글자색 지정 */
+        border: none; /* 버튼 테두리 제거 */
+        padding: 0px; /* 패딩 제거 */
+        font-size: 12px; /* 폰트 크기 지정 */
+        margin-right: 15px; /* 북마크 버튼과의 간격 지정 */
     }
-    .nav-map-pagination{
-        margin-top: 6.5%;
+    .button-map-card-body-bookmark{ /* 카드 컴포넌트 내부 북마크 버튼 */
+        background:white; /* 버튼 배경색 지정 */
+        color:blue; /* 버튼 내부 글자색 지정 */
+        border: none; /* 버튼 테두리 제거 */
+        padding: 0px; /* 패딩 제거 */
+        font-size: 12px; /* 폰트 크기 지정 */
     }
-    .button-map-card-body-bookmark{
-        background:white; 
-        color:blue; 
-        border:none; 
-        padding:0px; 
-        margin-right:15px; 
-        font-size: 12px;
+    /* pagination 부분 */
+    .div-map-pagination{ /* pagination을 담는 div */
+        display:flex; /* pagination flex 정렬 */
+        flex-direction: column; /* pagination column 정렬 */ 
+        align-items: center; /* pagination 가운데 정렬 */
+        padding-top: 20px; /* 위(카드 컴포넌트)와 간격 조절 */
+        padding-bottom: 5px; /* 아래와 간격 조절 */
     }
-    .button-map-card-body-detail{
-        background:white; 
-        color:blue; 
-        border:none; 
-        padding:0px; 
-        font-size: 12px;
-    }
-    .div-map-map{
-        border-style: solid;
-        border-width: 1px;
-        border-color: rgb(219, 219, 219);
-        width: 80%;
+    .div-map-map{ /* 카카오맵 api를 담는 div */
+        width: 80%; /* 너비 지정 */
     }
     #map{
+        /* 카카오맵 api 지도 너비, 높이 모두 100% 지정 */
         width: 100%;
         height: 100%;
     }
+    /* 화면 너비가 992px 이하인 경우 배치 및 스타일 변경 */
     @media screen and (max-width: 992px){
-        .div-map-top{
-            display: flex;
-            flex-direction: column;
-            width: 100%;
+        /* 상단 메뉴 */
+        .div-map-top{ /* 검색바 + select 메뉴를 담는 div */
+            flex-direction: column; /* column 정렬로 변경 */
         }
-        .div-map-search{
-            border-style: solid;
-            border-width: 1px;
-            border-color: rgb(219, 219, 219);
-            width: 100%;
-            display: flex;
-            align-items: center;
+        .div-map-search{ /* 검색바 담는 div */
+            width: 100%; /* 너비 100%로 변경 */
+            display: flex; /* flex 정렬 */
+            border-right: 0; /* 오른쪽 테두리 제거 */
+            border-bottom: 1px solid rgb(219, 219, 219); /* 아래 테두리 추가 */
         }
-        .form-map-search{
-            width: 100%;
+        .form-map-search{ /* 검색바 form */
+            width: 100%; /* 너비 100%로 변경 */
+            /* 상하좌우 간격 조절 */
             margin-top: 2%;
             margin-bottom: 2%;
             margin-left: 1.5%;
             margin-right: 1.5%;
         }
-        .div-map-select{
-            border-style: solid;
-            border-width: 1px;
-            border-color: rgb(219, 219, 219);
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 2%;
+        .div-map-select{ /* select 메뉴 담는 div */
+            width: 100%; /* 너비 100%로 변경 */
+            display: flex; /* select flex 정렬 */
+            flex-direction: column; /* select column 정렬로 변경 */
+            align-items: center; /* select 가운데 정렬 */
+            /* 위, 오른쪽, 왼쪽 간격 조절 */
+            padding-top: 2%; 
             padding-left: 2%;
             padding-right: 1%;
         }
         .select-map{
-            height: 50%;
-            width: 100%;
-            margin-bottom: 2%;
+            width: 100%; /* 각 select 너비 100%로 변경 */
+            margin-bottom: 2%; /* 각 select 메뉴 간 간격 조절 */
         }
-        .div-map-main{
-            display: flex;
-            flex-direction: column;
-            height: 65vh;
+        /* 리스트 메뉴 + 지도 */
+        .div-map-list{ /* 시설 목록 출력 div */
+            width: 100%; /* 너비 100%로 변경 */
+            height: 74vh; /* 높이 viewport 기준으로 변경 */
+            border-right: 0px; /* 오른쪽 테두리 제거 */
         }
-        .div-map-list{
-            border-style: solid;
-            border-width: 1px;
-            border-color: rgb(219, 219, 219);
-            width: 100%;
-            height: 50vh;
+        .div-map-map{ /* 카카오맵 api 지도 감추기 => 992px 이하에선 동작하지 않도록 */
+            display: none;
         }
-        .div-map-card{
-            width: 100%;
-            border-width: 1px;
-            border-color: rgb(219, 219, 219);
-            border-top-color: white;
-            border-right-color: white;
-        }
-        .div-map-map{
-            border-style: solid;
-            border-width: 1px;
-            border-color: rgb(219, 219, 219);
-            width: 100%;
-            height: 100%;
-        }
-        #map{
-            width: 100%;
-            height: 100%;
+        .button-map-card-body-detail{ /* 992px 이하에서는 지도가 동작되지 않도록 했으므로 상세보기(오버레이) 버튼도 감추기 */
+            display: none;
         }
     }
 </style>

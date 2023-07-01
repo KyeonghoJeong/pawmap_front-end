@@ -38,6 +38,7 @@
 <style>
 .div-footer-footer{
     flex-shrink: 0; /* wrapper에 따른 비율 조정 X */
+    padding-top: 0%;
 }
 .div-footer-item{
     width: 100%;
