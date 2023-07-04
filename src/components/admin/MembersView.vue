@@ -118,6 +118,9 @@ export default {
 
                             // 유저에게 바로 로그인 페이지로 이동할지 묻기
                             if(confirm("다시 로그인하시겠습니까?")){
+                                // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
+                                this.$store.commit('setBeforePage', this.$route.fullPath);
+
                                 // 확인 버튼 누른 경우 로그인 페이지로 이동
                                 this.$router.push({path: "/signin"});
                             }
@@ -200,6 +203,9 @@ export default {
 
                                 // 유저에게 바로 로그인 페이지로 이동할지 묻기
                                 if(confirm("다시 로그인하시겠습니까?")){
+                                    // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
+                                    this.$store.commit('setBeforePage', this.$route.fullPath);
+
                                     // 확인 버튼 누른 경우 로그인 페이지로 이동
                                     this.$router.push({path: "/signin"});
                                 }

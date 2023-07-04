@@ -30,21 +30,22 @@ export default{
     },
     methods:{
         signin(){
+            const previousPage = localStorage.getItem("previousPage");
+
             axios.post('http://localhost:8090/api/member/signin', {
                 memberId: this.memberId,
                 pw: this.pw
-            }, {
-                withCredentials: true
+            },{
+                withCredentials: true // cookie로 refershToken을 받기위해 필요
             })
             .then(response => {
                 localStorage.setItem("accessToken", response.data.accessToken);
+                localStorage.setItem("authority", response.data.authority);
 
-                console.log(this.$store.getters.getBeforePage);
-
-                if(this.$store.getters.getBeforePage === '' || this.$store.getters.getBeforePage === '/signup'){
+                if(previousPage === '' || previousPage === '/signup'){
                     this.$router.push({path: '/'});
                 }else{
-                    this.$router.push({path: this.$store.getters.getBeforePage});
+                    this.$router.push(previousPage);
                 }
 
                 this.$router.go(this.$router.currentRoute);
@@ -54,6 +55,14 @@ export default{
                     alert("아이디 또는 비밀번호가 잘못되었거나 존재하지 않는 회원입니다.");
                 }
             })
+
+            localStorage.removeItem("previousPage");
+        }
+    },
+    created(){
+        // 이미 로그인 되어 있는 경우 로그인 페이지로의 접근을 막기 위해 한 페이지 전으로 이동
+        if(localStorage.getItem("accessToken") !== null){
+            this.$router.go(-1);
         }
     }
 }

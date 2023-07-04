@@ -14,7 +14,7 @@
             <tbody>
                 <tr v-for="(article, index) in articles" :key="article.articleId">
                     <th scope="row" class="th-contents-num">{{article.articleId}}</th>
-                    <td><span class="span-contents-title" @click="toArticle(article.articleId)">{{article.title}} <span style="color:red" v-if="commentNumbers[index] !== 0">[{{commentNumbers[index]}}]</span></span></td>
+                    <td><span class="span-contents-title" @click="toArticle(article.articleId)">{{article.title}} <span style="color:#fd7e14">[{{commentNumbers[index]}}]</span></span></td>
                     <td class="td-contents-nickname">{{article.nickname}}</td>
                     <td class="td-contents-date">{{article.postDate}}</td>
                     <td class="td-contents-deletion"><input class="form-check-input" type="checkbox" :v-model="article.articleId" v-model="checkedArticleNumbers[index]"></td>
@@ -126,6 +126,9 @@ export default {
 
                                 // 유저에게 바로 로그인 페이지로 이동할지 묻기
                                 if(confirm("다시 로그인하시겠습니까?")){
+                                    // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
+                                    this.$store.commit('setBeforePage', this.$route.fullPath);
+
                                     // 확인 버튼 누른 경우 로그인 페이지로 이동
                                     this.$router.push({path: "/signin"});
                                 }
@@ -204,9 +207,14 @@ export default {
                     this.articleIds.push(this.articles[i].articleId);
                 }
 
-                axios.post('http://localhost:8090/api/board/articles/comments/numbers', this.articleIds)
+                // get 요청에 array을 같이 보내기 위해서 배열 내의 값들을 콤마로 결합
+                const articleIdsString = this.articleIds.join(',');
+
+                axios.get('http://localhost:8090/api/board/articles/comments/numbers', {
+                    params: {articleIds: articleIdsString}
+                })
                 .then(response => {
-                    this.commentNumbers = response.data;
+                    this.commentNumbers = response.data; // 각 게시글의 댓글수 저장
                 })
                 .catch(error => {
                     console.log(error);
@@ -263,6 +271,9 @@ export default {
 
                             // 유저에게 바로 로그인 페이지로 이동할지 묻기
                             if(confirm("다시 로그인하시겠습니까?")){
+                                // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
+                                this.$store.commit('setBeforePage', this.$route.fullPath);
+
                                 // 확인 버튼 누른 경우 로그인 페이지로 이동
                                 this.$router.push({path: "/signin"});
                             }

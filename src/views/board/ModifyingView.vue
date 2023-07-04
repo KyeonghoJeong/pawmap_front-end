@@ -1,10 +1,10 @@
 <template>
     <div class="div-writing">
         <BoardTitleView></BoardTitleView>
-        <form @submit.prevent="postArticle" class="form-writing">
+        <form @submit.prevent="putArticle" class="form-writing">
             <div class="div-writing-menu">
                 <div class="mb-3">
-                    <input type="text" class="form-control" placeholder="제목을 입력하세요." maxlength="40" required v-model="title" autofocus>
+                    <input type="text" class="form-control" placeholder="제목을 입력하세요." maxlength="40" required v-model="title" >
                 </div>
                 <div class="mb-3 div-writing-menu-writing">
                     <textarea class="form-control textarea-writing-menu-writing" placeholder="내용을 입력하세요." maxlength="1000" required v-model="writing"></textarea>
@@ -28,16 +28,15 @@ export default {
     },
     data(){
         return{
+            articleId: '',
             title: '',
             writing: '',
-            settedTitle: '',
-            settedWriting: '',
-            settedArticleId: '',
         }
     },
     methods:{
-        postArticle(){
-            axios.post('http://localhost:8090/api/board/article', {
+        putArticle(){
+            axios.put('http://localhost:8090/api/board/article', {
+                articleId: this.articleId,
                 title: this.title, 
                 writing: this.writing
             }, {
@@ -59,6 +58,9 @@ export default {
 
                             // 유저에게 바로 로그인 페이지로 이동할지 묻기
                             if(confirm("다시 로그인하시겠습니까?")){
+                                // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
+                                this.$store.commit('setBeforePage', this.$route.fullPath);
+
                                 // 확인 버튼 누른 경우 로그인 페이지로 이동
                                 this.$router.push({path: "/signin"});
                             }
@@ -71,13 +73,17 @@ export default {
                             localStorage.setItem("accessToken", response.data.accessToken);
 
                             // 재귀 호출 (반드시 이번 호출 안에 끝나므로 무한루프X)
-                            this.postArticle();
+                            this.putArticle();
                         }
                     })
                     .catch(error => {
                         console.log(error);
                     })
                 }else{
+                    this.$store.commit('updateTitle', '');
+                    this.$store.commit('updateWriting', '');
+                    this.$store.commit('updateArticleId', '');
+
                     this.$router.push({path: '/board'});
                 }
             })
@@ -85,6 +91,11 @@ export default {
                 console.log(error);
             })
         }
+    },
+    created(){
+        this.articleId = this.$route.query.articleId;
+        this.title = this.$store.getters.getTitle;
+        this.writing = this.$store.getters.getWriting;
     }
 }
 </script>

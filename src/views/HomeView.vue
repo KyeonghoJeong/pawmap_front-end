@@ -126,7 +126,7 @@ export default{
 }
 .div-home-card:hover{
     background-color: white;
-    color: #fd7e14;
+    color: black;
 
     /* background-color: #fd7e14;
     color: white; */

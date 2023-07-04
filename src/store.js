@@ -8,7 +8,7 @@ export default new Vuex.Store({
     beforePage: '',
   },
   mutations:{
-    updateBeforePage(state, data){
+    setBeforePage(state, data){
       state.beforePage = data;
     },
   },

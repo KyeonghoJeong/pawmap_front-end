@@ -25,9 +25,9 @@
 </template>
 
 <script>
-import BookmarkView from '../../components/BookmarkView.vue'
-import MyArticleView from '../../components/MyArticleView.vue'
-import InfoView from '../../components/InfoView.vue'
+import BookmarkView from '../components/mypage/BookmarkView.vue'
+import MyArticleView from '../components/mypage/MyArticleView.vue'
+import InfoView from '../components/mypage/InfoView.vue'
 
 export default {
     data(){

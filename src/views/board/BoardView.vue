@@ -137,6 +137,8 @@ export default {
                 alert("게시글 등록을 위해서는 로그인하셔야 합니다.");
                 
                 if(confirm("로그인 하시겠습니까?")){
+                    localStorage.setItem("previousPage", this.$route.fullPath);
+                    
                     this.$router.push('/signin');
                 }
             }
@@ -266,9 +268,9 @@ export default {
             // startNum = 0, endNum = 0인 경우 고려
             // 이후 같은 패턴 반복
 
-            let numbers = [];
-            let start = this.startNum;
-            let end = this.endNum;
+            let numbers = []; // 페이지 번호를 담을 배열 초기화
+            let start = this.startNum; // 시작 번호
+            let end = this.endNum; // 마지막 번호
 
             // startNum이 0이면 맨 처음 페이지 배열에 해당
             if(this.startNum === 0){
@@ -279,11 +281,12 @@ export default {
                 }
             }
 
+            // 시작 번호 ~ 마지막 번호까지 1씩 증가시켜서 numbers 배열에 넣기 (ex: 1, 2, 3, 4, 5 / 6, 7, 8, 9, 10)
             for(let i=start; i<=end; i++){
                 numbers.push(i);
             }
 
-            return numbers;
+            return numbers; // numbers 리턴
         }
     },
     created(){
@@ -322,6 +325,7 @@ export default {
     .th-col-board-nickname{
         width: 15%;
         text-align: center;
+        white-space: nowrap;
     }
     .th-col-board-date{
         width: 25%;
@@ -369,36 +373,35 @@ export default {
         color: white;
         width: 80px;
     }
-    .div-board-pagination{
-        width: 80%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+    .div-board-pagination{ /* pagination을 담을 div */
+        width: 80%; /* 너비 설정 */
+        display: flex; /* flex 정렬 */
+        flex-direction: column; /* column 정렬 */
+        align-items: center; /* pagination 가운데 정렬 */
     }
     /* width가 992px 이하면 div 재조정 */
     @media screen and (max-width: 992px){
-        .div-board-table{
-            width: 100%;
+        .div-board-table{ /* 테이블 div */
+            width: 100%; /* 다시 너비 100%로 변경 */
         }
-        .div-board-bottom-menu{
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 3%;
+        .div-board-bottom-menu{ /* 검색 div + 버튼 div를 담을 div */
+            width: 100%; /* 너비 100%로 변경 */
+            display: flex; /* flex 정렬로 변경 */
+            flex-direction: column; /* column 정렬로 변경해서 검색 메뉴, select 메뉴 수직 정렬 */
+            margin-bottom: 3%; /* pagination과의 간격 조절 */
         }
-        .div-board-bottom-search{
-            width: 100%;
-            margin-bottom: 3%;
+        .div-board-bottom-search{ /* 검색바 div + select div 담을 div */
+            width: 100%; /* 너비 100%로 변경 */
+            margin-bottom: 3%; /* 버튼과의 간격 조절 */
         }
-        .div-board-bottom-bar{
-            width: 70%;
+        .div-board-bottom-bar{ /* 검색바 div */
+            width: 70%; /* 너비 70% */
         }
-        .div-board-bottom-select{
-            width: 30%;
-            margin-top: 0%;
+        .div-board-bottom-select{ /* select div */
+            width: 30%; /* 너비 30% */
         }
-        .div-board-bottom-btn{
-            width: 100%;
+        .div-board-bottom-btn{ /* 버튼 div */
+            width: 100%; /* 너비 100% */
         }
     }
 </style>
