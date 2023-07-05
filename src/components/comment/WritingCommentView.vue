@@ -84,6 +84,11 @@ export default{
                                 this.$router.push({path: "/signin"});
                             }
 
+                            if(this.$route.path === "/mypage" || this.$route.path === "/admin"){
+                                // 마이페이지 또는 관리페이지인 경우는 메인 페이지로 이동
+                                this.$router.push({path: "/"});
+                            }
+
                             // header 메뉴 갱신을 위해 새로고침
                             this.$router.go(this.$router.currentRoute);
                         }else{

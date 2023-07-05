@@ -17,7 +17,7 @@
                     <td><span class="span-contents-title" @click="toArticle(article.articleId)">{{article.title}} <span style="color:#fd7e14">[{{commentNumbers[index]}}]</span></span></td>
                     <td class="td-contents-nickname">{{article.nickname}}</td>
                     <td class="td-contents-date">{{article.postDate}}</td>
-                    <td class="td-contents-deletion"><input class="form-check-input" type="checkbox" :v-model="article.articleId" v-model="checkedArticleNumbers[index]"></td>
+                    <td class="td-contents-deletion"><input class="form-check-input" type="checkbox" :v-model="article.articleId" v-model="checkedArticleIndex[index]"></td>
                 </tr>
             </tbody>
             </table>
@@ -77,31 +77,150 @@ import axios from 'axios'
 export default {
     data(){
         return{
-            articles: [],
-            totalPages: '',
-            pageActive: 1,
-            startNum: 0,
-            endNum: 0,
-            articleIds: [],
-            commentNumbers: [],
-            searchOptions: ['제목', '내용'],
-            selectedOption: '제목+내용',
-            searchQuery: '',
-            title: '',
-            writing: '',
-            nickname: '',
-            memberId: '',
-            checkedArticleNumbers: [],
-            checkedArticles: [],
+            articles: [], // 게시글 저장할 배열
+            totalPages: '', // 총 게시글 페이지 수
+            pageActive: 1, // pagination 초기 선택 페이지
+            startNum: 0, // pagination 초기 시작 숫자
+            endNum: 0, // pagination 초기 마지막 숫자
+            articleIds: [], // 게시글 id 저장 배열 => 각 게시글의 댓글 수를 요청하기 위함
+            commentNumbers: [], // 각 게시글의 댓글 수를 저장할 배열
+            searchOptions: ['제목', '내용'], // 게시글 검색 select 옵션
+            selectedOption: '제목+내용', // 게시글 검색 select 초기 선택 옵션
+            searchQuery: '', // 검색어 저장
+            title: '', // 게시글 요청 시 검색 옵션이 제목인 경우 검색어를 저장
+            writing: '', // 게시글 요청 시 검색 옵션이 내용인 경우 검색어를 저장
+            nickname: '', // 게시글 요청 시 검색 옵션이 닉네임인 경우 검색어를 저장
+            memberId: '', // 로그인 중인 회원 id
+            checkedArticleIndex: [], // 삭제할 게시글의 인덱스 체크 용도
+            checkedArticles: [], // 삭제할 게시글의 id 저장
         }
     },
     methods:{
+        // 페이지 번호에 맞는 게시글 요청 메소드
+        async getArticles(page){
+            try {
+                // accessToken + 각 검색 옵션 + 회원 id + pagination 옵션으로 게시글 get 요청
+                const getArticlesResponse = await axios.get('http://localhost:8090/api/board/articles', {
+                    params: {
+                        title: this.title,
+                        writing: this.writing,
+                        nickname: this.nickname,
+                        memberId: this.memberId,
+                        page: page, 
+                        size: 10
+                    }
+                });
+
+                // 응답 결과 유효하지 않은 acccessToken인 경우
+                if(getArticlesResponse.data === 'invalidAccessToken'){
+                    console.log(true);
+                    // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                    localStorage.removeItem("accessToken");
+
+                    // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
+                    // axios의 동기적 동작을 위해 async/await 사용
+                    // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
+                    const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
+                        withCredentials: true
+                    })
+
+                    // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
+                    if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
+                        // 로그인 만료 알림
+                        alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+
+                        // 유저에게 바로 로그인 페이지로 이동할지 묻기
+                        if(confirm("다시 로그인하시겠습니까?")){
+                            // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
+                            localStorage.setItem("previousPage", this.$route.fullPath);
+
+                            // 확인 버튼 누른 경우 로그인 페이지로 이동
+                            this.$router.push({path: "/signin"});
+                        }
+
+                        if(this.$route.path === "/mypage" || this.$route.path === "/admin"){
+                            // 마이페이지 또는 관리페이지인 경우는 메인 페이지로 이동
+                            this.$router.push({path: "/"});
+                        }
+
+                        // header 메뉴 갱신을 위해 새로고침
+                        this.$router.go(this.$router.currentRoute);
+                    }else{
+                        // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
+
+                        // 재발급 받은 accessToken 로컬 스토리지에 저장
+                        localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
+
+                        // accessToken + 각 검색 옵션 + 회원 id + pagination 옵션으로 게시글 get 재요청
+                        const reGetArticlesResponse = await axios.get('http://localhost:8090/api/board/articles', {
+                            params: {
+                                title: this.title,
+                                writing: this.writing,
+                                nickname: this.nickname,
+                                memberId: this.memberId,
+                                page: page, 
+                                size: 10
+                            }
+                        });
+
+                        // accessToken이 유효한 경우 => 재요청 성공
+                        if(reGetArticlesResponse.data !== 'invalidAccessToken'){
+                            this.articles = reGetArticlesResponse.data.content; // 게시글 데이터
+                            this.totalPages = reGetArticlesResponse.data.totalPages; // 총 게시글 페이지 수
+
+                            this.articleIds = []; // 게시글 id 저장 배열 초기화
+
+                            // 게시글 수만큼 반복
+                            for(let i=0; i<this.articles.length; i++){
+                                this.articleIds.push(this.articles[i].articleId); // 모든 게시글의 id 저장
+                            }
+
+                            // get 요청으로 array를 보내기 위해서 배열 내의 값들을 콤마로 결합
+                            const articleIdsString = this.articleIds.join(',');
+
+                            // 각 게시글의 댓글 수 get 요청
+                            const reCommentNumbersResponse = await axios.get('http://localhost:8090/api/board/articles/comments/numbers', {
+                                params: {articleIds: articleIdsString}
+                            })
+
+                            // 각 게시글의 댓글 수 저장
+                            // articles와 commentNumbers의 값은 인덱스가 동일하게 매치
+                            this.commentNumbers = reCommentNumbersResponse.data;
+                        }
+                    }
+                }else{
+                    this.articles = getArticlesResponse.data.content; // 게시글 데이터
+                    this.totalPages = getArticlesResponse.data.totalPages; // 총 게시글 페이지 수
+
+                    this.articleIds = []; // 게시글 id 저장 배열 초기화
+
+                    // 게시글 수만큼 반복
+                    for(let i=0; i<this.articles.length; i++){
+                        this.articleIds.push(this.articles[i].articleId); // 모든 게시글의 id 저장
+                    }
+
+                    // get 요청으로 array를 보내기 위해서 배열 내의 값들을 콤마로 결합
+                    const articleIdsString = this.articleIds.join(',');
+
+                    // 각 게시글의 댓글 수 get 요청
+                    const commentNumbersResponse = await axios.get('http://localhost:8090/api/board/articles/comments/numbers', {
+                        params: {articleIds: articleIdsString}
+                    })
+
+                    // 각 게시글의 댓글 수 저장
+                    // articles와 commentNumbers의 값은 인덱스가 동일하게 매치
+                    this.commentNumbers = commentNumbersResponse.data;
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        },
         deleteArticles(){
             if(confirm("정말 삭제하시겠습니까?")){
                 this.checkedArticles = [];
 
                 for(let i=0; i<this.articles.length; i++){
-                    if(this.checkedArticleNumbers[i] === true){
+                    if(this.checkedArticleIndex[i] === true){
                         this.checkedArticles.push(this.articles[i].articleId);
                     }
                 }
@@ -160,69 +279,6 @@ export default {
         },
         toArticle(articleId){
             this.$router.push({ path: '/board/article', query: {articleId: articleId}});
-        },
-        setPrevPageNum(){
-            // isPrevDisabled()에 의해 startNum이 5 이하인 경우는 신경 X
-            this.startNum = this.startNum - 5; // 시작 번호는 현재 시작 번호 - 5
-            this.endNum = this.startNum + 4; // 마지막 번호는 현재 시작 번호 + 4
-            this.pageActive = this.endNum; // 이전 버튼 클릭 시 선택 중인 페이지 표시를 위해 선택한 페이지 번호 리턴
-            this.getArticles(this.endNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
-        },
-        // 다음 버튼 클릭 시 startNum, endNum 재설정을 위한 메소드
-        setNextPageNum(){
-            // 페이지를 처음 띄우는 경우 startNum은 0, endNum은 0이므로 startNum은 startNum + 6으로 설정
-            // 페이지를 처음 띄우는 경우가 아닌 경우는 startNum은 endNum + 1
-            if(this.endNum === 0){
-                this.startNum = this.startNum + 6;
-            }else{
-                this.startNum = this.endNum + 1;
-            }
-            
-            this.endNum = this.startNum + 4; // endNum은 startNum + 4
-            // 마지막 페이지로 설정한 번호가 총 페이지 수를 넘는 경우 마지막 페이지 번호를 총 페이지 수로 설정
-            if(this.endNum > this.totalPages){
-                this.endNum = this.totalPages;
-            }
-
-            this.pageActive = this.startNum; // 다음 버튼을 누르면 첫 페이지 번호를 active
-            this.getArticles(this.startNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
-        },
-        getArticles(page){
-            axios.get('http://localhost:8090/api/board/articles', {
-                params: {
-                    title: this.title,
-                    writing: this.writing,
-                    nickname: this.nickname,
-                    memberId: this.memberId,
-                    page: page, 
-                    size: 10
-                }
-            })
-            .then(response => {
-                this.articles = response.data.content;
-                this.totalPages = response.data.totalPages;
-
-                this.articleIds = [];
-                for(let i=0; i<this.articles.length; i++){
-                    this.articleIds.push(this.articles[i].articleId);
-                }
-
-                // get 요청에 array을 같이 보내기 위해서 배열 내의 값들을 콤마로 결합
-                const articleIdsString = this.articleIds.join(',');
-
-                axios.get('http://localhost:8090/api/board/articles/comments/numbers', {
-                    params: {articleIds: articleIdsString}
-                })
-                .then(response => {
-                    this.commentNumbers = response.data; // 각 게시글의 댓글수 저장
-                })
-                .catch(error => {
-                    console.log(error);
-                })
-            })
-            .catch(error => {
-                console.log(error);
-            })
         },
         setValues(){
             if(this.selectedOption === '제목+내용'){
@@ -301,6 +357,32 @@ export default {
             .catch(error => {
                 console.log(error);
             })
+        },
+        setPrevPageNum(){
+            // isPrevDisabled()에 의해 startNum이 5 이하인 경우는 신경 X
+            this.startNum = this.startNum - 5; // 시작 번호는 현재 시작 번호 - 5
+            this.endNum = this.startNum + 4; // 마지막 번호는 현재 시작 번호 + 4
+            this.pageActive = this.endNum; // 이전 버튼 클릭 시 선택 중인 페이지 표시를 위해 선택한 페이지 번호 리턴
+            this.getArticles(this.endNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
+        },
+        // 다음 버튼 클릭 시 startNum, endNum 재설정을 위한 메소드
+        setNextPageNum(){
+            // 페이지를 처음 띄우는 경우 startNum은 0, endNum은 0이므로 startNum은 startNum + 6으로 설정
+            // 페이지를 처음 띄우는 경우가 아닌 경우는 startNum은 endNum + 1
+            if(this.endNum === 0){
+                this.startNum = this.startNum + 6;
+            }else{
+                this.startNum = this.endNum + 1;
+            }
+            
+            this.endNum = this.startNum + 4; // endNum은 startNum + 4
+            // 마지막 페이지로 설정한 번호가 총 페이지 수를 넘는 경우 마지막 페이지 번호를 총 페이지 수로 설정
+            if(this.endNum > this.totalPages){
+                this.endNum = this.totalPages;
+            }
+
+            this.pageActive = this.startNum; // 다음 버튼을 누르면 첫 페이지 번호를 active
+            this.getArticles(this.startNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
         },
     },
     computed:{

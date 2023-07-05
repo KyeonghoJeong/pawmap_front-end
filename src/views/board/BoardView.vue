@@ -127,56 +127,6 @@ export default {
         }
     },
     methods:{
-        // 글쓰기 버튼 클릭 시 호출 메소드
-        toWriting(){
-            // 로컬 스토리지의 accessToken이 있는지 확인하여 있는 경우(로그인한 경우)만 글쓰기 페이지로 이동
-            if(localStorage.getItem("accessToken") !== null){
-                this.$router.push('/board/writing');
-            }else{
-                // 로그인 상태가 아닌 경우 로그인 요청
-                alert("게시글 등록을 위해서는 로그인하셔야 합니다.");
-                
-                // 유저에게 바로 로그인 페이지로 이동할 지 묻기
-                if(confirm("로그인 하시겠습니까?")){
-                    // 로그인 후 현재 페이지로 돌아오기 위해 로컬 스토리지에 현재 페이지 주소 저장
-                    localStorage.setItem("previousPage", this.$route.fullPath);
-                    
-                    // 로그인 페이지로 이동
-                    this.$router.push('/signin');
-                }
-            }
-        },
-        // 테이블에서 제목 클릭 시 호출 메소드
-        toArticle(articleId){
-            // 매개변수로 게시글 id를 받아서 쿼리와 같이 보냄
-            this.$router.push({ path: '/board/article', query: {articleId: articleId}});
-        },
-        setPrevPageNum(){
-            // isPrevDisabled()에 의해 startNum이 5 이하인 경우는 신경 X
-            this.startNum = this.startNum - 5; // 시작 번호는 현재 시작 번호 - 5
-            this.endNum = this.startNum + 4; // 마지막 번호는 현재 시작 번호 + 4
-            this.pageActive = this.endNum; // 이전 버튼 클릭 시 선택 중인 페이지 표시를 위해 선택한 페이지 번호 리턴
-            this.getArticles(this.endNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
-        },
-        // 다음 버튼 클릭 시 startNum, endNum 재설정을 위한 메소드
-        setNextPageNum(){
-            // 페이지를 처음 띄우는 경우 startNum은 0, endNum은 0이므로 startNum은 startNum + 6으로 설정
-            // 페이지를 처음 띄우는 경우가 아닌 경우는 startNum은 endNum + 1
-            if(this.endNum === 0){
-                this.startNum = this.startNum + 6;
-            }else{
-                this.startNum = this.endNum + 1;
-            }
-            
-            this.endNum = this.startNum + 4; // endNum은 startNum + 4
-            // 마지막 페이지로 설정한 번호가 총 페이지 수를 넘는 경우 마지막 페이지 번호를 총 페이지 수로 설정
-            if(this.endNum > this.totalPages){
-                this.endNum = this.totalPages;
-            }
-
-            this.pageActive = this.startNum; // 다음 버튼을 누르면 첫 페이지 번호를 active
-            this.getArticles(this.startNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
-        },
         // 페이지 번호에 맞는 게시글 목록을 조회하기 위한 메소드
         getArticles(page){
             axios.get('http://localhost:8090/api/board/articles', {
@@ -252,6 +202,56 @@ export default {
 
             this.getArticles(0); // 설정한 파라미터 대로 게시글 목록을 요청하기 위한 메소드 호출
         },
+        // 테이블에서 제목 클릭 시 호출 메소드
+        toArticle(articleId){
+            // 매개변수로 게시글 id를 받아서 쿼리와 같이 보냄
+            this.$router.push({ path: '/board/article', query: {articleId: articleId}});
+        },
+        // 글쓰기 버튼 클릭 시 호출 메소드
+        toWriting(){
+            // 로컬 스토리지의 accessToken이 있는지 확인하여 있는 경우(로그인한 경우)만 글쓰기 페이지로 이동
+            if(localStorage.getItem("accessToken") !== null){
+                this.$router.push('/board/writing');
+            }else{
+                // 로그인 상태가 아닌 경우 로그인 요청
+                alert("게시글 등록을 위해서는 로그인하셔야 합니다.");
+                
+                // 유저에게 바로 로그인 페이지로 이동할 지 묻기
+                if(confirm("로그인 하시겠습니까?")){
+                    // 로그인 후 현재 페이지로 돌아오기 위해 로컬 스토리지에 현재 페이지 주소 저장
+                    localStorage.setItem("previousPage", this.$route.fullPath);
+                    
+                    // 로그인 페이지로 이동
+                    this.$router.push('/signin');
+                }
+            }
+        },
+        setPrevPageNum(){
+            // isPrevDisabled()에 의해 startNum이 5 이하인 경우는 신경 X
+            this.startNum = this.startNum - 5; // 시작 번호는 현재 시작 번호 - 5
+            this.endNum = this.startNum + 4; // 마지막 번호는 현재 시작 번호 + 4
+            this.pageActive = this.endNum; // 이전 버튼 클릭 시 선택 중인 페이지 표시를 위해 선택한 페이지 번호 리턴
+            this.getArticles(this.endNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
+        },
+        // 다음 버튼 클릭 시 startNum, endNum 재설정을 위한 메소드
+        setNextPageNum(){
+            // 페이지를 처음 띄우는 경우 startNum은 0, endNum은 0이므로 startNum은 startNum + 6으로 설정
+            // 페이지를 처음 띄우는 경우가 아닌 경우는 startNum은 endNum + 1
+            if(this.endNum === 0){
+                this.startNum = this.startNum + 6;
+            }else{
+                this.startNum = this.endNum + 1;
+            }
+            
+            this.endNum = this.startNum + 4; // endNum은 startNum + 4
+            // 마지막 페이지로 설정한 번호가 총 페이지 수를 넘는 경우 마지막 페이지 번호를 총 페이지 수로 설정
+            if(this.endNum > this.totalPages){
+                this.endNum = this.totalPages;
+            }
+
+            this.pageActive = this.startNum; // 다음 버튼을 누르면 첫 페이지 번호를 active
+            this.getArticles(this.startNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
+        },
     },
     computed:{
         // 맨 첫 페이지 이전 버튼 동작 중지를 위해 startNum이 5 이하인 경우 false 리턴
@@ -292,7 +292,7 @@ export default {
             return numbers; // numbers 리턴
         }
     },
-    created(){
+    mounted(){
         this.getArticles(0);
     }
 }

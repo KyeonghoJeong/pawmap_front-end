@@ -93,6 +93,7 @@ export default {
     /* 네비게이션 탭 div */
     .div-MyPageView-tab{
         width: 60%; /* 탭 너비 지정 */
+        margin-bottom: 3%;
     }
     /* 탭 리스트 */
     .li-MyPageView{
