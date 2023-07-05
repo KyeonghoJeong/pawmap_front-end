@@ -366,7 +366,7 @@ export default {
                         // 작은 마커 이미지 사이즈 설정
                         const smallMarkerSize = new kakao.maps.Size(8, 8);
                         // 리스트 기준 마커 이미지 사이즈 설정
-                        const listMarkerSize = new kakao.maps.Size(30, 30);
+                        const listMarkerSize = new kakao.maps.Size(35, 35);
                         
                         // 오버레이 출력 시 마커의 이미지가 바뀌는데 리스트 기준 마커 외 작은 마커 중 클릭 상태의 마커 또한 기본 아이콘으로 변경
                         this.clickedMarker.setImage(new kakao.maps.MarkerImage(require('/src/assets/marker/smallMarker.png'), smallMarkerSize));
@@ -439,7 +439,7 @@ export default {
             // 작은 마커 이미지 사이즈 설정
             const smallMarkerSize = new kakao.maps.Size(8, 8);
             // 리스트 기준 마커 이미지 사이즈 설정
-            const listMarkerSize = new kakao.maps.Size(30, 30);
+            const listMarkerSize = new kakao.maps.Size(35, 35);
 
             // 이전에 클릭한 마커가 있는 경우 해제
             if(this.clickedMarker !== ''){
@@ -768,7 +768,7 @@ export default {
                     // 작은 마커 이미지 사이즈 설정
                     const smallMarkerSize = new kakao.maps.Size(8, 8);
                     // 리스트 기준 마커 이미지 사이즈 설정
-                    const listMarkerSize = new kakao.maps.Size(30, 30);
+                    const listMarkerSize = new kakao.maps.Size(35, 35);
 
                     // 마커 생성 및 출력
                     const marker = new kakao.maps.Marker({
