@@ -33,6 +33,12 @@
           <li v-if="this.authority === 'ROLE_USER' || this.authority === 'ROLE_MEMBER' || this.authority === 'ROLE_ADMIN'" class="nav-item">
             <span @click="toBoard" class="nav-link active router-header-menu">게시판</span>
           </li>
+          <li v-if="this.authority === 'ROLE_MEMBER' || this.authority === 'ROLE_ADMIN'" class="nav-item">
+            <span @click="toMyPage" class="nav-link active router-header-menu">마이페이지</span>
+          </li>
+          <li v-if="this.authority === 'ROLE_ADMIN'" class="nav-item">
+            <span @click="toAdmin" class="nav-link active router-header-menu">관리페이지</span>
+          </li>
           <li v-if="this.authority === 'ROLE_USER'" class="nav-item">
             <span @click="toSignIn" class="nav-link active router-header-menu">로그인</span>
           </li>
@@ -41,12 +47,6 @@
           </li>
           <li v-if="this.authority === 'ROLE_USER'" class="nav-item">
             <span @click="toSignUp" class="nav-link active router-header-menu">가입</span>
-          </li>
-          <li v-if="this.authority === 'ROLE_MEMBER' || this.authority === 'ROLE_ADMIN'" class="nav-item">
-            <span @click="toMyPage" class="nav-link active router-header-menu">마이페이지</span>
-          </li>
-          <li v-if="this.authority === 'ROLE_ADMIN'" class="nav-item">
-            <span @click="toAdmin" class="nav-link active router-header-menu">관리페이지</span>
           </li>
         </ul>
       </div>
@@ -125,7 +125,7 @@ export default{
     toMyPage(){
       // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /mypage인 경우 이동 X
       if(this.$route.path !== '/mypage'){
-        this.$router.push({path: '/mypage', query:{tab: 'bookmark'}});
+        this.$router.push({path: '/mypage'});
       }else{
         this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
       }
@@ -134,7 +134,7 @@ export default{
     toAdmin(){
       // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /admin인 경우 이동 X
       if(this.$route.path !== '/admin'){
-        this.$router.push({path: '/admin', query:{tab: 'members'}});
+        this.$router.push({path: '/admin'});
       }else{
         this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
       }

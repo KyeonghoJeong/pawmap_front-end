@@ -40,9 +40,12 @@ export default{
                 // 로그인 상태가 아닌 경우 로그인 요청
                 alert("댓글 등록을 위해서는 로그인하셔야 합니다.");
                 
+                // 유저에게 바로 로그인 페이지로 이동할 지 묻기
                 if(confirm("로그인 하시겠습니까?")){
+                    // 로그인 후 현재 페이지로 돌아오기 위해 로컬 스토리지에 현재 페이지 주소 저장
                     localStorage.setItem("previousPage", this.$route.fullPath);
                     
+                    // 로그인 페이지로 이동
                     this.$router.push('/signin');
                 }
             }else{

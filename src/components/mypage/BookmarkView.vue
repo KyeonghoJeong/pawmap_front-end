@@ -1,6 +1,6 @@
 <template>
     <div class="div-board-mine">
-        <div class="div-board-table">
+        <div class="div-board-table" style="width: 80%">
             <table class="table table-hover table-bordered table-sm div-board-table-table">
             <thead class="table-secondary">
                 <tr>

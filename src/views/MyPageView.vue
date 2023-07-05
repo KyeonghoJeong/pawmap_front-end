@@ -1,119 +1,121 @@
 <template>
-    <div class="mp">
-        <div class="mp-title">
+    <!-- 타이틀 div, 네비게이션 탭 div, 네비게이션 탭 선택 시 출력할 컴포넌트 div를 담을 div -->
+    <div class="div-MyPageView-container">
+        <!-- 타이틀 div -->
+        <div class="div-MyPageView-title">
             <h1>마이페이지</h1>
         </div>
 
-        <div class="mp-nav">
-            <ul class="nav nav-tabs mp-tabs">
-                <li class="nav-item mp-tab">
-                    <p class="nav-link mp-link p-mypage-bookmark" v-bind:class="{ active: activeTab === 'BookmarkView' }" @click="setPath('bookmark')">북마크</p>
+        <!-- 네비게이션 탭 div -->
+        <div class="div-MyPageView-tab">
+            <!-- ul - li - span 구조 -->
+            <ul class="nav nav-tabs">
+                <!-- activeTab 변수의 값이 각 span에 할당된 값과 같으면 active 클래스 적용 -->
+                <!-- span 클릭 시 getComponent 호출, 매개변수는 각 탭에 해당하는 쿼리 -->
+                <li class="nav-item li-MyPageView">
+                    <span class="nav-link span-MyPageView-tab" v-bind:class="{ active: activeTab === 'bookmark' }" @click="getComponent('bookmark')">북마크</span>
                 </li>
-                <li class="nav-item mp-tab">
-                    <p class="nav-link mp-link p-mypage-posting" v-bind:class="{ active: activeTab === 'MyArticleView' }" @click="setPath('posting')">내가 쓴 글</p>
+                <li class="nav-item li-MyPageView">
+                    <span class="nav-link span-MyPageView-tab" v-bind:class="{ active: activeTab === 'myArticles' }" @click="getComponent('myArticles')">내 게시글</span>
                 </li>
-                <li class="nav-item mp-tab">
-                    <p class="nav-link mp-link p-mypage-info" v-bind:class="{ active: activeTab === 'InfoView' }" @click="setPath('info')">내 정보</p>
+                <li class="nav-item li-MyPageView">
+                    <span class="nav-link span-MyPageView-tab" v-bind:class="{ active: activeTab === 'myInfo' }" @click="getComponent('myInfo')">회원정보</span>
                 </li>
             </ul>
         </div>
 
-        <div style="width: 100%">
-            <component v-bind:is="activeTab"></component>
+        <!-- 네비게이션 탭 선택 시 출력할 컴포넌트 div -->
+        <div class="div-MyPageView-component">
+            <component v-bind:is="activeComponent"></component>
         </div>
     </div>
 </template>
 
 <script>
 import BookmarkView from '../components/mypage/BookmarkView.vue'
-import MyArticleView from '../components/mypage/MyArticleView.vue'
-import InfoView from '../components/mypage/InfoView.vue'
+import MyArticlesView from '../components/mypage/MyArticlesView.vue'
+import MyInfoView from '../components/mypage/MyInfoView.vue'
 
 export default {
     data(){
         return{
-            activeTab: '',
+            activeTab: '', // 선택한 탭 이름을 저장할 변수
+            activeComponent: '', // 선택한 탭의 컴포넌트 이름을 저장할 변수
         }
     },
     methods:{
-        setPath(query){
+        // 매개변수(쿼리)에 따라 선택한 탭을 바꾸고 해당 컴포넌트로 이동하는 메소드
+        getComponent(query){
             if(query === 'bookmark'){
-                this.activeTab = 'BookmarkView';
-            }else if(query === 'posting'){
-                this.activeTab = 'MyArticleView';
-            }else if(query === 'info'){
-                this.activeTab = 'InfoView';
-            }
-
-            if(this.$route.fullPath === `/mypage?tab=${query}`){
-                this.$router.go(this.$router.currentRoute);
-            }else{
-                this.$router.push({path: "/mypage", query: {tab: query}});
+                this.activeTab = 'bookmark';
+                this.activeComponent = 'BookmarkView';
+            }else if(query === 'myArticles'){
+                this.activeTab = 'myArticles';
+                this.activeComponent = 'MyArticlesView';
+            }else if(query === 'myInfo'){
+                this.activeTab = 'myInfo';
+                this.activeComponent = 'MyInfoView';
             }
         }
     },
     components:{
-        BookmarkView,
-        MyArticleView,
-        InfoView,
+        BookmarkView, // 북마크 컴포넌트
+        MyArticlesView, // 내 게시글 컴포넌트
+        MyInfoView, // 회원정보 컴포넌트
     },
     created(){
-        if(this.$route.query.tab === 'bookmark'){
-            this.activeTab = 'BookmarkView';
-        }else if(this.$route.query.tab === 'posting'){
-            this.activeTab = 'MyArticleView';
-        }else if(this.$route.query.tab === 'info'){
-            this.activeTab = 'InfoView';
-        }
+        // 마이페이지 메뉴 클릭 시 첫 탭과 컴포넌트를 북마크로 설정
+        this.activeTab = 'bookmark';
+        this.activeComponent = 'BookmarkView';
     }
 }
 
 </script>
 
 <style>
-    .mp{
+    /* 타이틀 div, 네비게이션 탭 div, 네비게이션 탭 선택 시 출력할 컴포넌트 div를 담을 div */
+    .div-MyPageView-container{
+        /* 각 자식 div 가운데 세로 정렬 */
         display: flex;
         flex-direction: column;
         align-items: center;
     }
-    .mp-title{
+    /* 타이틀 div */
+    .div-MyPageView-title{
+        /* 타이틀 div 가운데 세로 정렬 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        /* 위, 아래 간격 조절 */
         margin-top: 5%;
         margin-bottom: 2%;
-        width: 60%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
     }
-    .mp-nav{
-        width: 60%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+    /* 네비게이션 탭 div */
+    .div-MyPageView-tab{
+        width: 60%; /* 탭 너비 지정 */
     }
-    .mp-tabs{
-        width: 100%;
-        text-align: center;
+    /* 탭 리스트 */
+    .li-MyPageView{
+        text-align: center; /* 탭 리스트 텍스트 가운데 정렬 */
+        width: 33%; /* 각 탭 비율 조정 */
     }
-    .mp-tab {
-        width: 33%;
-    }
-    .mp-link{
-        color: black;
-    }
-    .mp-tabs .nav-link.active {
+    /* 선택 중인 탭 색 변경 */
+    .li-MyPageView .nav-link.active{
         background-color: #fd7e14; 
         color: white;
     }
-    .nav-link:hover {
+    /* 리스트 내부 span 글자 색 변경 */
+    .span-MyPageView-tab{
+        color: black;
+    }
+    /* 리스트 내부 span 마우스오버 시 색 및 커서 변경 */
+    .span-MyPageView-tab:hover {
         background-color: #fd7e14;
         color: white;
-    }.p-mypage-bookmark:hover, .p-mypage-posting:hover, .p-mypage-info:hover {
         cursor:pointer;
     }
-
-    @media screen and (max-width: 992px){
-        .mp-tab {
-            width: 33%;
-        }
+    /* 컴포넌트 div 너비 지정 */
+    .div-MyPageView-component{
+        width: 100%;
     }
 </style>
