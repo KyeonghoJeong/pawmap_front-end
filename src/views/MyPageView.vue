@@ -34,7 +34,7 @@
 <script>
 import BookmarkView from '../components/mypage/BookmarkView.vue'
 import MyArticlesView from '../components/mypage/MyArticlesView.vue'
-import MyInfoView from '../components/mypage/MyInfoView.vue'
+import MyInfoView from '../components/mypage/MemberInfo.vue'
 
 export default {
     data(){

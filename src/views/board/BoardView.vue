@@ -6,8 +6,7 @@
 
         <!-- 게시판 구성요소 중 테이블을 담을 div -->
         <div class="div-board-table">
-            <!-- table-board-board는 table 사이즈를 부모 div에 맞게 하도록 지정하기 위한 클래스 -->
-            <table class="table table-hover table-bordered table-sm table-board-board">
+            <table class="table table-hover table-bordered table-sm">
             <thead class="table-secondary">
                 <!-- 게시판 헤더 설정 -->
                 <!-- 각 클래스는 테이블 헤더 비율 설정 및 정렬을 위한 클래스 -->
@@ -25,19 +24,19 @@
                     <th scope="row" class="th-row-board-num">{{article.articleId}}</th>
                     <!-- row에서 제목 부분은 클릭 시 게시글의 내용을 출력해야 하므로 toArticle을 호출 -->
                     <!-- commentNumbers의 index는 articles의 index와 일치, 해당 게시글의 댓글 수를 백엔드에서 받아와서 제목 옆에 출력 -->
-                    <td><span class="td-board-title" @click="toArticle(article.articleId)">{{article.title}} <span style="color:#fd7e14">[{{commentNumbers[index]}}]</span></span></td>
+                    <td><span class="span-board-title" @click="toArticle(article.articleId)">{{article.title}} <span style="color:#fd7e14">[{{commentNumbers[index]}}]</span></span></td>
                     <td class="td-board-nickname">{{article.nickname}}</td>
                     <td class="td-board-date">{{article.postDate}}</td>
                 </tr>
             </tbody>
             </table>
         </div>
-        <!-- div-board-bottom-search는 테이블 하단 검색바, 셀렉트, 글쓰기 버튼을 담을 div -->
-        <div class="div-board-bottom-menu">
+        <!-- div-board-bottom-container는 테이블 하단 검색바, 셀렉트, 글쓰기 버튼을 담을 div -->
+        <div class="div-board-bottom-container">
             <!-- div-board-bottom-search는 검색바 div와 셀렉트 div를 담고 정렬을 하기 위한 div -->
             <div class="div-board-bottom-search">
-                <!-- div-board-bottom-bar는 검색바 비율(사이즈) 지정을 위한 div -->
-                <div class="div-board-bottom-bar">
+                <!-- div-board-bottom-input는 검색바 비율(사이즈) 지정을 위한 div -->
+                <div class="div-board-bottom-input">
                     <!-- 검색 시 setParams 메소드 호출 -->
                     <form @submit.prevent="setParams">
                         <div class="input-group">
@@ -313,9 +312,6 @@ export default {
     .div-board-table{
         width: 80%;  /* 화면 비율 지정 */
     }
-    .table-board-board{
-        width: 100%; /* 부모 div-board-table에 맞게 100%로 지정 */
-    }
     /* 테이블 헤더 비율 설정 및 정렬 */
     .th-col-board-num{
         width: 15%;
@@ -335,7 +331,7 @@ export default {
         text-align: center;
     }
     /* 테이블 로우 마우스오버 효과 및 정렬 */
-    .td-board-title:hover{
+    .span-board-title:hover{
         text-decoration: underline;
         cursor: pointer;
     }
@@ -349,22 +345,21 @@ export default {
         text-align: center;
     }
     /* 테이블 하단 검색바, 셀렉트, 글쓰기 버튼을 담는 div */
-    .div-board-bottom-menu{
+    .div-board-bottom-container{
         width: 80%;
         display:flex; /* 하단 메뉴 div 정렬 */
-        margin-top: 1%;
-        margin-bottom: 2.5%;
+        margin-bottom: 1.2%;
     }
     .div-board-bottom-search{
         width: 50%; /* 검색 메뉴 50% + 글쓰기 버튼 50% */
         display:flex;
     }
-    .div-board-bottom-bar{
-        width: 57%; /* 검색바 70% + 셀렉트 30% */
+    .div-board-bottom-input{
+        width: 57%; /* 검색바 60% + 셀렉트 40% */
         margin-right: 3%; /* 검색바와 셀렉트 사이의 간격 */
     }
     .div-board-bottom-select{
-        width: 40%; /* 검색바 70% + 셀렉트 30% */
+        width: 40%; /* 검색바 60% + 셀렉트 40% */
     }
     .div-board-bottom-btn{
         width: 50%; /* 검색 메뉴 50% + 글쓰기 버튼 50% */
@@ -387,7 +382,7 @@ export default {
         .div-board-table{ /* 테이블 div */
             width: 100%; /* 다시 너비 100%로 변경 */
         }
-        .div-board-bottom-menu{ /* 검색 div + 버튼 div를 담을 div */
+        .div-board-bottom-container{ /* 검색 div + 버튼 div를 담을 div */
             width: 100%; /* 너비 100%로 변경 */
             display: flex; /* flex 정렬로 변경 */
             flex-direction: column; /* column 정렬로 변경해서 검색 메뉴, select 메뉴 수직 정렬 */
@@ -397,7 +392,7 @@ export default {
             width: 100%; /* 너비 100%로 변경 */
             margin-bottom: 3%; /* 버튼과의 간격 조절 */
         }
-        .div-board-bottom-bar{ /* 검색바 div */
+        .div-board-bottom-input{ /* 검색바 div */
             width: 70%; /* 너비 70% */
         }
         .div-board-bottom-select{ /* select div */

@@ -1,31 +1,44 @@
 <template>
-    <div class="div-adminboard">
-        <div class="div-adminboard-table">
-            <table class="table table-hover table-bordered table-sm div-adminboard-table-table">
+    <!-- 게시글 테이블 div, 검색 기능 div, 삭제 버튼 div, pagination div를 담을 컨테이너 div -->
+    <div class="div-MyArticles-container">
+        <!-- 게시판 구성요소 중 테이블을 담을 div -->
+        <div class="div-MyArticles-table">
+            <table class="table table-hover table-bordered table-sm">
             <thead class="table-secondary">
+                <!-- 게시판 헤더 설정 -->
+                <!-- 각 클래스는 테이블 헤더 비율 설정 및 정렬을 위한 클래스 -->
                 <tr>
-                    <th scope="col" class="th-headers-num">#</th>
-                    <th scope="col" class="th-headers-title">제목</th>
-                    <th scope="col" class="th-headers-nickname">닉네임</th>
-                    <th scope="col" class="th-headers-date">날짜</th>
-                    <th scope="col" class="th-headers-deletion">삭제</th>
+                    <th scope="col" class="th-MyArticles-num">#</th>
+                    <th scope="col" class="th-MyArticles-title">제목</th>
+                    <th scope="col" class="th-MyArticles-nickname">닉네임</th>
+                    <th scope="col" class="th-MyArticles-date">날짜</th>
+                    <th scope="col" class="th-MyArticles-del">삭제</th>
                 </tr>
             </thead>
             <tbody>
+                <!-- 테이블 row 반복문으로 출력 -->
+                <!-- articles는 백엔드로부터 받은 게시글 데이터 -->
                 <tr v-for="(article, index) in articles" :key="article.articleId">
-                    <th scope="row" class="th-contents-num">{{article.articleId}}</th>
-                    <td><span class="span-contents-title" @click="toArticle(article.articleId)">{{article.title}} <span style="color:#fd7e14">[{{commentNumbers[index]}}]</span></span></td>
-                    <td class="td-contents-nickname">{{article.nickname}}</td>
-                    <td class="td-contents-date">{{article.postDate}}</td>
-                    <td class="td-contents-deletion"><input class="form-check-input" type="checkbox" :v-model="article.articleId" v-model="checkedArticleIndex[index]"></td>
+                    <th scope="row" class="th-MyArticles-num">{{article.articleId}}</th>
+                    <!-- row에서 제목 부분은 클릭 시 게시글의 내용을 출력해야 하므로 toArticle을 호출 -->
+                    <!-- commentNumbers의 index는 articles의 index와 일치, 해당 게시글의 댓글 수를 백엔드에서 받아와서 제목 옆에 출력 -->
+                    <td><span class="span-MyArticles-title" @click="toArticle(article.articleId)">{{article.title}} <span style="color:#fd7e14">[{{commentNumbers[index]}}]</span></span></td>
+                    <td class="th-MyArticles-nickname">{{article.nickname}}</td>
+                    <td class="th-MyArticles-date">{{article.postDate}}</td>
+                    <!-- 배열에 체크박스로 체크한 게시글의 인덱스로 v-model로 값 저장 -->
+                    <td class="th-MyArticles-del"><input class="form-check-input" type="checkbox" :v-model="article.articleId" v-model="checkedArticleIndex[index]"></td>
                 </tr>
             </tbody>
             </table>
         </div>
-        <div class="div-adminboard-bottom-set">
-            <div class="div-adminboard-bottom-scset">
-                <div class="div-adminboard-bottom-search">
-                    <form @submit.prevent="setValues">
+        <!-- 테이블 하단 검색바, 셀렉트, 삭제 버튼을 담을 div -->
+        <div class="div-MyArticles-bottom-container">
+            <!-- 검색바 div와 셀렉트 div를 담고 정렬을 하기 위한 div -->
+            <div class="div-MyArticles-bottom-search">
+                <!-- 검색바 비율(사이즈) 지정을 위한 div -->
+                <div class="div-MyArticles-bottom-input">
+                    <!-- 검색 시 getArticlesByQuery 메소드 호출 -->
+                    <form @submit.prevent="getArticlesByQuery">
                         <div class="input-group">
                             <input type="text" class="form-control" aria-label="keyword" aria-describedby="basic-addon1" v-model="searchQuery">
                             <span class="input-group-text" id="basic-addon1"  style="background-color:white">
@@ -36,30 +49,44 @@
                         </div>
                     </form>
                 </div>
-                <div class="div-adminboard-bottom-category">
+                <!-- 셀렉트 비율(사이즈) 지정을 위한 div -->
+                <div class="div-MyArticles-bottom-select">
+                    <!-- selectedOption은 셀렉트에서 선택된 옵션값을 저장 -->
                     <select class="form-select" aria-label="Default select example" v-model="selectedOption">
+                        <!-- select 메뉴 기본값 설정 -->
                         <option :value="'제목+내용'">제목+내용</option>
+                        <!-- v-for을 사용하여 searchOptions에서 검색 옵션을 반복문으로 출력, 제목+내용 포함 X -->
                         <option v-for="option in searchOptions" :value="option" :key="option">{{ option }}</option>
                     </select>
                 </div>
             </div>
-            <div class="div-adminboard-bottom-btn">
-                <button type="button" class="btn div-adminboard-bottom-btn-btn" @click="deleteArticles">삭제</button>
+            <!-- 삭제 버튼의 비율(사이즈) 및 위치 지정을 위한 div -->
+            <!-- 삭제 버튼 클릭 시 deleteArticles 메소드 호출 -->
+            <div class="div-MyArticles-bottom-btn">
+                <button type="button" class="btn button-MyArticles-del" @click="deleteArticles">삭제</button>
             </div>
         </div>
-        <div class="div-adminboard-paging">
+        <!-- 페이지네이션 메뉴를 담고 정렬하기 위한 div -->
+        <div class="div-MyArticles-pagination">
             <nav aria-label="Page navigation example">
                 <ul class="pagination">
+                    <!-- computed에서 isPrevDisabled 계산 후 true면 비활성화, false면 활성화 -->
+                    <!-- 클릭 시 setPrevPageNum 메소드 호출하여 새로 page 번호를 만들어 출력하고 해당하는 페이지의 게시글 출력 -->
                     <li class="page-item">
                         <button :class="['page-link', isPrevDisabled ? 'disabled' : '']" aria-label="Previous" @click="setPrevPageNum">
                             <span aria-hidden="true">&laquo;</span>
                         </button>
                     </li>
 
+                    <!-- computed에서 pageNumbers 메소드로 만든 페이지 번호를 반복문으로 출력 -->
+                    <!-- 페이지 번호 클릭 시 pageActive = i로 저장하고 둘이 같을 때 active 즉, 선택한 페이지 번호는 active로 출력 -->
+                    <!-- 페이지 번호 클릭 시 getArticles 메소드에 해당하는 페이지 번호(i-1)의 게시글 데이터를 백엔드로부터 받아와 출력 -->
                     <li v-for="i in pageNumbers" :key="i" :class="['page-item', pageActive === i ? 'active' : '']" @click="pageActive = i">
                         <button class="page-link" @click="getArticles(i-1)">{{i}}</button>
                     </li>
 
+                    <!-- computed에서 isNextDisabled 계산 후 true면 비활성화, false면 활성화 -->
+                    <!-- 클릭 시 setNextPageNum 메소드 호출하여 새로 page 번호를 만들어 출력하고 해당하는 페이지의 게시글 출력 -->
                     <li class="page-item">
                         <button :class="['page-link', isNextDisabled ? 'disabled' : '']" aria-label="Next" @click="setNextPageNum">
                             <span aria-hidden="true">&raquo;</span>
@@ -96,24 +123,17 @@ export default {
         }
     },
     methods:{
-        // 페이지 번호에 맞는 게시글 요청 메소드
-        async getArticles(page){
+        // 로그인중인 회원의 아이디를 요청하는 메소드
+        // 동기적 동작을 위해 async/await 사용
+        async getArticlesByMemberId(){
             try {
-                // accessToken + 각 검색 옵션 + 회원 id + pagination 옵션으로 게시글 get 요청
-                const getArticlesResponse = await axios.get('http://localhost:8090/api/board/articles', {
-                    params: {
-                        title: this.title,
-                        writing: this.writing,
-                        nickname: this.nickname,
-                        memberId: this.memberId,
-                        page: page, 
-                        size: 10
-                    }
-                });
+                // accessToken으로 로그인중인 회원의 id get 요청
+                const getArticlesByMemberIdResponse = await axios.get('http://localhost:8090/api/member/memberId', {
+                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                })
 
                 // 응답 결과 유효하지 않은 acccessToken인 경우
-                if(getArticlesResponse.data === 'invalidAccessToken'){
-                    console.log(true);
+                if(getArticlesByMemberIdResponse.data === 'invalidAccessToken') {
                     // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
                     localStorage.removeItem("accessToken");
 
@@ -151,136 +171,155 @@ export default {
                         // 재발급 받은 accessToken 로컬 스토리지에 저장
                         localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
 
-                        // accessToken + 각 검색 옵션 + 회원 id + pagination 옵션으로 게시글 get 재요청
-                        const reGetArticlesResponse = await axios.get('http://localhost:8090/api/board/articles', {
-                            params: {
-                                title: this.title,
-                                writing: this.writing,
-                                nickname: this.nickname,
-                                memberId: this.memberId,
-                                page: page, 
-                                size: 10
-                            }
-                        });
+                        // accessToken으로 로그인중인 회원의 id 재요청
+                        const regetArticlesByMemberIdResponse = await axios.get('http://localhost:8090/api/member/memberId', {
+                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                        })
 
                         // accessToken이 유효한 경우 => 재요청 성공
-                        if(reGetArticlesResponse.data !== 'invalidAccessToken'){
-                            this.articles = reGetArticlesResponse.data.content; // 게시글 데이터
-                            this.totalPages = reGetArticlesResponse.data.totalPages; // 총 게시글 페이지 수
-
-                            this.articleIds = []; // 게시글 id 저장 배열 초기화
-
-                            // 게시글 수만큼 반복
-                            for(let i=0; i<this.articles.length; i++){
-                                this.articleIds.push(this.articles[i].articleId); // 모든 게시글의 id 저장
-                            }
-
-                            // get 요청으로 array를 보내기 위해서 배열 내의 값들을 콤마로 결합
-                            const articleIdsString = this.articleIds.join(',');
-
-                            // 각 게시글의 댓글 수 get 요청
-                            const reCommentNumbersResponse = await axios.get('http://localhost:8090/api/board/articles/comments/numbers', {
-                                params: {articleIds: articleIdsString}
-                            })
-
-                            // 각 게시글의 댓글 수 저장
-                            // articles와 commentNumbers의 값은 인덱스가 동일하게 매치
-                            this.commentNumbers = reCommentNumbersResponse.data;
+                        if(regetArticlesByMemberIdResponse.data !== 'invalidAccessToken'){
+                            this.memberId = regetArticlesByMemberIdResponse.data; // 회원 아이디 설정
+                            this.getArticles(0); // 게시글 요청
                         }
                     }
                 }else{
-                    this.articles = getArticlesResponse.data.content; // 게시글 데이터
-                    this.totalPages = getArticlesResponse.data.totalPages; // 총 게시글 페이지 수
-
-                    this.articleIds = []; // 게시글 id 저장 배열 초기화
-
-                    // 게시글 수만큼 반복
-                    for(let i=0; i<this.articles.length; i++){
-                        this.articleIds.push(this.articles[i].articleId); // 모든 게시글의 id 저장
-                    }
-
-                    // get 요청으로 array를 보내기 위해서 배열 내의 값들을 콤마로 결합
-                    const articleIdsString = this.articleIds.join(',');
-
-                    // 각 게시글의 댓글 수 get 요청
-                    const commentNumbersResponse = await axios.get('http://localhost:8090/api/board/articles/comments/numbers', {
-                        params: {articleIds: articleIdsString}
-                    })
-
-                    // 각 게시글의 댓글 수 저장
-                    // articles와 commentNumbers의 값은 인덱스가 동일하게 매치
-                    this.commentNumbers = commentNumbersResponse.data;
+                    this.memberId = getArticlesByMemberIdResponse.data; // 회원 아이디 설정
+                    this.getArticles(0); // 게시글 요청
                 }
             } catch (error) {
                 console.log(error);
             }
         },
-        deleteArticles(){
+        // 페이지 번호에 맞는 게시글 요청 메소드
+        // 동기적 동작을 위해 async/await 사용
+        async getArticles(page){
+            try {
+                // accessToken + 각 검색 옵션 + 회원 id + pagination 옵션으로 게시글 get 요청
+                const getArticlesResponse = await axios.get('http://localhost:8090/api/board/articles', {
+                    params: {
+                        title: this.title,
+                        writing: this.writing,
+                        nickname: this.nickname,
+                        memberId: this.memberId,
+                        page: page, 
+                        size: 10
+                    }
+                });
+
+                this.articles = getArticlesResponse.data.content; // 게시글 데이터
+                this.totalPages = getArticlesResponse.data.totalPages; // 총 게시글 페이지 수
+
+                this.articleIds = []; // 게시글 id 저장 배열 초기화
+
+                // 게시글 수만큼 반복
+                for(let i=0; i<this.articles.length; i++){
+                    this.articleIds.push(this.articles[i].articleId); // 모든 게시글의 id 저장
+                }
+
+                // get 요청으로 array를 보내기 위해서 배열 내의 값들을 콤마로 결합
+                const articleIdsString = this.articleIds.join(',');
+
+                // 각 게시글의 댓글 수 get 요청
+                const commentNumbersResponse = await axios.get('http://localhost:8090/api/board/articles/comments/numbers', {
+                    params: {articleIds: articleIdsString}
+                })
+
+                // 각 게시글의 댓글 수 저장
+                // articles와 commentNumbers의 값은 인덱스가 동일하게 매치
+                this.commentNumbers = commentNumbersResponse.data;
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        // 여러 게시글 삭제 요청 메소드
+        // 동기적 동작을 위해 async/await 사용
+        async deleteArticles(){
             if(confirm("정말 삭제하시겠습니까?")){
+                // 삭제할 게시글 배열 초기화
                 this.checkedArticles = [];
 
+                // 현재 게시글 배열에 저장되어 있는 게시글 수 만큼 반복
                 for(let i=0; i<this.articles.length; i++){
                     if(this.checkedArticleIndex[i] === true){
+                        // checkedArticleIndex[i]가 true이면 체크박스 체크를 의미
+                        // checkedArticleIndex bookmarks의 인덱스는 같으므로 checkedArticles 삭제할 북마크의 시설 id를 push
                         this.checkedArticles.push(this.articles[i].articleId);
                     }
                 }
 
-                axios.delete('http://localhost:8090/api/board/articles', {
-                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
-                    data: this.checkedArticles
-                })
-                .then(response => {
-                    if(response.data === 'invalidAccessToken'){
-                        axios.get('http://localhost:8090/api/member/accesstoken', {
+                try {
+                    // accessToken + 체크한 게시글 id로 delete 요청
+                    const deleteArticlesResponse = await axios.delete('http://localhost:8090/api/board/articles', {
+                        headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
+                        data: this.checkedArticles
+                    })
+
+                    // 응답 결과 유효하지 않은 acccessToken인 경우
+                    if(deleteArticlesResponse.data === 'invalidAccessToken'){
+                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                        localStorage.removeItem("accessToken");
+                        
+                        // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
+                        // axios의 동기적 동작을 위해 async/await 사용
+                        // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
+                        const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
                             withCredentials: true
                         })
-                        .then(response => {
-                            // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
-                            if(response.data === 'invalidRefreshToken'){
-                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                                localStorage.removeItem("accessToken");
 
-                                // 로그인 만료 알림
-                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+                        // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
+                        if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
+                            // 로그인 만료 알림
+                            alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
 
-                                // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                                if(confirm("다시 로그인하시겠습니까?")){
-                                    // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                                    this.$store.commit('setBeforePage', this.$route.fullPath);
+                            // 유저에게 바로 로그인 페이지로 이동할지 묻기
+                            if(confirm("다시 로그인하시겠습니까?")){
+                                // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
+                                localStorage.setItem("previousPage", this.$route.fullPath);
 
-                                    // 확인 버튼 누른 경우 로그인 페이지로 이동
-                                    this.$router.push({path: "/signin"});
-                                }
-                            }else{
-                                // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                                localStorage.removeItem("accessToken");
-                                // 재발급 받은 accessToken 로컬 스토리지에 저장
-                                localStorage.setItem("accessToken", response.data.accessToken);
-
-                                // 재귀 호출 (반드시 이번 호출 안에 끝나므로 무한루프X)
-                                this.deleteArticles();
+                                // 확인 버튼 누른 경우 로그인 페이지로 이동
+                                this.$router.push({path: "/signin"});
                             }
-                        })
-                        .catch(error => {
-                            console.log(error);
-                        })
-                    }else{
-                        alert("게시글이 삭제되었습니다.");
 
+                            if(this.$route.path === "/mypage" || this.$route.path === "/admin"){
+                                // 마이페이지 또는 관리페이지인 경우는 메인 페이지로 이동
+                                this.$router.push({path: "/"});
+                            }
+
+                            // header 메뉴 갱신을 위해 새로고침
+                            this.$router.go(this.$router.currentRoute);
+                        }else{
+                            // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
+
+                            // 재발급 받은 accessToken 로컬 스토리지에 저장
+                            localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
+
+                            // accessToken + 체크한 게시글 id로 delete 재요청
+                            const reDeleteArticlesResponse = await axios.delete('http://localhost:8090/api/board/articles', {
+                                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
+                                data: this.checkedArticles
+                            })
+
+                            // accessToken이 유효한 경우 => 재요청 성공
+                            if(reDeleteArticlesResponse.data !== 'invalidAccessToken'){
+                                // 삭제 후 새로고침
+                                this.$router.go(this.$router.currentRoute);
+                            }
+                        }
+                    }else{
+                        // 삭제 후 새로고침
                         this.$router.go(this.$router.currentRoute);
                     }
-                })
-                .catch(error => {
+                } catch (error) {
                     console.log(error);
-                })
+                }
             }
         },
+        // 게시글 제목 클릭 시 이동 메소드
         toArticle(articleId){
             this.$router.push({ path: '/board/article', query: {articleId: articleId}});
         },
-        setValues(){
+        // 검색 시 검색어 + select 메뉴로 게시글 요청 시 보낼 파라미터 값 설정하는 메소드
+        getArticlesByQuery(){
             if(this.selectedOption === '제목+내용'){
                 this.title = this.searchQuery;
                 this.writing = this.searchQuery;
@@ -303,60 +342,9 @@ export default {
                 this.writing = '';
             }
 
-            this.pageActive = 1;
+            this.pageActive = 1; // 검색 후 초기 선택 페이지 번호 1로 설정
 
             this.getArticles(0);
-        },
-        getMember(){
-            axios.get('http://localhost:8090/api/member', {
-                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-            })
-            .then(response => {
-                if(response.data === 'invalidAccessToken'){
-                    axios.get('http://localhost:8090/api/member/accesstoken', {
-                        withCredentials: true
-                    })
-                    .then(response => {
-                        // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
-                        if(response.data === 'invalidRefreshToken'){
-                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                            localStorage.removeItem("accessToken");
-
-                            // 로그인 만료 알림
-                            alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-
-                            // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                            if(confirm("다시 로그인하시겠습니까?")){
-                                // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                                this.$store.commit('setBeforePage', this.$route.fullPath);
-
-                                // 확인 버튼 누른 경우 로그인 페이지로 이동
-                                this.$router.push({path: "/signin"});
-                            }
-                        }else{
-                            // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                            localStorage.removeItem("accessToken");
-                            // 재발급 받은 accessToken 로컬 스토리지에 저장
-                            localStorage.setItem("accessToken", response.data.accessToken);
-
-                            // 재귀 호출 (반드시 이번 호출 안에 끝나므로 무한루프X)
-                            this.getMember();
-                        }
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    })
-                }else{
-                    this.memberId = response.data.memberId;
-
-                    this.getArticles(0);
-                }
-            })
-            .catch(error => {
-                console.log(error);
-            })
         },
         setPrevPageNum(){
             // isPrevDisabled()에 의해 startNum이 5 이하인 경우는 신경 X
@@ -424,138 +412,101 @@ export default {
             return numbers;
         }
     },
-    created(){
-        this.getMember();
+    mounted(){
+        // 회원 아이디로 해당 회원의 게시글만 요청하는 메소드 호출
+        this.getArticlesByMemberId();
     }
 }
 </script>
 
 <style>
-    .div-adminboard{
-        padding-top: 4.3%;
-        padding-left: 10%;
-        padding-right: 10%;
-        padding-bottom: 2%;
+    /* 게시글 테이블 div, 검색 기능 div, 삭제 버튼 div, pagination div를 담을 컨테이너 div */
+    .div-MyArticles-container{
+        /* 게시판 구성 요소 (테이블, 검색바+셀렉트+글쓰기 버튼, 페이지네이션) 정렬 */
         display: flex;
         flex-direction: column;
         align-items: center;
     }
-
-    .div-adminboard-table{
+    /* 게시판 구성요소 중 테이블을 담을 div */
+    .div-MyArticles-table{
+        width: 60%; /* 너비 지정 */
+    }
+    /* 테이블 항목 가운데 정렬 */
+    .th-MyArticles-num, .th-MyArticles-title, .th-MyArticles-nickname, .th-MyArticles-date, .th-MyArticles-del{
+        text-align: center;
+    }
+    /* 각 테이블 항목 너비 조절 */
+   .th-MyArticles-num{
+        width: 15%;
+    }
+    .th-MyArticles-title{
+        width: 35%;
+    }
+    .th-MyArticles-nickname{
+        width: 15%;
+    }
+    .th-MyArticles-date{
+        width: 25%;
+    }
+    .th-MyArticles-del{
+        width: 10%;
+    }
+    .span-MyArticles-title:hover{ /* 테이블 로우 마우스오버 효과 및 정렬 */
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    .div-MyArticles-bottom-container{ /* 테이블 하단 검색바, 셀렉트, 글쓰기 버튼을 담는 div */
         width: 60%;
+        display:flex; /* 하단 메뉴 div 정렬 */
+        margin-bottom: 15px;
+    }
+    .div-MyArticles-bottom-search{
+        width: 50%; /* 검색 메뉴 50% + 글쓰기 버튼 50% */
         display: flex;
-        flex-direction: column;
-        align-items: center;
     }
-    .div-adminboard-bottom-set{
-        width: 60%;
-        display:flex;
-        margin-bottom: 1.5%;
+    .div-MyArticles-bottom-input{
+        width: 57%; /* 검색바 60% + 셀렉트 40% */
+        margin-right: 3%; /* 검색바와 셀렉트 사이의 간격 */
     }
-    .div-adminboard-paging{
-        width: 60%;
+    .div-MyArticles-bottom-select{
+        width: 40%; /* 검색바 60% + 셀렉트 40% */
+    }
+    .div-MyArticles-bottom-btn{
+        width: 50%; /* 검색 메뉴 50% + 글쓰기 버튼 50% */
         display: flex;
-        flex-direction: column;
-        align-items: center;
+        flex-direction: row-reverse; /* 버튼 우측 끝에 배치 */
     }
-
-    .div-adminboard-table-table{
-        width: 100%;
-    }
-    .div-adminboard-bottom-scset{
-        width: 50%;
-        display:flex;
-    }
-    .div-adminboard-bottom-search{
-        width: 60%;
-        margin-right: 2%;
-    }
-    .div-adminboard-bottom-category{
-        width: 40%;
-    }
-    .div-adminboard-bottom-btn{
-        width: 50%;
-        display: flex;
-        flex-direction: row-reverse;
-    }
-    .div-adminboard-bottom-btn-btn{
+    .button-MyArticles-del{ /* 버튼 색, 비율(사이즈) 지정 */
         background-color: #fd7e14;
         color: white;
         width: 80px;
     }
-    .th-headers-num{
-        width: 15%;
-        text-align: center;
+    .div-MyArticles-pagination{ /* pagination을 담을 div */
+        width: 60%; /* 너비 설정 */
+        display: flex; /* flex 정렬 */
+        flex-direction: column; /* column 정렬 */
+        align-items: center; /* pagination 가운데 정렬 */
     }
-    .th-headers-title{
-        width: 35%;
-        text-align: center;
-    }
-    .th-headers-nickname{
-        width: 15%;
-        text-align: center;
-    }
-    .th-headers-date{
-        width: 25%;
-        text-align: center;
-    }
-    .th-headers-deletion{
-        width: 10%;
-        text-align: center;
-    }
-
-    .th-contents-num{
-        text-align: center;
-    }
-    .td-contents-date{
-        text-align: center;
-    }
-    .td-contents-nickname{
-        text-align: center;
-    }
-    .td-contents-deletion{
-        text-align: center;
-    }
-
-    .page-link{
-        color: black;
-    }
-    .pagination .page-item.active .page-link {
-        background-color: #fd7e14;
-        border-color: rgb(225, 228, 232);
-    }
-    .span-contents-title:hover{
-        text-decoration: underline;
-        cursor: pointer;
-    }
-
+    /* width가 992px 이하면 div 재조정 */
     @media screen and (max-width: 992px){
-        .div-adminboard-table{
-            width: 100%;
+        .div-MyArticles-bottom-container{ /* 검색 div + 버튼 div를 담을 div */
+            width: 60%; /* 너비 100%로 변경 */
+            display: flex; /* flex 정렬로 변경 */
+            flex-direction: column; /* column 정렬로 변경해서 검색 메뉴, select 메뉴 수직 정렬 */
+            margin-bottom: 3%; /* pagination과의 간격 조절 */
         }
-        .div-adminboard-bottom-set{
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 3%;
+        .div-MyArticles-bottom-search{ /* 검색바 div + select div 담을 div */
+            width: 100%; /* 너비 100%로 변경 */
+            margin-bottom: 3%; /* 버튼과의 간격 조절 */
         }
-
-        .div-adminboard-bottom-scset{
-            width: 100%;
-            margin-bottom: 3%;
+        .div-MyArticles-bottom-input{ /* 검색바 div */
+            width: 60%; /* 너비 70% */
         }
-        .div-adminboard-bottom-btn{
-            width: 100%;
+        .div-MyArticles-bottom-select{ /* select div */
+            width: 40%; /* 너비 30% */
         }
-        .div-adminboard-bottom-search{
-            width: 70%;
-        }
-        .div-adminboard-bottom-category{
-            width: 30%;
-            margin-top: 0%;
-        }
-        .div-adminboard-table-table{
-            width: 100%;
+        .div-MyArticles-bottom-btn{ /* 버튼 div */
+            width: 100%; /* 너비 100% */
         }
     }
 </style>
