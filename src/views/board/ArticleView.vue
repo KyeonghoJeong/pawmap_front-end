@@ -135,8 +135,8 @@ export default {
                             this.$router.push({path: "/signin"});
                         }
 
-                        if(this.$route.path === "/mypage" || this.$route.path === "/admin"){
-                            // 마이페이지 또는 관리페이지인 경우는 메인 페이지로 이동
+                        if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
+                            // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
                             this.$router.push({path: "/"});
                         }
 
@@ -244,11 +244,8 @@ export default {
 <style>
     /* 게시판 안내 메시지 + 게시글 담을 div */
     .div-article-container{
-        /* 상하좌우 간격 설정 */
+        /* padding으로 게시판 간격 조절 */
         padding-top: 6.5%;
-        padding-left: 10%;
-        padding-right: 10%;
-        padding-bottom: 2%;
         /* 안내 메시지, 게시글 정렬 */
         display: flex;
         flex-direction: column;
@@ -256,7 +253,7 @@ export default {
     }
     /* 게시글 div */
     .div-article-main{
-        width: 80%; /* 너비 지정 */
+        width: 70%; /* 너비 지정 */
         border: 1px solid rgb(219, 219, 219); /* 테두리 굵기, 색 설정 */
     }
     /* 제목 전체 div */
@@ -330,7 +327,7 @@ export default {
     /* 너비 992px 이하 시 너비 재조정 */
     @media screen and (max-width: 992px){
         .div-article-main{
-            width: 100%;
+            width: 70%;
         }
     }
 </style>

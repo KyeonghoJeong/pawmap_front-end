@@ -84,7 +84,7 @@ export default{
     // 로그인 메소드
     toSignIn(){
       // 로그인 페이지에서 또 로그인 메뉴를 누른 경우 제외
-      // 로그인 후 이전 페이지로 돌아가기 위해 store에 쿼리를 포함한 fullPath 저장
+      // 로그인 후 이전 페이지로 돌아가기 위해 로컬 스토리지에 fullPath 저장
       if(this.$route.fullPath !== '/signin'){
         localStorage.setItem("previousPage", this.$route.fullPath);
       }
@@ -92,6 +92,8 @@ export default{
       // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /signin인 경우 이동 X
       if(this.$route.path !== '/signin'){
         this.$router.push({path: '/signin'});
+      }else{
+        this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
       }
     },
     // 로그아웃 메소드
@@ -104,7 +106,7 @@ export default{
         localStorage.removeItem("authority");
         
         // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
-        if(this.$route.path === '/mypage' || this.$route.path === '/admin' || this.$route.path === '/board/writing'){
+        if(this.$route.path === '/mypage' || this.$route.path === '/deletingAccount' || this.$route.path === '/admin' || this.$route.path === '/board/writing'){
           this.$router.push({path: '/'});
         }
         

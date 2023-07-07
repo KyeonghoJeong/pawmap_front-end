@@ -37,8 +37,8 @@
             <div class="div-board-bottom-search">
                 <!-- div-board-bottom-input는 검색바 비율(사이즈) 지정을 위한 div -->
                 <div class="div-board-bottom-input">
-                    <!-- 검색 시 setParams 메소드 호출 -->
-                    <form @submit.prevent="setParams">
+                    <!-- 검색 시 getArticlesByQuery 메소드 호출 -->
+                    <form @submit.prevent="getArticlesByQuery">
                         <div class="input-group">
                             <input type="text" class="form-control" aria-label="keyword" aria-describedby="basic-addon1" v-model="searchQuery">
                             <span class="input-group-text" id="basic-addon1"  style="background-color:white">
@@ -166,8 +166,8 @@ export default {
                 console.log(error);
             })
         },
-        // 검색 시 게시판 하단의 검색바와 셀렉트의 값에 따라 게시글 요청을 위한 파라미터의 값을 설정하는 메소드
-        setParams(){
+        // 검색 시 게시판 하단의 검색바와 셀렉트의 값에 따라 게시글 요청을 위한 파라미터의 값을 설정하고 게시물을 요청하는 메소드
+        getArticlesByQuery(){
             // selectedOption은 현재 선택한 셀렉트 옵션
             // searchQuery는 검색바에 검색한 내용
 
@@ -292,6 +292,7 @@ export default {
         }
     },
     mounted(){
+        // 게시글 요청 메소드
         this.getArticles(0);
     }
 }
@@ -301,16 +302,13 @@ export default {
     .div-board-container{
         /* padding으로 게시판 간격 조절 */
         padding-top: 6.5%;
-        padding-left: 10%;
-        padding-right: 10%;
-        padding-bottom: 2%;
         /* 게시판 구성 요소 (테이블, 검색바+셀렉트+글쓰기 버튼, 페이지네이션) 정렬 */
         display: flex;
         flex-direction: column;
         align-items: center;
     }
     .div-board-table{
-        width: 80%;  /* 화면 비율 지정 */
+        width: 70%;  /* 화면 비율 지정 */
     }
     /* 테이블 헤더 비율 설정 및 정렬 */
     .th-col-board-num{
@@ -324,7 +322,7 @@ export default {
     .th-col-board-nickname{
         width: 15%;
         text-align: center;
-        white-space: nowrap;
+        /* white-space: nowrap; */
     }
     .th-col-board-date{
         width: 25%;
@@ -346,7 +344,7 @@ export default {
     }
     /* 테이블 하단 검색바, 셀렉트, 글쓰기 버튼을 담는 div */
     .div-board-bottom-container{
-        width: 80%;
+        width: 70%;
         display:flex; /* 하단 메뉴 div 정렬 */
         margin-bottom: 1.2%;
     }
@@ -377,13 +375,22 @@ export default {
         flex-direction: column; /* column 정렬 */
         align-items: center; /* pagination 가운데 정렬 */
     }
+    .page-link{ /* pagination에서 이전/다음 버튼 제외한 각 버튼 */
+        color: black;
+    }
+    .pagination .page-item.active .page-link {
+        /* 콤마가 없으면 조합  */
+        /* ul pagination => li page-item이 active일 때 => button page-link 색 변경 */
+        background-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
+    }
     /* width가 992px 이하면 div 재조정 */
     @media screen and (max-width: 992px){
         .div-board-table{ /* 테이블 div */
-            width: 100%; /* 다시 너비 100%로 변경 */
+            width: 70%; /* 다시 너비 100%로 변경 */
         }
         .div-board-bottom-container{ /* 검색 div + 버튼 div를 담을 div */
-            width: 100%; /* 너비 100%로 변경 */
+            width: 70%; /* 너비 100%로 변경 */
             display: flex; /* flex 정렬로 변경 */
             flex-direction: column; /* column 정렬로 변경해서 검색 메뉴, select 메뉴 수직 정렬 */
             margin-bottom: 3%; /* pagination과의 간격 조절 */

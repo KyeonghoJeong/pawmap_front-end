@@ -158,8 +158,8 @@ export default {
                             this.$router.push({path: "/signin"});
                         }
 
-                        if(this.$route.path === "/mypage" || this.$route.path === "/admin"){
-                            // 마이페이지 또는 관리페이지인 경우는 메인 페이지로 이동
+                        if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
+                            // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
                             this.$router.push({path: "/"});
                         }
 
@@ -194,7 +194,7 @@ export default {
         // 동기적 동작을 위해 async/await 사용
         async getArticles(page){
             try {
-                // accessToken + 각 검색 옵션 + 회원 id + pagination 옵션으로 게시글 get 요청
+                // 각 검색 옵션 + 회원 id + pagination 옵션으로 게시글 get 요청
                 const getArticlesResponse = await axios.get('http://localhost:8090/api/board/articles', {
                     params: {
                         title: this.title,
@@ -280,8 +280,8 @@ export default {
                                 this.$router.push({path: "/signin"});
                             }
 
-                            if(this.$route.path === "/mypage" || this.$route.path === "/admin"){
-                                // 마이페이지 또는 관리페이지인 경우는 메인 페이지로 이동
+                            if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
+                                // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
                                 this.$router.push({path: "/"});
                             }
 
@@ -486,6 +486,15 @@ export default {
         display: flex; /* flex 정렬 */
         flex-direction: column; /* column 정렬 */
         align-items: center; /* pagination 가운데 정렬 */
+    }
+    .page-link{ /* pagination에서 이전/다음 버튼 제외한 각 버튼 */
+        color: black;
+    }
+    .pagination .page-item.active .page-link {
+        /* 콤마가 없으면 조합  */
+        /* ul pagination => li page-item이 active일 때 => button page-link 색 변경 */
+        background-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
     }
     /* width가 992px 이하면 div 재조정 */
     @media screen and (max-width: 992px){

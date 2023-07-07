@@ -204,8 +204,8 @@ export default {
                                     this.$router.push({path: "/signin"});
                                 }
 
-                                if(this.$route.path === "/mypage" || this.$route.path === "/admin"){
-                                    // 마이페이지 또는 관리페이지인 경우는 메인 페이지로 이동
+                                if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
+                                    // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
                                     this.$router.push({path: "/"});
                                 }
 
@@ -1415,6 +1415,15 @@ export default {
         align-items: center; /* pagination 가운데 정렬 */
         padding-top: 20px; /* 위(카드 컴포넌트)와 간격 조절 */
         padding-bottom: 5px; /* 아래와 간격 조절 */
+    }
+    .page-link{ /* pagination에서 이전/다음 버튼 제외한 각 버튼 */
+        color: black;
+    }
+    .pagination .page-item.active .page-link {
+        /* 콤마가 없으면 조합  */
+        /* ul pagination => li page-item이 active일 때 => button page-link 색 변경 */
+        background-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
     }
     .div-map-map{ /* 카카오맵 api를 담는 div */
         width: 80%; /* 너비 지정 */

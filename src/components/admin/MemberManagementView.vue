@@ -1,43 +1,85 @@
 <template>
-    <div class="div-members">
-        <div class="div-board-table" style="width:70%;">
+    <!-- 테이블 div, pagination div, 검색 메뉴 div를 담을 컨테이너 div -->
+    <div class="div-MemberManagement-container">
+        <!-- 테이블 div -->
+        <div class="div-MemberManagement-table">
             <table class="table table-hover table-bordered table-sm">
             <thead class="table-secondary">
+                <!-- 게시판 헤더 설정 -->
+                <!-- 각 클래스는 테이블 헤더 비율 설정 및 정렬을 위한 클래스 -->
                 <tr>
-                    <th scope="col" class="th-members-id">아이디</th>
-                    <th scope="col" class="th-members-nickname">닉네임</th>
-                    <th scope="col" class="th-members-email">이메일</th>
-                    <th scope="col" class="th-members-bandate">차단날짜</th>
-                    <th scope="col" class="th-members-ban">차단</th>
+                    <th scope="col" class="th-MemberManagement-id">아이디</th>
+                    <th scope="col" class="th-MemberManagement-nickname">닉네임</th>
+                    <th scope="col" class="th-MemberManagement-email">이메일</th>
+                    <th scope="col" class="th-MemberManagement-ban">차단</th>
                 </tr>
             </thead>
             <tbody>
+                <!-- 테이블 row 반복문으로 출력 -->
+                <!-- members는 백엔드로부터 받은 회원들의 정보 데이터 -->
                 <tr v-for="member in members" :key="member.memberId">
-                    <th style="text-align: center;" scope="row" class="category-in-board">{{member.memberId}}</th>
-                    <td style="text-align: center;" class="place-in-board">{{member.nickname}}</td>
-                    <td>{{member.email}}</td>
-                    <td style="text-align: center;" v-if="member.banDate === null">N/A</td>
-                    <td style="text-align: center;" v-if="member.banDate !== null">{{member.banDate}}</td>
-                    <td style="text-align: center;" v-if="member.banDate === null"><button type="button" class="btn div-board-bottom-btn-btn btn-sm" @click="updateBanDate(member.memberId, 'ban')">차단</button></td>
-                    <td style="text-align: center;" v-if="member.banDate !== null"><button type="button" class="btn div-board-bottom-btn-btn btn-sm" @click="updateBanDate(member.memberId, 'unban')">해제</button></td>
+                    <th scope="row" class="th-MemberManagement-id">{{member.memberId}}</th>
+                    <td class="th-MemberManagement-nickname">{{member.nickname}}</td>
+                    <td class="td-MemberManagement-email">{{member.email}}</td>
+                    <!-- 해당 member 데이터의 banDate가 null인지 아닌지에 따라 다르게 출력 -->
+                    <!-- 버튼 클릭 시 banMember 메소드 호출, 파라미터로 ban 또는 unban -->
+                    <td class="th-MemberManagement-ban" v-if="member.banDate === null"><button type="button" class="btn btn-sm button-MemberManagement-ban" @click="banMember(member.memberId, 'ban')">차단</button></td>
+                    <td class="th-MemberManagement-ban" v-if="member.banDate !== null"><button type="button" class="btn btn-sm button-MemberManagement-unban" @click="banMember(member.memberId, 'unban')">해제</button></td>
                 </tr>
             </tbody>
             </table>
         </div>
-        
-        <div class="div-board-paging" style="margin-top: 2%;">
+        <!-- 테이블 하단 검색바, 셀렉트를 담을 div -->
+        <div class="div-MemberManagement-bottom-container">
+            <!-- 검색바 div와 셀렉트 div를 담고 정렬을 하기 위한 div -->
+            <div class="div-MemberManagement-bottom-search">
+                <!-- 검색바 비율(사이즈) 지정을 위한 div -->
+                <div class="div-MemberManagement-bottom-input">
+                    <!-- 검색 시 getArticlesByQuery 메소드 호출 -->
+                    <form @submit.prevent="getMembersByQuery">
+                        <div class="input-group">
+                            <input type="text" class="form-control" aria-label="keyword" aria-describedby="basic-addon1" v-model="searchQuery">
+                            <span class="input-group-text" id="basic-addon1"  style="background-color:white">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                <!-- 셀렉트 비율(사이즈) 지정을 위한 div -->
+                <div class="div-MemberManagement-bottom-select">
+                    <!-- selectedOption은 셀렉트에서 선택된 옵션값을 저장 -->
+                    <select class="form-select" aria-label="Default select example" v-model="selectedOption">
+                        <!-- select 메뉴 기본값 설정 -->
+                        <option :value="'아이디'">아이디</option>
+                        <!-- v-for을 사용하여 searchOptions에서 검색 옵션을 반복문으로 출력, 제목+내용 포함 X -->
+                        <option v-for="option in searchOptions" :value="option" :key="option">{{ option }}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <!-- 페이지네이션 메뉴를 담고 정렬하기 위한 div -->
+        <div class="div-MemberManagement-pagination">
             <nav aria-label="Page navigation example">
                 <ul class="pagination">
+                    <!-- computed에서 isPrevDisabled 계산 후 true면 비활성화, false면 활성화 -->
+                    <!-- 클릭 시 setPrevPageNum 메소드 호출하여 새로 page 번호를 만들어 출력하고 해당하는 페이지의 게시글 출력 -->
                     <li class="page-item">
                         <button :class="['page-link', isPrevDisabled ? 'disabled' : '']" aria-label="Previous" @click="setPrevPageNum">
                             <span aria-hidden="true">&laquo;</span>
                         </button>
                     </li>
 
+                    <!-- computed에서 pageNumbers 메소드로 만든 페이지 번호를 반복문으로 출력 -->
+                    <!-- 페이지 번호 클릭 시 pageActive = i로 저장하고 둘이 같을 때 active 즉, 선택한 페이지 번호는 active로 출력 -->
+                    <!-- 페이지 번호 클릭 시 getArticles 메소드에 해당하는 페이지 번호(i-1)의 게시글 데이터를 백엔드로부터 받아와 출력 -->
                     <li v-for="i in pageNumbers" :key="i" :class="['page-item', pageActive === i ? 'active' : '']" @click="pageActive = i">
                         <button class="page-link" @click="getMembers(i-1)">{{i}}</button>
                     </li>
 
+                    <!-- computed에서 isNextDisabled 계산 후 true면 비활성화, false면 활성화 -->
+                    <!-- 클릭 시 setNextPageNum 메소드 호출하여 새로 page 번호를 만들어 출력하고 해당하는 페이지의 게시글 출력 -->
                     <li class="page-item">
                         <button :class="['page-link', isNextDisabled ? 'disabled' : '']" aria-label="Next" @click="setNextPageNum">
                             <span aria-hidden="true">&raquo;</span>
@@ -45,27 +87,6 @@
                     </li>
                 </ul>
             </nav>
-        </div>
-
-        <div class="div-board-bottom-scset" style="margin-top: 2%;">
-            <div class="div-board-bottom-search">
-                <form @submit.prevent="setValues">
-                    <div class="input-group">
-                        <input type="text" class="form-control" aria-label="keyword" aria-describedby="basic-addon1" v-model="searchQuery">
-                        <span class="input-group-text" id="basic-addon1"  style="background-color:white">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                            </svg>
-                        </span>
-                    </div>
-                </form>
-            </div>
-            <div class="div-board-bottom-category">
-                <select class="form-select" aria-label="Default select example" v-model="selectedOption">
-                    <option :value="'아이디'">아이디</option>
-                    <option v-for="option in searchOptions" :value="option" :key="option">{{ option }}</option>
-                </select>
-            </div>
         </div>
     </div>
 </template>
@@ -76,79 +97,108 @@ import axios from 'axios';
 export default {
     data(){
         return{
-            members: [],
-            totalPages: '',
-            pageActive: 1,
-            startNum: 0,
-            endNum: 0,
-            searchOptions: ['닉네임', '이메일'],
-            selectedOption: '아이디',
-            memberId: '',
-            nickname: '',
-            email: '',
-            searchQuery: '',
+            members: [], // 모든 회원 정보 저장
+            totalPages: '', // 모든 회원 총 페이지 수
+            pageActive: 1, // pagination 첫 활성 페이지
+            startNum: 0, // pagination 시작 번호
+            endNum: 0, // pagination 마지막 번호
+            searchOptions: ['닉네임', '이메일'], // 검색 옵션
+            selectedOption: '아이디', // 기본 검색 옵션
+            memberId: '', // 회원 아이디
+            nickname: '', // 닉네임
+            email: '', // 이메일
+            searchQuery: '', // 검색어
         }
     },
     methods:{
-        getMembers(page){
-            axios.get('http://localhost:8090/api/members', {
-                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
-                params: {
-                    memberId: this.memberId,
-                    nickname: this.nickname,
-                    email: this.email,
-                    page: page, 
-                    size: 10,
-                }
-            })
-            .then(response => {
-                if(response.data === 'invalidAccessToken'){ // accessToken 만료
-                    // accessToken 재발급을 위해 refreshToken 전송
-                    axios.get('http://localhost:8090/api/member/accesstoken', {
+        // 모든 회원의 정보를 요청하는 메소드
+        // 동기적 동작을 위해 async/await 사용
+        async getMembers(page){
+            try {
+                // accessToken + 검색 옵션 + pagination 옵션으로 회원 정보 get 요청
+                const getMembersResponse = await axios.get('http://localhost:8090/api/members', {
+                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
+                    params: {
+                        memberId: this.memberId,
+                        nickname: this.nickname,
+                        email: this.email,
+                        page: page, 
+                        size: 10,
+                    }
+                })
+
+                // 응답 결과 유효하지 않은 acccessToken인 경우
+                if(getMembersResponse.data === 'invalidAccessToken'){
+                    // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                    localStorage.removeItem("accessToken");
+
+                    // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
+                    // axios의 동기적 동작을 위해 async/await 사용
+                    // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
+                    const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
                         withCredentials: true
                     })
-                    .then(response => {
-                        // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우 
-                        if(response.data === 'invalidRefreshToken'){
-                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                            localStorage.removeItem("accessToken");
 
-                            // 로그인 만료 알림
-                            alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+                    // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
+                    if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
+                        // 로그인 만료 알림
+                        alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
 
-                            // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                            if(confirm("다시 로그인하시겠습니까?")){
-                                // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                                this.$store.commit('setBeforePage', this.$route.fullPath);
+                        // 유저에게 바로 로그인 페이지로 이동할지 묻기
+                        if(confirm("다시 로그인하시겠습니까?")){
+                            // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
+                            localStorage.setItem("previousPage", this.$route.fullPath);
 
-                                // 확인 버튼 누른 경우 로그인 페이지로 이동
-                                this.$router.push({path: "/signin"});
-                            }
-                        }else{
-                            // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                            localStorage.removeItem("accessToken");
-                            // 재발급 받은 accessToken 로컬 스토리지에 저장
-                            localStorage.setItem("accessToken", response.data.accessToken);
-
-                            // 재귀 호출 (반드시 이번 호출 안에 끝나므로 무한루프X)
-                            this.getMembers(page);
+                            // 확인 버튼 누른 경우 로그인 페이지로 이동
+                            this.$router.push({path: "/signin"});
                         }
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    })
+
+                        if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
+                            // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
+                            this.$router.push({path: "/"});
+                        }
+
+                        // header 메뉴 갱신을 위해 새로고침
+                        this.$router.go(this.$router.currentRoute);
+                    }else{
+                        // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
+
+                        // 재발급 받은 accessToken 로컬 스토리지에 저장
+                        localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
+
+                        // accessToken + 검색 옵션 + pagination 옵션으로 회원 정보 get 재요청
+                        const reGetMembersResponse = await axios.get('http://localhost:8090/api/members', {
+                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
+                            params: {
+                                memberId: this.memberId,
+                                nickname: this.nickname,
+                                email: this.email,
+                                page: page, 
+                                size: 10,
+                            }
+                        })
+
+                        // accessToken이 유효한 경우 => 재요청 성공
+                        if(reGetMembersResponse.data !== 'invalidAccessToken'){
+                            // 회원 정보, 총 페이지 수 저장
+                            this.members = reGetMembersResponse.data.content;
+                            this.totalPages = reGetMembersResponse.data.totalPages;
+                        }
+                    }
                 }else{
-                    this.members = response.data.content;
-                    this.totalPages = response.data.totalPages;
+                    // 회원 정보, 총 페이지 수 저장
+                    this.members = getMembersResponse.data.content;
+                    this.totalPages = getMembersResponse.data.totalPages;
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.log(error);
-            })
+            }
         },
-        setValues(){
+        // 검색어에 맞게 쿼리를 설정하고 회원 정보를 요청하는 메소드
+        getMembersByQuery(){
+            // selectedOption은 현재 선택한 셀렉트 옵션
+            // searchQuery는 검색바에 검색한 내용
+
             if(this.selectedOption === '아이디'){
                 this.memberId = this.searchQuery;
 
@@ -170,69 +220,89 @@ export default {
 
             this.getMembers(0);
         },
-        updateBanDate(memberId, order){
-            let message = '';
+        // 회원 차단 요청 메소드
+        // 동기적 동작을 위해 async/await 사용
+        async banMember(memberId, order){
+            // 회원 테이블의 banDate 칼럼이 null인 경우 => 차단 X
+            // 회원 테이블의 banDate 칼럼에 날짜 데이터가 있는 경우 => 차단 O
 
+            let word = '';
+
+            // 차단 또는 차단 해제 확인 메시지 출력 용도
             if(order === 'ban'){
-                message = '차단';
+                word = '차단';
             }else{
-                message = '차단 해제';
+                word = '차단 해제';
             }
 
-            if(confirm("정말 해당 유저를 "+message+"하시겠습니까?")){
-                axios.put('http://localhost:8090/api/member/ban', {
-                    memberId: memberId,
-                    order: order,
-                }, {
-                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                })
-                .then(response => {
-                    if(response.data === 'invalidAccessToken'){ // accessToken 만료
-                        // accessToken 재발급을 위해 refreshToken 전송
-                        axios.get('http://localhost:8090/api/member/accesstoken', {
+            if(confirm("해당 회원을 "+word+"하시겠습니까?")){
+                try {
+                    // accessToken + 회원 아이디 + ban or unban 데이터로 put 요청
+                    const banMemberResponse = await axios.put('http://localhost:8090/api/member/ban', {
+                        memberId: memberId,
+                        order: order,
+                    }, {
+                        headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                    })
+
+                    // 응답 결과 유효하지 않은 acccessToken인 경우
+                    if(banMemberResponse.data === 'invalidAccessToken'){
+                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                        localStorage.removeItem("accessToken");
+
+                        // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
+                        // axios의 동기적 동작을 위해 async/await 사용
+                        // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
+                        const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
                             withCredentials: true
                         })
-                        .then(response => {
-                            // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
-                            if(response.data === 'invalidRefreshToken'){
-                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                                localStorage.removeItem("accessToken");
 
-                                // 로그인 만료 알림
-                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+                        // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
+                        if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
+                            // 로그인 만료 알림
+                            alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
 
-                                // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                                if(confirm("다시 로그인하시겠습니까?")){
-                                    // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                                    this.$store.commit('setBeforePage', this.$route.fullPath);
+                            // 유저에게 바로 로그인 페이지로 이동할지 묻기
+                            if(confirm("다시 로그인하시겠습니까?")){
+                                // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
+                                localStorage.setItem("previousPage", this.$route.fullPath);
 
-                                    // 확인 버튼 누른 경우 로그인 페이지로 이동
-                                    this.$router.push({path: "/signin"});
-                                }
-                            }else{
-                                // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                                localStorage.removeItem("accessToken");
-                                // 재발급 받은 accessToken 로컬 스토리지에 저장
-                                localStorage.setItem("accessToken", response.data.accessToken);
-
-                                // 재귀 호출 (반드시 이번 호출 안에 끝나므로 무한루프X)
-                                this.updateBanDate(memberId, order);
+                                // 확인 버튼 누른 경우 로그인 페이지로 이동
+                                this.$router.push({path: "/signin"});
                             }
-                        })
-                        .catch(error => {
-                            console.log(error);
-                        })
-                    }else{
-                        alert("해당 유저가 "+message+"되었습니다.");
 
-                        this.$router.go(this.$router.currentRoute);
+                            if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
+                                // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
+                                this.$router.push({path: "/"});
+                            }
+
+                            // header 메뉴 갱신을 위해 새로고침
+                            this.$router.go(this.$router.currentRoute);
+                        }else{
+                            // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
+
+                            // 재발급 받은 accessToken 로컬 스토리지에 저장
+                            localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
+
+                            // accessToken + 회원 아이디 + ban or unban 데이터로 put 재요청
+                            const reBanMemberResponse = await axios.put('http://localhost:8090/api/member/ban', {
+                                memberId: memberId,
+                                order: order,
+                            }, {
+                                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                            })
+
+                            // accessToken이 유효한 경우 => 재요청 성공
+                            if(reBanMemberResponse.data !== 'invalidAccessToken'){
+                                this.$router.go(this.$router.currentRoute); // 새로고침
+                            }
+                        }
+                    }else{
+                        this.$router.go(this.$router.currentRoute); // 새로고침
                     }
-                })
-                .catch(error => {
+                } catch (error) {
                     console.log(error);
-                })
+                }
             }
         },
         // 이전 버튼 클릭 시 startNum, endNum 재설정을 위한 메소드
@@ -301,63 +371,95 @@ export default {
         return numbers;
       }
     },
-    created(){
+    mounted(){
         this.getMembers(0);
     }
 }
 </script>
 
 <style>
-    .div-members{
-        padding-top: 4.3%;
-        padding-left: 10%;
-        padding-right: 10%;
-        padding-bottom: 2%;
+    .div-MemberManagement-container{
+        /* 테이블, pagination, 검색 메뉴 가운데 세로 정렬 */
         display: flex;
         flex-direction: column;
         align-items: center;
     }
-    .th-members-id{
+    .div-MemberManagement-table{ /* 테이블 div */
+        width: 60%; /* 너비 지정 */
+    }
+    /* 테이블 내부 아이디, 닉네임, 이메일, 차단 날짜, 차단 버튼 가운데 정렬 */
+    .th-MemberManagement-id, .th-MemberManagement-nickname, .th-MemberManagement-email, .th-MemberManagement-ban{
+        text-align: center;
+    }
+    /* 각 속성 비율 조정 */
+    .th-MemberManagement-id{
         width: 20%;
-        text-align: center;
     }
-    .th-members-nickname{
+    .th-MemberManagement-nickname{
         width: 20%;
-        text-align: center;
     }
-    .th-members-email{
+    .th-MemberManagement-email{
         width: 20%;
-        text-align: center;
     }
-    .th-members-bandate{
+    .th-MemberManagement-ban{
         width: 20%;
-        text-align: center;
     }
-    .th-members-ban{
-        width: 20%;
-        text-align: center;
+    .button-MemberManagement-ban, .button-MemberManagement-unban{ /* 차단, 해제 버튼 색 및 사이즈 변경 */
+        background-color: #fd7e14;
+        color: white;
+        width: 80px;
     }
-
-    .category-in-board{
-        text-align: center;
-    }
-    .place-in-board{
-        text-align: center;
-    }
-    .del-in-board{
-        text-align: center;
-    }
-
-    .div-board-bottom-del-btn{
+    .div-MemberManagement-bottom-container{
         width: 60%;
-        display: flex;
+        display: flex; /* 하단 메뉴 div 정렬 */
         flex-direction: row-reverse;
-        margin-bottom: 3%;
+        margin-bottom: 15px;
     }
-
+    .div-MemberManagement-bottom-search{
+        width: 50%; /* 검색 메뉴 50% + 글쓰기 버튼 50% */
+        display: flex;
+    }
+    .div-MemberManagement-bottom-input{
+        width: 57%; /* 검색바 60% + 셀렉트 40% */
+        margin-right: 3%; /* 검색바와 셀렉트 사이의 간격 */
+    }
+    .div-MemberManagement-bottom-select{
+        width: 40%; /* 검색바 60% + 셀렉트 40% */
+    }
+    .div-MemberManagement-pagination{ /* pagination을 담을 div */
+        width: 60%; /* 너비 설정 */
+        display: flex; /* flex 정렬 */
+        flex-direction: column; /* column 정렬 */
+        align-items: center; /* pagination 가운데 정렬 */
+    }
+    .page-link{ /* pagination에서 이전/다음 버튼 제외한 각 버튼 */
+        color: black;
+    }
+    .pagination .page-item.active .page-link {
+        /* 콤마가 없으면 조합  */
+        /* ul pagination => li page-item이 active일 때 => button page-link 색 변경 */
+        background-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
+    }
     @media screen and (max-width: 992px){
-        .div-board-bottom-del-btn{
-            width: 100%;
+        .div-MemberManagement-bottom-container{ /* 검색 div + 버튼 div를 담을 div */
+            width: 60%; /* 너비 100%로 변경 */
+            display: flex; /* flex 정렬로 변경 */
+            flex-direction: column; /* column 정렬로 변경해서 검색 메뉴, select 메뉴 수직 정렬 */
+            margin-bottom: 2%;
+        }
+        .div-MemberManagement-bottom-search{ /* 검색바 div + select div 담을 div */
+            width: 100%; /* 너비 100%로 변경 */
+        }
+        .div-MemberManagement-bottom-input{ /* 검색바 div */
+            width: 60%; /* 너비 70% */
+        }
+        .div-MemberManagement-bottom-select{ /* select div */
+            width: 40%; /* 너비 30% */
+        }
+        .th-MemberManagement-id, .th-MemberManagement-email, .td-MemberManagement-email{
+            /* 아이디, 이메일 감추기 */
+            display: none;
         }
     }
 </style>

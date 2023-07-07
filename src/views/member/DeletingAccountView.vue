@@ -1,29 +1,24 @@
 <template>
-    <div>
-        <form class="form-signin form-info" @submit.prevent="deleteAccount" >
-            <div class="div-info">
-                <div><h1 class="h3 mb-3 font-weight-normal">회원탈퇴</h1><br></div>
-                <div><p>회원탈퇴를 위해 비밀번호를 입력해주세요.</p><br></div>
-                <div class="div-info-id">
-                    <label for="p-info-id-id" class="sr-only label-info-id">아이디</label>
-                    <p id="p-info-id-id">&nbsp;{{this.member.memberId}}</p><br><br>
+    <div class="div-DeletingAccount-container">
+        <div class="div-DeletingAccount-deletingaccount">
+            <!-- 확인 버튼 클릭 시 deleteAccount 메소드 호출 -->
+            <form @submit.prevent="deleteAccount">
+                <h1 class="h3 mb-3 font-weight-normal">회원탈퇴</h1><br>
+                
+                <p>회원탈퇴를 위해 비밀번호를 입력해주세요.</p><br>
+                
+                <label for="id-div-DeletingAccount-pw" class="sr-only label-DeletingAccount-pw">비밀번호</label><br><br>
+                <div id="id-div-DeletingAccount-pw">
+                    <!-- password1와 password2에 비밀번호 입력, 비밀번호 확인 값 저장 -->
+                    <input v-model="password1" type="password" class="form-control" oninvalid="setCustomValidity('비밀번호는 8글자 이상으로 숫자와 특수문자를 반드시 포함시켜주세요.')" oninput="setCustomValidity('')" placeholder="비밀번호 입력" required><br>
+                    <input v-model="password2" type="password" class="form-control" oninvalid="setCustomValidity('비밀번호는 8글자 이상으로 숫자와 특수문자를 반드시 포함시켜주세요.')" oninput="setCustomValidity('')" placeholder="비밀번호 확인" required><br>
                 </div>
-                <div class="div-info-nickname">
-                    <label for="p-info-id-nickname" class="sr-only label-info-nickname">닉네임</label>
-                    <p id="p-info-id-nickname">&nbsp;{{this.member.nickname}}</p><br><br>
+
+                <div class="div-DeletingAccount-confirm">
+                    <button class="btn btn-lg btn-primary btn-block button-DeletingAccount-confirm" type="submit">확인</button>
                 </div>
-                <div class="div-info-email">
-                    <label for="p-info-id-email" class="sr-only label-info-email">이메일</label>
-                    <p id="p-info-id-email">&nbsp;{{this.member.email}}</p><br><br>
-                </div>
-                <label for="div-info-id-pw" class="sr-only label-info-pw">비밀번호</label><br><br>
-                <div id="div-info-id-pw">
-                    <input v-model="tempPassword1" type="password" class="form-control" pattern="(?=.*[0-9])(?=.*[!@#$%^&amp;*()_+=\[\]{}~?:;`|/]).*" oninvalid="setCustomValidity('비밀번호는 8글자 이상으로 숫자와 특수문자를 반드시 포함시켜주세요.')" oninput="setCustomValidity('')" placeholder="비밀번호 입력" required><br>
-                    <input v-model="tempPassword2" type="password" class="form-control" pattern="(?=.*[0-9])(?=.*[!@#$%^&amp;*()_+=\[\]{}~?:;`|/]).*" oninvalid="setCustomValidity('비밀번호는 8글자 이상으로 숫자와 특수문자를 반드시 포함시켜주세요.')" oninput="setCustomValidity('')" placeholder="비밀번호 확인" required><br>
-                </div>
-                <div><button class="btn btn-lg btn-primary btn-block btn-info-confirm" type="submit" style="width:100%">회원탈퇴</button></div>
-            </div>
         </form>
+        </div>
     </div>
 </template>
 
@@ -33,146 +28,156 @@ import axios from 'axios';
 export default{
     data(){
         return{
-            member: [],
-            password: '',
-            newPassword: '',
-            tempPassword1: '',
-            tempPassword2: '',
+            password: '', // 최종 입력 비밀번호
+            password1: '', // 입력 비밀번호 1
+            password2: '', // 입력 비밀번호 2
         }
     },
     methods:{
-        getMember(){
-            axios.get('http://localhost:8090/api/member', {
-                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-            })
-            .then(response => {
-                if(response.data === 'invalidAccessToken'){
-                    axios.get('http://localhost:8090/api/member/accesstoken', {
-                        withCredentials: true
-                    })
-                    .then(response => {
-                        // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
-                        if(response.data === 'invalidRefreshToken'){
-                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                            localStorage.removeItem("accessToken");
-
-                            // 로그인 만료 알림
-                            alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-
-                            // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                            if(confirm("다시 로그인하시겠습니까?")){
-                                // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                                this.$store.commit('setBeforePage', this.$route.fullPath);
-
-                                // 확인 버튼 누른 경우 로그인 페이지로 이동
-                                this.$router.push({path: "/signin"});
-                            }
-                        }else{
-                            // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                            localStorage.removeItem("accessToken");
-                            // 재발급 받은 accessToken 로컬 스토리지에 저장
-                            localStorage.setItem("accessToken", response.data.accessToken);
-
-                            // 재귀 호출 (반드시 이번 호출 안에 끝나므로 무한루프X)
-                            this.getMember();
-                        }
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    })
-                }else{
-                    this.member = response.data;
-                }
-            })
-            .catch(error => {
-                console.log(error);
-            })
-        },
-        deleteAccount(){
-            if(this.tempPassword1 !== this.tempPassword2){
+        // 회원탈퇴 요청 메소드
+        // 동기적 동작을 위해 async/await 사용
+        async deleteAccount(){
+            if(this.password1 !== this.password2){
+                // 비밀번호 입력 값과 비밀번호 확인 값이 다를 때
                 alert("비밀번호가 같지 않습니다.");
             }else{
+                // 비밀번호 입력 값과 비밀번호 확인 값이 같을 때
                 if(confirm("정말 회원탈퇴 하시겠습니까?")){
-                    this.newPassword = this.tempPassword1;
+                    this.password = this.password1;
 
-                    axios.put('http://localhost:8090/api/member/deletion', {
-                        memberId: this.member.memberId,
-                        pw: this.newPassword
-                    })
-                    .then(response => {
-                        if(response.data === 'Success'){
-                            axios.delete(`http://localhost:8090/api/bookmarks?memberId=${this.member.memberId}`)
-                            .then(response => {
-                                if(response.data === 'Success'){
+                    try {
+                        // accessToken + 입력 비밀번호로 회원탈퇴 put 요청
+                        const deleteAccountResponse = await axios.put('http://localhost:8090/api/member/deletion', {
+                            pw: this.password
+                        },{
+                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                        })
+
+                        // 응답 결과 유효하지 않은 acccessToken인 경우
+                        if(deleteAccountResponse.data === 'invalidAccessToken'){
+                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                            localStorage.removeItem("accessToken");
+
+                            // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
+                            // axios의 동기적 동작을 위해 async/await 사용
+                            // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
+                            const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
+                                withCredentials: true
+                            })
+
+                            // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
+                            if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
+                                // 로그인 만료 알림
+                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+
+                                // 유저에게 바로 로그인 페이지로 이동할지 묻기
+                                if(confirm("다시 로그인하시겠습니까?")){
+                                    // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
+                                    localStorage.setItem("previousPage", this.$route.fullPath);
+
+                                    // 확인 버튼 누른 경우 로그인 페이지로 이동
+                                    this.$router.push({path: "/signin"});
+                                }
+
+                                if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
+                                    // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
+                                    this.$router.push({path: "/"});
+                                }
+
+                                // header 메뉴 갱신을 위해 새로고침
+                                this.$router.go(this.$router.currentRoute);
+                            }else{
+                                // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
+
+                                // 재발급 받은 accessToken 로컬 스토리지에 저장
+                                localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
+
+                                // accessToken + 입력 비밀번호로 회원탈퇴 put 재요청
+                                const reDeleteAccountResponse = await axios.put('http://localhost:8090/api/member/deletion', {
+                                    pw: this.password
+                                },{
+                                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                                })
+
+                                // accessToken이 유효한 경우 => 재요청 성공
+                                if(reDeleteAccountResponse.data !== 'invalidAccessToken'){
                                     alert("회원탈퇴가 완료되었습니다.");
 
-                                    localStorage.removeItem("accessToken");
-                                    window.location.href = "/";
+                                    localStorage.clear(); // 로컬 스토리지 클리어
+
+                                    this.$router.push({path: "/"}); // 메인 페이지로 이동
+                                    this.$router.go(this.$router.currentRoute); // 새로고침
                                 }
-                            })
-                            .catch(error => {
-                                console.log(error);
-                            })
+                            }
+                        }else{
+                            if(deleteAccountResponse.data === 'Success'){
+                                alert("회원탈퇴가 완료되었습니다.");
+
+                                    localStorage.clear(); // 로컬 스토리지 클리어
+
+                                    this.$router.push({path: "/"}); // 메인 페이지로 이동
+                                    this.$router.go(this.$router.currentRoute); // 새로고침
+                            }
                         }
-                    })
-                    .catch(error => {
+                    } catch (error) {
                         if(error.response.status === 403){
                             alert("잘못된 비밀번호입니다.");
+                        }else{
+                            console.log(error);
                         }
-                    })
+                    }
                 }
             }
         }
     },
-    created(){
-        this.getMember();
-    }
 }
 </script>
 
 <style>
-.form-info{
-    margin-top: 4.4%;
-    margin-bottom: 4.4%;
-    margin-left: 33%;
-}
-.div-info{
-    width: 50%;
-    height: 50%;
-    border-style: solid;
-    border-color: rgb(189, 189, 189);
-    border-width: 1px;
-    padding-top: 5%;
-    padding-bottom: 5%;
-    padding-left: 5%;
-    padding-right: 5%;
-    font-size: 0.8rem;
-}
-.div-info-id, .div-info-nickname, .div-info-email{
-    display:flex;
-}
-.label-info-id, .label-info-nickname, .label-info-email, .label-info-pw {
-    font-weight: bold;
-}
-.btn-info-confirm{
-    width: 100%;
-    background-color: #fd7e14;
-    border-color: #fd7e14;
-}
-.btn-info-confirm:hover{
-    width: 100%;
-    background-color: white;
-    border-color: white;
-    color: #fd7e14;
-}
-.router-info-deleteAcc{
-    color: black;
-    font-weight: bold;
-    text-decoration: none;
-}
-.router-info-deleteAcc:hover{
-    cursor: pointer;
-}
+    .div-DeletingAccount-container{ /* 회원탈퇴 양식을 담을 div */
+        padding-top: 6.5%; /* 상단 패딩 */
+        margin-bottom: 5%; /* 하단 마진 */
+        /* 회원탈퇴 양식 가운데 세로 정렬 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .div-DeletingAccount-deletingaccount{ /* 회원탈퇴 양식 전체를 담을 div */
+        border: 1px solid rgb(219, 219, 219); /* 테두리 굵기, 색 설정 */
+        width: 30%; /* 너비 지정 */
+        padding: 3%; /* 상하좌우 간격 조절 */
+        font-size: 0.8rem; /* 폰트 크기 */
+    }
+    .label-DeletingAccount-pw {
+        /* 비밀번호 label 폰트 굵게 */
+        font-weight: bold;
+    }
+    .div-DeletingAccount-confirm{
+        /* 버튼 위에 마진 추가 */
+        margin-top: 7%;
+    }
+    .button-DeletingAccount-confirm{
+        /* 확인 버튼 너비 및 색 지정 */
+        width: 100%;
+        background-color: #fd7e14;
+        border-color: #fd7e14;
+    }
+    .button-DeletingAccount-confirm:hover{
+        /* 확인 버튼 마우스오버 시 색 변경 */
+        background-color: white;
+        border-color: #fd7e14;
+        color: black;
+    }
+    /* 너비가 992 이하 시 div 재조정 */
+    @media screen and (max-width: 992px){
+        .div-DeletingAccount-deletingaccount{
+            width: 50%;
+        }
+    }
+    /* 너비가 576 이하 시 div 재조정 */
+    @media screen and (max-width: 576px){
+        .div-DeletingAccount-deletingaccount{
+            width: 70%;
+        }
+    }
 </style>

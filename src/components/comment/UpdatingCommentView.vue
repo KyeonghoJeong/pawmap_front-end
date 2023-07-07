@@ -83,8 +83,8 @@ export default{
                                 this.$router.push({path: "/signin"});
                             }
 
-                            if(this.$route.path === "/mypage" || this.$route.path === "/admin"){
-                                // 마이페이지 또는 관리페이지인 경우는 메인 페이지로 이동
+                            if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
+                                // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
                                 this.$router.push({path: "/"});
                             }
 

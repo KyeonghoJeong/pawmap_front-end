@@ -17,12 +17,12 @@
 
 <style>
     .div-BoardTitle-BoardTitle{
-        width: 80%;
+        width: 70%;
     }
     
     @media screen and (max-width: 992px){
         .div-BoardTitle-BoardTitle{
-            width: 100%;
+            width: 70%;
         }
     }
 </style>

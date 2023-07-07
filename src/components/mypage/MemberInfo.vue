@@ -2,32 +2,34 @@
     <!-- 회원정보 수정 form을 담을 div -->
     <div class="div-MemberInfo-container">
         <!-- 회원정보 수정 양식 프레임 div -->
-        <div class="div-MemberInfo-modifying">
+        <div class="div-MemberInfo-memberinfo">
             <!-- 수정 버튼 클릭 시 updatePassword 메소드 호출 -->
             <form @submit.prevent="updatePassword">
-                <div>
-                    <h1 class="h3 mb-3 font-weight-normal">회원정보 수정</h1><br>
-                </div>
-                <div>
-                    <p>비밀번호를 변경할 수 있습니다.</p><br>
-                </div>
+                <h1 class="h3 mb-3 font-weight-normal">회원정보 수정</h1><br>
+                
+                <p>비밀번호를 변경할 수 있습니다.</p><br>
+                
                 <div class="div-MemberInfo-id">
-                    <label for="id-p-MemberInfo-id" class="sr-only label-MemberInfo-id">아이디</label>
-                    <p id="id-p-MemberInfo-id">&nbsp;&nbsp;{{this.memberInfo.memberId}}</p><br><br>
+                    <label for="id-p-MemberInfo-id" class="sr-only label-MemberInfo-id">아이디&nbsp;&nbsp;</label>
+                    <p id="id-p-MemberInfo-id">{{this.member.memberId}}</p><br><br>
                 </div>
+                
                 <div class="div-MemberInfo-nickname">
-                    <label for="id-p-MemberInfo-nickname" class="sr-only label-MemberInfo-nickname">닉네임</label>
-                    <p id="id-p-MemberInfo-nickname">&nbsp;&nbsp;{{this.memberInfo.nickname}}</p><br><br>
+                    <label for="id-p-MemberInfo-nickname" class="sr-only label-MemberInfo-nickname">닉네임&nbsp;&nbsp;</label>
+                    <p id="id-p-MemberInfo-nickname">{{this.member.nickname}}</p><br><br>
                 </div>
+                
                 <div class="div-MemberInfo-email">
-                    <label for="id-p-MemberInfo-email" class="sr-only label-MemberInfo-email">이메일</label>
-                    <p id="id-p-MemberInfo-email">&nbsp;&nbsp;{{this.memberInfo.email}}</p><br><br>
+                    <label for="id-p-MemberInfo-email" class="sr-only label-MemberInfo-email">이메일&nbsp;&nbsp;</label>
+                    <p id="id-p-MemberInfo-email">{{this.member.email}}</p><br><br>
                 </div>
+                
                 <label for="id-div-MemberInfo-pw" class="sr-only label-MemberInfo-pw">비밀번호 변경</label><br><br>
+                
                 <div id="id-div-MemberInfo-pw">
-                    <!-- 패턴 지정으로 비밀번호 유효성 검사, tempPassword1과 tempPassword2는 일치하는지 확인하는 데 사용 -->
-                    <input v-model="tempPassword1" type="password" class="form-control" pattern="(?=.*[0-9])(?=.*[!@#$%^&amp;*()_+=\[\]{}~?:;`|/]).*" oninvalid="setCustomValidity('비밀번호는 8글자 이상으로 숫자와 특수문자를 반드시 포함시켜주세요.')" oninput="setCustomValidity('')" placeholder="신규 비밀번호" required><br>
-                    <input v-model="tempPassword2" type="password" class="form-control" pattern="(?=.*[0-9])(?=.*[!@#$%^&amp;*()_+=\[\]{}~?:;`|/]).*" oninvalid="setCustomValidity('비밀번호는 8글자 이상으로 숫자와 특수문자를 반드시 포함시켜주세요.')" oninput="setCustomValidity('')" placeholder="비밀번호 확인" required><br>
+                    <!-- 패턴 지정으로 비밀번호 유효성 검사, password1과 password2는 일치하는지 확인하는 데 사용 -->
+                    <input v-model="password1" type="password" class="form-control" oninvalid="setCustomValidity('비밀번호는 8글자 이상의 영어 알파벳, 숫자, 특수문자의 조합으로 만들어주세요.')" oninput="setCustomValidity('')" placeholder="신규 비밀번호" required><br>
+                    <input v-model="password2" type="password" class="form-control" oninvalid="setCustomValidity('비밀번호는 8글자 이상의 영어 알파벳, 숫자, 특수문자의 조합으로 만들어주세요.')" oninput="setCustomValidity('')" placeholder="비밀번호 확인" required><br>
                     <!-- password는 현재 비밀번호 -->
                     <input v-model="password" type="password" class="form-control" placeholder="현재 비밀번호" required><br>
                     <div class="div-MemberInfo-delAcc">
@@ -35,9 +37,8 @@
                         <router-link to="/deletingAccount" class="router-MemberInfo-delAcc">회원탈퇴</router-link>
                     </div><br>
                 </div>
-                <div>
-                    <button class="btn btn-lg btn-primary btn-block button-MemberInfo-mod" type="submit">수정</button>
-                </div>
+                
+                <button class="btn btn-lg btn-primary btn-block button-MemberInfo-mod" type="submit">확인</button>
             </form>
         </div>
     </div>
@@ -49,11 +50,11 @@ import axios from 'axios';
 export default{
     data(){
         return{
-            memberInfo: [], // 회원정보 저장
+            member: '', // 회원정보 저장
             password: '', // 현재 비밀번호
             newPassword: '', // 새로운 비밀번호
-            tempPassword1: '',
-            tempPassword2: '',
+            password1: '',
+            password2: '',
         }
     },
     methods:{
@@ -92,8 +93,8 @@ export default{
                             this.$router.push({path: "/signin"});
                         }
 
-                        if(this.$route.path === "/mypage" || this.$route.path === "/admin"){
-                            // 마이페이지 또는 관리페이지인 경우는 메인 페이지로 이동
+                        if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
+                            // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
                             this.$router.push({path: "/"});
                         }
 
@@ -113,12 +114,12 @@ export default{
                         // accessToken이 유효한 경우 => 재요청 성공
                         if(reGetMemberResponse.data !== 'invalidAccessToken'){
                             // 회원정보 저장
-                            this.memberInfo = reGetMemberResponse.data;
+                            this.member = reGetMemberResponse.data;
                         }
                     }
                 }else{
                     // 회원정보 저장
-                    this.memberInfo = getMemberResponse.data;
+                    this.member = getMemberResponse.data;
                 }
             } catch (error) {
                 console.log(error);
@@ -127,86 +128,102 @@ export default{
         // 비밀번호 변경 요청 메소드
         // 동기적 동작을 위해 async/await 사용
         async updatePassword(){
-            if(this.tempPassword1 !== this.tempPassword2){
-                alert("신규 비밀번호와 비밀번호 확인의 내용이 다릅니다.");
-            }else{
-                this.newPassword = this.tempPassword1; // 새 비밀번호
+            // 패스워드 패턴은 영어 알파벳 + 숫자 + 특수문자 각각을 하나 이상 반드시 포함
+            const pattern = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*()-+-={}|,.<>/?\\[\]])[a-zA-Z0-9!@#$%^&*()-+-={}|,.<>/?\\[\]]+$/;
+            const minLength = 8;
 
-                try {
-                    // accessToken + 회원 아이디 + 비밀번호로 put 요청
-                    const updatePasswordResponse = await axios.put('http://localhost:8090/api/member', {
-                        memberId: this.memberInfo.memberId,
-                        pw: this.newPassword
-                    },{
-                        headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                    })
+            if(this.password1 === this.password2) {
+                this.newPassword = this.password1; // 새 비밀번호
 
-                    // 응답 결과 유효하지 않은 acccessToken인 경우
-                    if(updatePasswordResponse.data === 'invalidAccessToken'){
-                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                        localStorage.removeItem("accessToken");
+                if(pattern.test(this.newPassword) && this.newPassword.length >= minLength){
+                    // 패턴에 부합하고 최소 길이보다 길 때 비밀번호 수정 put 요청
 
-                        // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
-                        // axios의 동기적 동작을 위해 async/await 사용
-                        // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                        const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
-                            withCredentials: true
+                    try {
+                        // accessToken + 회원 아이디 + 비밀번호로 put 요청
+                        const updatePasswordResponse = await axios.put('http://localhost:8090/api/member', {
+                            memberId: this.member.memberId,
+                            pw: this.newPassword
+                        },{
+                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                         })
 
-                        // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
-                        if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                            // 로그인 만료 알림
-                            alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+                        // 응답 결과 유효하지 않은 acccessToken인 경우
+                        if(updatePasswordResponse.data === 'invalidAccessToken'){
+                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                            localStorage.removeItem("accessToken");
 
-                            // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                            if(confirm("다시 로그인하시겠습니까?")){
-                                // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                                localStorage.setItem("previousPage", this.$route.fullPath);
-
-                                // 확인 버튼 누른 경우 로그인 페이지로 이동
-                                this.$router.push({path: "/signin"});
-                            }
-
-                            if(this.$route.path === "/mypage" || this.$route.path === "/admin"){
-                                // 마이페이지 또는 관리페이지인 경우는 메인 페이지로 이동
-                                this.$router.push({path: "/"});
-                            }
-
-                            // header 메뉴 갱신을 위해 새로고침
-                            this.$router.go(this.$router.currentRoute);
-                        }else{
-                            // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                            // 재발급 받은 accessToken 로컬 스토리지에 저장
-                            localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
-
-                            // accessToken + 회원 아이디 + 비밀번호로 put 재요청
-                            const reUpdatePasswordResponse = await axios.put('http://localhost:8090/api/member', {
-                                memberId: this.memberInfo.memberId,
-                                pw: this.newPassword
-                            },{
-                                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                            // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
+                            // axios의 동기적 동작을 위해 async/await 사용
+                            // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
+                            const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
+                                withCredentials: true
                             })
 
-                            // accessToken이 유효한 경우 => 재요청 성공
-                            if(reUpdatePasswordResponse.data !== 'invalidAccessToken'){
-                                alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
-                                
-                                localStorage.removeItem("accessToken"); // 로컬 스토리지에서 accessToken 삭제
-                                this.$router.push({path: "/signin"}); // 로그인 페이지로 이동
-                                this.$router.go(this.$router.currentRoute); // 새로고침
+                            // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
+                            if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
+                                // 로그인 만료 알림
+                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+
+                                // 유저에게 바로 로그인 페이지로 이동할지 묻기
+                                if(confirm("다시 로그인하시겠습니까?")){
+                                    // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
+                                    localStorage.setItem("previousPage", this.$route.fullPath);
+
+                                    // 확인 버튼 누른 경우 로그인 페이지로 이동
+                                    this.$router.push({path: "/signin"});
+                                }
+
+                                if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
+                                    // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
+                                    this.$router.push({path: "/"});
+                                }
+
+                                // header 메뉴 갱신을 위해 새로고침
+                                this.$router.go(this.$router.currentRoute);
+                            }else{
+                                // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
+
+                                // 재발급 받은 accessToken 로컬 스토리지에 저장
+                                localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
+
+                                // accessToken + 회원 아이디 + 비밀번호로 put 재요청
+                                const reUpdatePasswordResponse = await axios.put('http://localhost:8090/api/member', {
+                                    memberId: this.member.memberId,
+                                    pw: this.newPassword
+                                },{
+                                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                                })
+
+                                // accessToken이 유효한 경우 => 재요청 성공
+                                if(reUpdatePasswordResponse.data !== 'invalidAccessToken'){
+                                    alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
+                                    
+                                    localStorage.removeItem("accessToken"); // 로컬 스토리지에서 accessToken 삭제
+                                    this.$router.push({path: "/signin"}); // 로그인 페이지로 이동
+                                    this.$router.go(this.$router.currentRoute); // 새로고침
+                                }
                             }
+                        }else{
+                            alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
+                            
+                            localStorage.removeItem("accessToken"); // 로컬 스토리지에서 accessToken 삭제
+                            this.$router.push({path: "/signin"}); // 로그인 페이지로 이동
+                            this.$router.go(this.$router.currentRoute); // 새로고침
                         }
-                    }else{
-                        alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
-                        
-                        localStorage.removeItem("accessToken"); // 로컬 스토리지에서 accessToken 삭제
-                        this.$router.push({path: "/signin"}); // 로그인 페이지로 이동
-                        this.$router.go(this.$router.currentRoute); // 새로고침
+                    } catch (error) {
+                        console.log(error);
                     }
-                } catch (error) {
-                    console.log(error);
+                }else{
+                    // 패턴에 부합하지 않고 최소 길이보다 작을 때 false 리턴
+                    if(!pattern.test(this.newPassword)){
+                        alert("비밀번호는 영어 알파벳, 숫자, 특수문자의 조합으로 만들어주세요.");
+                    }else if(this.newPassword.length < minLength){
+                        alert("비밀번호는 8글자 이상으로 만들어주세요.");
+                    }
                 }
+            }else{
+                // 두 입력 비밀번호가 다른 경우
+                alert("신규 비밀번호와 비밀번호 확인의 내용이 다릅니다.");
             }
         }
     },
@@ -224,11 +241,11 @@ export default{
         align-items: center;
         margin-bottom: 1%;
     }
-    .div-MemberInfo-modifying{ /* 회원정보 수정 양식 프레임 div */
-        width: 30%; /* 너비 지정 */
-        padding: 2%; /* 상하좌우 간격 조절 */
-        font-size: 0.8rem; /* 폰트 크기 */
+    .div-MemberInfo-memberinfo{ /* 회원정보 수정 양식 프레임 div */
         border: 1px solid rgb(219, 219, 219); /* 테두리 굵기, 색 설정 */
+        width: 30%; /* 너비 지정 */
+        padding: 3%; /* 상하좌우 간격 조절 */
+        font-size: 0.8rem; /* 폰트 크기 */
     }
     .div-MemberInfo-id, .div-MemberInfo-nickname, .div-MemberInfo-email{
         /* 내부 label, p 정렬 */
@@ -254,13 +271,19 @@ export default{
     }
     .button-MemberInfo-mod:hover{ /* 버튼 마우스오버시 색 변경 */
         background-color: white;
-        border-color: white;
+        border-color: #fd7e14;
         color: black;
     }
     /* width가 992px 이하 시 재설정 */
     @media screen and (max-width: 992px){
-        .div-MemberInfo-modifying{
-            width: 60%;
+        .div-MemberInfo-memberinfo{
+            width: 50%;
+        }
+    }
+    /* 너비가 576 이하 시 div 재조정 */
+    @media screen and (max-width: 576px){
+        .div-MemberInfo-memberinfo{
+            width: 70%;
         }
     }
 </style>
