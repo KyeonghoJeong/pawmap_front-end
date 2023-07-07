@@ -274,7 +274,7 @@ export default{
             return numbers; // numbers 리턴
         }
     },
-    created(){
+    mounted(){
         // 해당 게시글 id에 맞는 댓글 모두 가져오기
         this.getComments(this.articleId);
     }
@@ -325,14 +325,5 @@ export default{
         align-items:center; 
         border-bottom: 1px solid rgb(219, 219, 219); /* 아래 테두리 추가 굵기, 색 설정 */
         margin-top: 15px;
-    }
-    .page-link{ /* pagination에서 이전/다음 버튼 제외한 각 버튼 */
-        color: black;
-    }
-    .pagination .page-item.active .page-link {
-        /* 콤마가 없으면 조합  */
-        /* ul pagination => li page-item이 active일 때 => button page-link 색 변경 */
-        background-color: #fd7e14;
-        border-color: rgb(219, 219, 219);
     }
 </style>

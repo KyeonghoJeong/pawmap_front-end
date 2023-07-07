@@ -151,8 +151,14 @@ export default{
     }
     /* 버튼 클래스 => 색, 너비 지정 */
     .btn-updatingComment-cancel, .btn-updatingComment-update{
-        background-color: #fd7e14;
-        color: white;
         width: 80px;
+        background-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
+        color: white;
+    }
+    .btn-updatingComment-cancel:hover, .btn-updatingComment-update:hover{ /* 버튼 마우스오버 시 색 변경 */
+        background-color: white;
+        border-color: rgb(219, 219, 219);
+        color: black;
     }
 </style>

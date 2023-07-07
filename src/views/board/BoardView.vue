@@ -365,24 +365,21 @@ export default {
         flex-direction: row-reverse; /* 버튼 우측 끝에 배치 */
     }
     .button-board-writing{ /* 버튼 색, 비율(사이즈) 지정 */
-        background-color: #fd7e14;
-        color: white;
         width: 80px;
+        background-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
+        color: white;
+    }
+    .button-board-writing:hover{ /* 글쓰기 버튼 마우스오버 시 색 변경 */
+        background-color: white;
+        border-color: rgb(219, 219, 219);
+        color: black;
     }
     .div-board-pagination{ /* pagination을 담을 div */
         width: 80%; /* 너비 설정 */
         display: flex; /* flex 정렬 */
         flex-direction: column; /* column 정렬 */
         align-items: center; /* pagination 가운데 정렬 */
-    }
-    .page-link{ /* pagination에서 이전/다음 버튼 제외한 각 버튼 */
-        color: black;
-    }
-    .pagination .page-item.active .page-link {
-        /* 콤마가 없으면 조합  */
-        /* ul pagination => li page-item이 active일 때 => button page-link 색 변경 */
-        background-color: #fd7e14;
-        border-color: rgb(219, 219, 219);
     }
     /* width가 992px 이하면 div 재조정 */
     @media screen and (max-width: 992px){

@@ -229,14 +229,15 @@ export default {
         // 현재 로그인 중인 회원의 게시글인지 판단하기
         this.articleId = this.$route.query.articleId;
 
-        // 게시글 정보 가져오기 => 데이터 로딩 대기 필요
-        this.getArticle();
-
         // 로그인 중인 경우
         // 게시글 작성 회원과 로그인 중인 회원이 같은 지 확인 => 데이터 로딩 대기 필요
         if(localStorage.getItem("accessToken") !== null){
             this.checkMember();
         }
+    },
+    mounted(){
+        // 게시글 정보 가져오기 => 데이터 로딩 대기 필요
+        this.getArticle();
     }
 }
 </script>
@@ -319,10 +320,16 @@ export default {
         align-items: center;
         border-bottom: 1px solid rgb(219, 219, 219); /* 테두리 굵기, 색 설정 */     
     }
-    .btn-article-board{
-        background-color: #fd7e14;
-        color: white;
+    .btn-article-board{ /* 목록 버튼 색 변경 */
         width: 80px;
+        background-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
+        color: white;
+    }
+    .btn-article-board:hover{ /* 목록 버튼 마우스오버 시 색 변경 */
+        background-color: white;
+        border-color: rgb(219, 219, 219);
+        color: black;
     }
     /* 너비 992px 이하 시 너비 재조정 */
     @media screen and (max-width: 992px){

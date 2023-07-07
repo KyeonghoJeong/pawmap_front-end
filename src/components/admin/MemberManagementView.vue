@@ -294,10 +294,14 @@ export default {
 
                             // accessToken이 유효한 경우 => 재요청 성공
                             if(reBanMemberResponse.data !== 'invalidAccessToken'){
+                                localStorage.setItem("adminQuery", "memberManagement"); // 뒤로가기 시 탭 설정 유지를 위해 저장
+
                                 this.$router.go(this.$router.currentRoute); // 새로고침
                             }
                         }
                     }else{
+                        localStorage.setItem("adminQuery", "memberManagement"); // 뒤로가기 시 탭 설정 유지를 위해 저장
+
                         this.$router.go(this.$router.currentRoute); // 새로고침
                     }
                 } catch (error) {
@@ -405,9 +409,15 @@ export default {
         width: 20%;
     }
     .button-MemberManagement-ban, .button-MemberManagement-unban{ /* 차단, 해제 버튼 색 및 사이즈 변경 */
-        background-color: #fd7e14;
-        color: white;
         width: 80px;
+        background-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
+        color: white;
+    }
+    .button-MemberManagement-ban:hover, .button-MemberManagement-unban:hover{ /* 마우스오버 시 색 변경 */
+        background-color: white;
+        border-color: rgb(219, 219, 219);
+        color: black;
     }
     .div-MemberManagement-bottom-container{
         width: 60%;
@@ -431,15 +441,6 @@ export default {
         display: flex; /* flex 정렬 */
         flex-direction: column; /* column 정렬 */
         align-items: center; /* pagination 가운데 정렬 */
-    }
-    .page-link{ /* pagination에서 이전/다음 버튼 제외한 각 버튼 */
-        color: black;
-    }
-    .pagination .page-item.active .page-link {
-        /* 콤마가 없으면 조합  */
-        /* ul pagination => li page-item이 active일 때 => button page-link 색 변경 */
-        background-color: #fd7e14;
-        border-color: rgb(219, 219, 219);
     }
     @media screen and (max-width: 992px){
         .div-MemberManagement-bottom-container{ /* 검색 div + 버튼 div를 담을 div */

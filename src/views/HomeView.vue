@@ -116,20 +116,13 @@ export default{
     margin-bottom: 2%;
 }
 .div-home-card {
-    border-color: rgb(219, 219, 219);
-
     background-color: #fd7e14;
+    border-color: rgb(219, 219, 219);
     color: white;
-
-    /* background-color: white;
-    color: black; */
 }
 .div-home-card:hover{
     background-color: white;
     color: black;
-
-    /* background-color: #fd7e14;
-    color: white; */
 }
 /* 카드 내부 폰트 설정 */
 .h5-home-category{

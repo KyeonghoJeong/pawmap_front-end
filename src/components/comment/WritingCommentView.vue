@@ -6,7 +6,7 @@
             <div class="form-floating div-writingComment-writing">
                 <!-- textarea 최대 길이 지정 및 required 지정, 데이터 입력 시 writing 변수에 저장 -->
                 <textarea class="form-control textarea-writingComment" placeholder="댓글을 남겨보세요." maxlength="300" v-model="writing" required></textarea>
-                <label for="floatingTextarea2">댓글을 남겨보세요.</label>
+                <label for="floatingTextarea2" style="padding:2%;">댓글을 남겨보세요.</label>
             </div>
             <!-- 댓글 등록 버튼 div -->
             <div class="div-writingComment-btns">
@@ -145,8 +145,14 @@ export default{
     }
     /* 버튼 클래스 => 색, 너비 지정 */
     .btn-writingComment-post{
-        background-color: #fd7e14;
-        color: white;
         width: 80px;
+        background-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
+        color: white;
+    }
+    .btn-writingComment-post:hover{ /* 등록 버튼 마우스오버 시 색 변경 */
+        background-color: white;
+        border-color: rgb(219, 219, 219);
+        color: black;
     }
 </style>

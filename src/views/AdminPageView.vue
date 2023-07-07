@@ -10,20 +10,20 @@
         <div class="div-AdminPage-tab">
             <!-- ul - li - span 구조 -->
             <ul class="nav nav-tabs nav-justified">
-                <!-- activeTab 변수의 값이 각 span에 할당된 값과 같으면 active 클래스 적용 -->
+                <!-- activatedTab 변수의 값이 각 span에 할당된 값과 같으면 active 클래스 적용 -->
                 <!-- span 클릭 시 getComponent 호출, 매개변수는 각 탭에 해당하는 쿼리 -->
                 <li class="nav-item li-AdminPage">
-                    <span class="nav-link span-AdminPage-tab" v-bind:class="{ active: activeTab === 'articleManagement' }" @click="getComponent('articleManagement')">게시글 관리</span>
+                    <span class="nav-link span-AdminPage-tab" v-bind:class="{ active: activatedTab === 'articleManagement' }" @click="getComponent('articleManagement')">게시글 관리</span>
                 </li>
                 <li class="nav-item li-AdminPage">
-                    <span class="nav-link span-AdminPage-tab" v-bind:class="{ active: activeTab === 'memberManagement' }" @click="getComponent('memberManagement')">회원 관리</span>
+                    <span class="nav-link span-AdminPage-tab" v-bind:class="{ active: activatedTab === 'memberManagement' }" @click="getComponent('memberManagement')">회원 관리</span>
                 </li>
             </ul>
         </div>
 
         <!-- 네비게이션 탭 선택 시 출력할 컴포넌트 div -->
         <div class="div-AdminPage-component">
-            <component v-bind:is="activeComponent"></component>
+            <component v-bind:is="activatedComponent"></component>
         </div>
     </div>
 </template>
@@ -35,19 +35,19 @@ import MemberManagementView from '/src/components/admin/MemberManagementView.vue
 export default {
     data(){
         return{
-            activeTab: '', // 선택한 탭 이름을 저장할 변수
-            activeComponent: '', // 선택한 탭의 컴포넌트 이름을 저장할 변수
+            activatedTab: '', // 선택한 탭 이름을 저장할 변수
+            activatedComponent: '', // 선택한 탭의 컴포넌트 이름을 저장할 변수
         }
     },
     methods:{
         // 매개변수(쿼리)에 따라 선택한 탭을 바꾸고 해당 컴포넌트로 이동하는 메소드
         getComponent(query){
             if(query === 'articleManagement'){
-                this.activeTab = 'articleManagement';
-                this.activeComponent = 'ArticleManagementView';
+                this.activatedTab = 'articleManagement';
+                this.activatedComponent = 'ArticleManagementView';
             }else if(query === 'memberManagement'){
-                this.activeTab = 'memberManagement';
-                this.activeComponent = 'MemberManagementView';
+                this.activatedTab = 'memberManagement';
+                this.activatedComponent = 'MemberManagementView';
             }
         }
     },
@@ -56,9 +56,14 @@ export default {
         MemberManagementView, // 회원 관리 컴포넌트
     },
     created(){
-        // 마이페이지 메뉴 클릭 시 첫 탭과 컴포넌트를 게시글 관리로 설정
-        this.activeTab = 'articleManagement';
-        this.activeComponent = 'ArticleManagementView';
+        // 관리페이지 메뉴 클릭 시 저장 된 쿼리가 있으면 저장 된 쿼리로 설정 없으면 게시글 관리로 설정
+        if(localStorage.getItem("adminQuery")){
+            this.getComponent(localStorage.getItem("adminQuery"));
+
+            localStorage.removeItem("adminQuery"); // 삭제
+        }else{
+            this.getComponent('articleManagement');
+        }
     }
 }
 
@@ -104,9 +109,9 @@ export default {
     }
     /* 리스트 내부 span 마우스오버 시 색 및 커서 변경 */
     .span-AdminPage-tab:hover {
+        cursor: pointer;
         background-color: #fd7e14;
         color: white;
-        cursor:pointer;
     }
     /* 컴포넌트 div 너비 지정 */
     .div-AdminPage-component{

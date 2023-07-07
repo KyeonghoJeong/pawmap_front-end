@@ -1416,14 +1416,22 @@ export default {
         padding-top: 20px; /* 위(카드 컴포넌트)와 간격 조절 */
         padding-bottom: 5px; /* 아래와 간격 조절 */
     }
-    .page-link{ /* pagination에서 이전/다음 버튼 제외한 각 버튼 */
+    .page-link{ /* pagination에서 각 버튼 */
+        background-color: white;
+        border-color: rgb(219, 219, 219);
         color: black;
+    }
+    .page-link:hover{ /* pagination에서 각 버튼 마우스오버 시 색 변경 */
+        background-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
+        color: white;
     }
     .pagination .page-item.active .page-link {
         /* 콤마가 없으면 조합  */
         /* ul pagination => li page-item이 active일 때 => button page-link 색 변경 */
         background-color: #fd7e14;
         border-color: rgb(219, 219, 219);
+        color: white;
     }
     .div-map-map{ /* 카카오맵 api를 담는 div */
         width: 80%; /* 너비 지정 */

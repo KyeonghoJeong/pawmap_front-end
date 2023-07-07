@@ -26,7 +26,7 @@
                     <td class="th-ArticleManagement-nickname">{{article.nickname}}</td>
                     <td class="th-ArticleManagement-date">{{article.postDate}}</td>
                     <!-- 배열에 체크박스로 체크한 게시글의 인덱스로 v-model로 값 저장 -->
-                    <td class="th-ArticleManagement-del"><input class="form-check-input" type="checkbox" :v-model="article.articleId" v-model="checkedArticleIndex[index]"></td>
+                    <td class="th-ArticleManagement-del"><input type="checkbox" :v-model="article.articleId" v-model="checkedArticleIndex[index]"></td>
                 </tr>
             </tbody>
             </table>
@@ -215,70 +215,74 @@ export default {
                     }
                 }
 
-                try {
-                    // accessToken + 체크한 게시글 id로 delete 요청
-                    const deleteArticlesResponse = await axios.delete('http://localhost:8090/api/board/articles', {
-                        headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
-                        data: this.checkedArticles
-                    })
-
-                    // 응답 결과 유효하지 않은 acccessToken인 경우
-                    if(deleteArticlesResponse.data === 'invalidAccessToken'){
-                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                        localStorage.removeItem("accessToken");
-                        
-                        // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
-                        // axios의 동기적 동작을 위해 async/await 사용
-                        // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                        const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
-                            withCredentials: true
+                if(this.checkedArticles.length === 0){
+                    alert("선택된 게시글이 없습니다.");
+                }else{
+                    try {
+                        // accessToken + 체크한 게시글 id로 delete 요청
+                        const deleteArticlesResponse = await axios.delete('http://localhost:8090/api/board/articles', {
+                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
+                            data: this.checkedArticles
                         })
 
-                        // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
-                        if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                            // 로그인 만료 알림
-                            alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-
-                            // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                            if(confirm("다시 로그인하시겠습니까?")){
-                                // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                                localStorage.setItem("previousPage", this.$route.fullPath);
-
-                                // 확인 버튼 누른 경우 로그인 페이지로 이동
-                                this.$router.push({path: "/signin"});
-                            }
-
-                            if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
-                                // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
-                                this.$router.push({path: "/"});
-                            }
-
-                            // header 메뉴 갱신을 위해 새로고침
-                            this.$router.go(this.$router.currentRoute);
-                        }else{
-                            // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                            // 재발급 받은 accessToken 로컬 스토리지에 저장
-                            localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
-
-                            // accessToken + 체크한 게시글 id로 delete 재요청
-                            const reDeleteArticlesResponse = await axios.delete('http://localhost:8090/api/board/articles', {
-                                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
-                                data: this.checkedArticles
+                        // 응답 결과 유효하지 않은 acccessToken인 경우
+                        if(deleteArticlesResponse.data === 'invalidAccessToken'){
+                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                            localStorage.removeItem("accessToken");
+                            
+                            // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
+                            // axios의 동기적 동작을 위해 async/await 사용
+                            // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
+                            const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
+                                withCredentials: true
                             })
 
-                            // accessToken이 유효한 경우 => 재요청 성공
-                            if(reDeleteArticlesResponse.data !== 'invalidAccessToken'){
-                                // 삭제 후 새로고침
+                            // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
+                            if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
+                                // 로그인 만료 알림
+                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+
+                                // 유저에게 바로 로그인 페이지로 이동할지 묻기
+                                if(confirm("다시 로그인하시겠습니까?")){
+                                    // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
+                                    localStorage.setItem("previousPage", this.$route.fullPath);
+
+                                    // 확인 버튼 누른 경우 로그인 페이지로 이동
+                                    this.$router.push({path: "/signin"});
+                                }
+
+                                if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
+                                    // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
+                                    this.$router.push({path: "/"});
+                                }
+
+                                // header 메뉴 갱신을 위해 새로고침
                                 this.$router.go(this.$router.currentRoute);
+                            }else{
+                                // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
+
+                                // 재발급 받은 accessToken 로컬 스토리지에 저장
+                                localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
+
+                                // accessToken + 체크한 게시글 id로 delete 재요청
+                                const reDeleteArticlesResponse = await axios.delete('http://localhost:8090/api/board/articles', {
+                                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
+                                    data: this.checkedArticles
+                                })
+
+                                // accessToken이 유효한 경우 => 재요청 성공
+                                if(reDeleteArticlesResponse.data !== 'invalidAccessToken'){
+                                    // 삭제 후 새로고침
+                                    this.$router.go(this.$router.currentRoute);
+                                }
                             }
+                        }else{
+                            // 삭제 후 새로고침
+                            this.$router.go(this.$router.currentRoute);
                         }
-                    }else{
-                        // 삭제 후 새로고침
-                        this.$router.go(this.$router.currentRoute);
+                    } catch (error) {
+                        console.log(error);
                     }
-                } catch (error) {
-                    console.log(error);
                 }
             }
         },
@@ -353,7 +357,7 @@ export default {
             return numbers;
         }
     },
-    created(){
+    mounted(){
         // 게시글 요청 메소드
         this.getArticles(0);
     }
@@ -418,24 +422,21 @@ export default {
         flex-direction: row-reverse; /* 버튼 우측 끝에 배치 */
     }
     .button-ArticleManagement-del{ /* 버튼 색, 비율(사이즈) 지정 */
-        background-color: #fd7e14;
-        color: white;
         width: 80px;
+        background-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
+        color: white;
+    }
+    .button-ArticleManagement-del:hover{ /* 마우스오버 시 색 변경 */
+        background-color: white;
+        border-color: rgb(219, 219, 219);
+        color: black;
     }
     .div-ArticleManagement-pagination{ /* pagination을 담을 div */
         width: 60%; /* 너비 설정 */
         display: flex; /* flex 정렬 */
         flex-direction: column; /* column 정렬 */
         align-items: center; /* pagination 가운데 정렬 */
-    }
-    .page-link{ /* pagination에서 이전/다음 버튼 제외한 각 버튼 */
-        color: black;
-    }
-    .pagination .page-item.active .page-link {
-        /* 콤마가 없으면 조합  */
-        /* ul pagination => li page-item이 active일 때 => button page-link 색 변경 */
-        background-color: #fd7e14;
-        border-color: rgb(219, 219, 219);
     }
     /* width가 992px 이하면 div 재조정 */
     @media screen and (max-width: 992px){
