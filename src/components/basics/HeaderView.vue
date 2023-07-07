@@ -76,7 +76,7 @@ export default{
     toBoard(){
       // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /board인 경우 이동 X
       if(this.$route.path !== '/board'){
-        this.$router.push({path: '/board'});
+        this.$router.push({path: '/board', query: {page: 1}});
       }else{
         this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
       }
@@ -102,12 +102,16 @@ export default{
       if(confirm("로그아웃 하시겠습니까?")){
         // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
         localStorage.removeItem("accessToken");
-        // 기존에 로컬 스토리지에 저장되어 있던 권한 삭제
+        // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
         localStorage.removeItem("authority");
         
         // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
-        if(this.$route.path === '/mypage' || this.$route.path === '/deletingAccount' || this.$route.path === '/admin' || this.$route.path === '/board/writing'){
-          this.$router.push({path: '/'});
+        if(this.$route.path === "/board/writing"
+            || this.$route.path === "/board/modifying"
+            || this.$route.path === "/mypage" 
+            || this.$route.path === "/mypage/deletingAccount" 
+            || this.$route.path === "/admin"){
+            this.$router.push({path: "/"});
         }
         
         // 새로고침
@@ -127,7 +131,7 @@ export default{
     toMyPage(){
       // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /mypage인 경우 이동 X
       if(this.$route.path !== '/mypage'){
-        this.$router.push({path: '/mypage'});
+        this.$router.push({path: '/mypage', query: {tab: 'bookmark'}});
       }else{
         this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
       }
@@ -136,7 +140,7 @@ export default{
     toAdmin(){
       // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /admin인 경우 이동 X
       if(this.$route.path !== '/admin'){
-        this.$router.push({path: '/admin'});
+        this.$router.push({path: '/admin', query: {tab: 'articleManagement'}});
       }else{
         this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
       }

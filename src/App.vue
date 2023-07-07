@@ -23,14 +23,14 @@ export default {
 </script>
 
 <style>
-/* header, content, footer 정렬 후 최소 높이 100vh로 고정 */
-.wrapper{
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-.content{
-  flex: 1; /* wrapper에 따른 비율 조정 */
-  padding-bottom: 0px;
-}
+  /* header, content, footer 정렬 후 최소 높이 100vh로 고정 */
+  .wrapper{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .content{
+    flex: 1; /* wrapper에 따른 비율 조정 */
+    padding-bottom: 0px;
+  }
 </style>

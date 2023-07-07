@@ -41,14 +41,17 @@ export default {
     },
     methods:{
         // 매개변수(쿼리)에 따라 선택한 탭을 바꾸고 해당 컴포넌트로 이동하는 메소드
-        getComponent(query){
-            if(query === 'articleManagement'){
+        getComponent(tab){
+            if(tab === 'articleManagement'){
                 this.activatedTab = 'articleManagement';
                 this.activatedComponent = 'ArticleManagementView';
-            }else if(query === 'memberManagement'){
+            }else if(tab === 'memberManagement'){
                 this.activatedTab = 'memberManagement';
                 this.activatedComponent = 'MemberManagementView';
             }
+
+            // url 쿼리 바꾸기
+            this.$router.replace({query: {tab: tab}}).catch(()=>{});
         }
     },
     components:{
@@ -56,14 +59,8 @@ export default {
         MemberManagementView, // 회원 관리 컴포넌트
     },
     created(){
-        // 관리페이지 메뉴 클릭 시 저장 된 쿼리가 있으면 저장 된 쿼리로 설정 없으면 게시글 관리로 설정
-        if(localStorage.getItem("adminQuery")){
-            this.getComponent(localStorage.getItem("adminQuery"));
-
-            localStorage.removeItem("adminQuery"); // 삭제
-        }else{
-            this.getComponent('articleManagement');
-        }
+        // 쿼리 값으로 탭 선택, 컴포넌트 설정
+        this.getComponent(this.$route.query.tab);
     }
 }
 

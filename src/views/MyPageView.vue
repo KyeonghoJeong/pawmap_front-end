@@ -45,17 +45,20 @@ export default {
     },
     methods:{
         // 매개변수(쿼리)에 따라 선택한 탭을 바꾸고 해당 컴포넌트로 이동하는 메소드
-        getComponent(query){
-            if(query === 'bookmark'){
+        getComponent(tab){
+            if(tab === 'bookmark'){
                 this.activatedtab = 'bookmark';
                 this.activatedComponent = 'BookmarkView';
-            }else if(query === 'myArticles'){
+            }else if(tab === 'myArticles'){
                 this.activatedtab = 'myArticles';
                 this.activatedComponent = 'MyArticlesView';
-            }else if(query === 'myInfo'){
+            }else if(tab === 'myInfo'){
                 this.activatedtab = 'myInfo';
                 this.activatedComponent = 'MyInfoView';
             }
+
+            // url 쿼리 바꾸기
+            this.$router.replace({query: {tab: tab}}).catch(()=>{});
         }
     },
     components:{
@@ -64,14 +67,8 @@ export default {
         MyInfoView, // 회원정보 컴포넌트
     },
     created(){
-        // 마이페이지 메뉴 클릭 시 저장 된 쿼리가 있으면 저장 된 쿼리로 설정 없으면 북마크로 설정
-        if(localStorage.getItem("myPageQuery")){
-            this.getComponent(localStorage.getItem("myPageQuery"));
-
-            localStorage.removeItem("myPageQuery"); // 삭제
-        }else{
-            this.getComponent('bookmark');
-        }
+        // 쿼리 값으로 탭 선택, 컴포넌트 설정
+        this.getComponent(this.$route.query.tab);
     }
 }
 

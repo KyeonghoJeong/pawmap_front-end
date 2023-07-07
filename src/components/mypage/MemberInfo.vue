@@ -34,7 +34,7 @@
                     <input v-model="password" type="password" class="form-control" placeholder="현재 비밀번호" required><br>
                     <div class="div-MemberInfo-delAcc">
                         <!-- 회원탈퇴 클릭 시 회원탈퇴 페이지로 이동 -->
-                        <router-link to="/deletingAccount" class="router-MemberInfo-delAcc">회원탈퇴</router-link>
+                        <router-link to="/mypage/deletingAccount" class="router-MemberInfo-delAcc">회원탈퇴</router-link>
                     </div><br>
                 </div>
                 
@@ -69,9 +69,6 @@ export default{
 
                  // 응답 결과 유효하지 않은 acccessToken인 경우
                 if(getMemberResponse.data === 'invalidAccessToken'){
-                    // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                    localStorage.removeItem("accessToken");
-
                     // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
                     // axios의 동기적 동작을 위해 async/await 사용
                     // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
@@ -81,6 +78,11 @@ export default{
 
                     // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
                     if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
+                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                        localStorage.removeItem("accessToken");
+                        // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
+                        localStorage.removeItem("authority");
+
                         // 로그인 만료 알림
                         alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
 
@@ -93,8 +95,12 @@ export default{
                             this.$router.push({path: "/signin"});
                         }
 
-                        if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
-                            // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
+                        // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
+                        if(this.$route.path === "/board/writing"
+                            || this.$route.path === "/board/modifying"
+                            || this.$route.path === "/mypage" 
+                            || this.$route.path === "/mypage/deletingAccount" 
+                            || this.$route.path === "/admin"){
                             this.$router.push({path: "/"});
                         }
 
@@ -149,9 +155,6 @@ export default{
 
                         // 응답 결과 유효하지 않은 acccessToken인 경우
                         if(updatePasswordResponse.data === 'invalidAccessToken'){
-                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
-                            localStorage.removeItem("accessToken");
-
                             // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
                             // axios의 동기적 동작을 위해 async/await 사용
                             // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
@@ -161,6 +164,11 @@ export default{
 
                             // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
                             if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
+                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                                localStorage.removeItem("accessToken");
+                                // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
+                                localStorage.removeItem("authority");
+
                                 // 로그인 만료 알림
                                 alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
 
@@ -173,8 +181,12 @@ export default{
                                     this.$router.push({path: "/signin"});
                                 }
 
-                                if(this.$route.path === "/mypage" || this.$route.path === "/deletingAccount" || this.$route.path === "/admin"){
-                                    // 마이페이지, 탈퇴페이지, 관리페이지인 경우는 메인 페이지로 이동
+                                // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
+                                if(this.$route.path === "/board/writing"
+                                    || this.$route.path === "/board/modifying"
+                                    || this.$route.path === "/mypage" 
+                                    || this.$route.path === "/mypage/deletingAccount" 
+                                    || this.$route.path === "/admin"){
                                     this.$router.push({path: "/"});
                                 }
 
@@ -198,7 +210,11 @@ export default{
                                 if(reUpdatePasswordResponse.data !== 'invalidAccessToken'){
                                     alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
                                     
-                                    localStorage.removeItem("accessToken"); // 로컬 스토리지에서 accessToken 삭제
+                                    // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                                    localStorage.removeItem("accessToken");
+                                    // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
+                                    localStorage.removeItem("authority");
+
                                     this.$router.push({path: "/signin"}); // 로그인 페이지로 이동
                                     this.$router.go(this.$router.currentRoute); // 새로고침
                                 }
@@ -206,7 +222,11 @@ export default{
                         }else{
                             alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
                             
-                            localStorage.removeItem("accessToken"); // 로컬 스토리지에서 accessToken 삭제
+                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                            localStorage.removeItem("accessToken");
+                            // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
+                            localStorage.removeItem("authority");
+                            
                             this.$router.push({path: "/signin"}); // 로그인 페이지로 이동
                             this.$router.go(this.$router.currentRoute); // 새로고침
                         }
@@ -283,6 +303,9 @@ export default{
     }
     /* 너비가 576 이하 시 div 재조정 */
     @media screen and (max-width: 576px){
+        .div-MemberInfo-email{
+            display: none;
+        }
         .div-MemberInfo-memberinfo{
             width: 70%;
         }

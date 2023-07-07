@@ -21,12 +21,12 @@
                 <!-- 테이블 row 반복문으로 출력 -->
                 <!-- articles는 백엔드로부터 받은 게시글 데이터 -->
                 <tr v-for="(article, index) in articles" :key="article.articleId">
-                    <th scope="row" class="th-row-board-num">{{article.articleId}}</th>
+                    <th scope="row" class="th-col-board-num">{{article.articleId}}</th>
                     <!-- row에서 제목 부분은 클릭 시 게시글의 내용을 출력해야 하므로 toArticle을 호출 -->
                     <!-- commentNumbers의 index는 articles의 index와 일치, 해당 게시글의 댓글 수를 백엔드에서 받아와서 제목 옆에 출력 -->
                     <td><span class="span-board-title" @click="toArticle(article.articleId)">{{article.title}} <span style="color:#fd7e14">[{{commentNumbers[index]}}]</span></span></td>
-                    <td class="td-board-nickname">{{article.nickname}}</td>
-                    <td class="td-board-date">{{article.postDate}}</td>
+                    <td class="th-col-board-nickname">{{article.nickname}}</td>
+                    <td class="th-col-board-date">{{article.postDate}}</td>
                 </tr>
             </tbody>
             </table>
@@ -111,6 +111,7 @@ export default {
         return{
             articles: [], // 해당 페이지에 해당하는 게시글 데이터를 백엔드에서 받아와서 저장할 배열
             totalPages: '', // pagination을 위해 총 페이지 수를 백엔드에서 받아와서 저장할 변수
+            page: '', // 쿼리로 받을 페이지 숫자
             pageActive: 1, // 첫 활성화 페이지 번호는 1로 초기화
             startNum: 0, // pagination 시 첫 페이지 출력인 경우 0
             endNum: 0, // pagination 시 첫 페이지 출력인 경우 0
@@ -157,6 +158,8 @@ export default {
                 })
                 .then(response => {
                     this.commentNumbers = response.data; // 각 게시글의 댓글수 저장
+
+                    this.$router.replace({query: {page: page + 1}}).catch(()=>{}); // 쿼리 변경
                 })
                 .catch(error => {
                     console.log(error);
@@ -267,33 +270,44 @@ export default {
         },
         // 페이지 5개 단위로 출력을 위해 numbers 배열에 5개씩 담아 리턴
         pageNumbers(){
-            // startNum = 0, endNum = 0인 경우 고려
-            // 이후 같은 패턴 반복
-
             let numbers = []; // 페이지 번호를 담을 배열 초기화
-            let start = this.startNum; // 시작 번호
-            let end = this.endNum; // 마지막 번호
 
-            // startNum이 0이면 맨 처음 페이지 배열에 해당
-            if(this.startNum === 0){
-                start = 1; // 맨 처음 페이지 배열 시작 페이지 번호를 1로 설정
-                end = this.totalPages; // 총 페이지 배열의 수가 하나를 넘지 않는 경우 시작 페이지의 마지막 번호를 총 페이지 수로 설정
-                if(end > 5){ // 총 페이지 배열의 수가 하나 이상인 경우 시작 페이지의 마지막 번호를 첫 번째 페이지 배열의 마지막 번호인 5로 설정
-                    end = 5;
+            if(this.page <= this.totalPages){
+                // 요청 페이지 숫자가 데이터의 총 페이지 수보다 같거나 작을 때만 숫자 생성
+
+                // startNum = 0, endNum = 0인 경우 고려
+                // 이후 같은 패턴 반복
+                let start = this.startNum; // 시작 번호
+                let end = this.endNum; // 마지막 번호
+
+                // startNum이 0이면 맨 처음 페이지 배열에 해당
+                if(this.startNum === 0){
+                    start = 1; // 맨 처음 페이지 배열 시작 페이지 번호를 1로 설정
+                    end = this.totalPages; // 총 페이지 배열의 수가 하나를 넘지 않는 경우 시작 페이지의 마지막 번호를 총 페이지 수로 설정
+                    if(end > 5){ // 총 페이지 배열의 수가 하나 이상인 경우 시작 페이지의 마지막 번호를 첫 번째 페이지 배열의 마지막 번호인 5로 설정
+                        end = 5;
+                    }
+                }
+
+                // 시작 번호 ~ 마지막 번호까지 1씩 증가시켜서 numbers 배열에 넣기 (ex: 1, 2, 3, 4, 5 / 6, 7, 8, 9, 10)
+                for(let i=start; i<=end; i++){
+                    numbers.push(i);
                 }
             }
-
-            // 시작 번호 ~ 마지막 번호까지 1씩 증가시켜서 numbers 배열에 넣기 (ex: 1, 2, 3, 4, 5 / 6, 7, 8, 9, 10)
-            for(let i=start; i<=end; i++){
-                numbers.push(i);
-            }
-
+            
             return numbers; // numbers 리턴
         }
     },
+    created(){
+        this.page = this.$route.query.page;
+        // pagination 시작 번호 설정
+        if(this.page > 0){
+            this.pageActive = parseInt(this.page);
+        }
+    },
     mounted(){
-        // 게시글 요청 메소드
-        this.getArticles(0);
+        // url의 쿼리와 연동하여 페이지 번호로 게시글 요청하는 메소드
+        this.getArticles(this.page - 1);
     }
 }
 </script>
@@ -301,14 +315,14 @@ export default {
 <style>
     .div-board-container{
         /* padding으로 게시판 간격 조절 */
-        padding-top: 6.5%;
+        padding-top: 5%;
         /* 게시판 구성 요소 (테이블, 검색바+셀렉트+글쓰기 버튼, 페이지네이션) 정렬 */
         display: flex;
         flex-direction: column;
         align-items: center;
     }
     .div-board-table{
-        width: 70%;  /* 화면 비율 지정 */
+        width: 60%; /* 화면 비율 지정 */
     }
     /* 테이블 헤더 비율 설정 및 정렬 */
     .th-col-board-num{
@@ -333,18 +347,9 @@ export default {
         text-decoration: underline;
         cursor: pointer;
     }
-    .th-row-board-num{
-        text-align: center;
-    }
-    .td-board-date{
-        text-align: center;
-    }
-    .td-board-nickname{
-        text-align: center;
-    }
     /* 테이블 하단 검색바, 셀렉트, 글쓰기 버튼을 담는 div */
     .div-board-bottom-container{
-        width: 70%;
+        width: 60%;
         display:flex; /* 하단 메뉴 div 정렬 */
         margin-bottom: 1.2%;
     }
@@ -376,18 +381,22 @@ export default {
         color: black;
     }
     .div-board-pagination{ /* pagination을 담을 div */
-        width: 80%; /* 너비 설정 */
+        width: 60%; /* 너비 설정 */
         display: flex; /* flex 정렬 */
         flex-direction: column; /* column 정렬 */
         align-items: center; /* pagination 가운데 정렬 */
     }
     /* width가 992px 이하면 div 재조정 */
     @media screen and (max-width: 992px){
+        .th-col-board-num, .th-col-board-date{
+            /* 게시글 번호, 날짜 가리기 */
+            display: none;
+        }
         .div-board-table{ /* 테이블 div */
-            width: 70%; /* 다시 너비 100%로 변경 */
+            width: 60%; /* 다시 너비 100%로 변경 */
         }
         .div-board-bottom-container{ /* 검색 div + 버튼 div를 담을 div */
-            width: 70%; /* 너비 100%로 변경 */
+            width: 60%; /* 너비 100%로 변경 */
             display: flex; /* flex 정렬로 변경 */
             flex-direction: column; /* column 정렬로 변경해서 검색 메뉴, select 메뉴 수직 정렬 */
             margin-bottom: 3%; /* pagination과의 간격 조절 */
@@ -397,10 +406,10 @@ export default {
             margin-bottom: 3%; /* 버튼과의 간격 조절 */
         }
         .div-board-bottom-input{ /* 검색바 div */
-            width: 70%; /* 너비 70% */
+            width: 60%; /* 너비 70% */
         }
         .div-board-bottom-select{ /* select div */
-            width: 30%; /* 너비 30% */
+            width: 40%; /* 너비 30% */
         }
         .div-board-bottom-btn{ /* 버튼 div */
             width: 100%; /* 너비 100% */

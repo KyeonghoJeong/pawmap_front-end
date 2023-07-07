@@ -6,8 +6,8 @@ import MapView from './views/MapView.vue'
 import BoardView from './views/board/BoardView.vue'
 import SignInView from './views/member/SignInView.vue'
 import SignUpView from './views/member/SignUpView.vue'
-import WritingView from './views/board/WritingView.vue'
-import ModifyingView from './views/board/ModifyingView.vue'
+import WritingView from './views/board/WritingArticleView.vue'
+import ModifyingView from './views/board/ModifyingArticleView.vue'
 import ArticleView from './views/board/ArticleView.vue'
 import MyPageView from './views/MyPageView.vue'
 import DeletingAccountView from './views/member/DeletingAccountView.vue'
@@ -62,7 +62,7 @@ const routes = [
         component: MyPageView
     },
     {
-        path: '/deletingAccount',
+        path: '/mypage/deletingAccount',
         name: 'deletingAccount',
         component: DeletingAccountView
     },
