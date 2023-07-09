@@ -89,7 +89,6 @@ export default {
             isArticleLoaded: false, // 백엔드로부터 해당 게시글 정보(내용)를 전부 받아왔는지 확인
             isItsMember: false, // 현재 로그인 중인 회원과 해당 게시글의 작성자가 일치하는지 확인
             memberId: '',
-            isMemberIdLoaded: false,
             comments: [], // 백엔드로부터 해당 게시글의 댓글을 받아서 저장할 배열
             totalPages: '', // 댓글 pagination을 위해 총 댓글 페이지 수를 받을 변수 
         }
@@ -104,7 +103,7 @@ export default {
         async checkMember(){
             try {
                 // accessToken + 게시글 id로 get 요청
-                const checkMemberResponse = await axios.get('http://localhost:8090/api/board/article/membercheck', {
+                const checkMemberResponse = await axios.get('http://localhost:8090/api/board/article/memberId/identification', {
                     headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
                     params: {articleId: this.articleId}
                 })
@@ -155,29 +154,17 @@ export default {
                         localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
 
                         // accessToken + 게시글 id로 get 재요청
-                        const reCheckMemberResponse = await axios.get('http://localhost:8090/api/board/article/membercheck', {
+                        const reCheckMemberResponse = await axios.get('http://localhost:8090/api/board/article/memberId/identification', {
                             headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
                             params: {articleId: this.articleId}
                         })
 
                         this.memberId = reCheckMemberResponse.data.memberId; // accessToken으로 회원 id 받기
-                        this.isMemberIdLoaded = true; // 회원 id 받기 확인
-
-                        // DB 테이블에서 해당 회원 id + 게시글 id로 조회 시 해당 게시글이 있는 경우 = count가 1인 경우
-                        if(reCheckMemberResponse.data.count === 1){
-                            // 현재 로그인 중인 회원과 게시글 작성자가 동일(true)
-                            this.isItsMember = true;
-                        }
+                        this.isItsMember = reCheckMemberResponse.data.isItsMember; // 게시글 작성자 일치 여부 받기
                     }
                 }else{
                     this.memberId = checkMemberResponse.data.memberId; // accessToken으로 회원 id 받기
-                    this.isMemberIdLoaded = true; // 회원 id 받기 확인
-
-                    // DB 테이블에서 해당 회원 id + 게시글 id로 조회 시 해당 게시글이 있는 경우 = count가 1인 경우
-                    if(checkMemberResponse.data.count === 1){
-                        // 현재 로그인 중인 회원과 게시글 작성자가 동일(true)
-                        this.isItsMember = true;
-                    }
+                    this.isItsMember = checkMemberResponse.data.isItsMember; // 게시글 작성자 일치 여부 받기
                 }
             } catch (error) {
                 console.log(error);
@@ -208,20 +195,71 @@ export default {
             if(confirm("정말 삭제하시겠습니까?")){
                 try {
                     // accessToken + 게시글 id로 게시글 삭제 delete 요청
-                    const response = axios.delete(`http://localhost:8090/api/board/article?articleId=${this.articleId}`, {
+                    const deleteArticleResponse = await axios.delete('http://localhost:8090/api/board/article', {
+                        params: {articleId: this.articleId},
                         headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                     })
 
                     // 응답 결과 유효하지 않은 acccessToken인 경우
-                    if(response.data === 'invalidAccessToken'){
-                        // accessToken 재발급 await
-                        await this.getNewAccessToken(this.deleteArticle);
-                    }else{
-                        // 삭제 후 게시판 페이지로 이동
-                        this.$router.push({path:'/board'});
+                    if(deleteArticleResponse.data === 'invalidAccessToken'){
+                        // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
+                        // axios의 동기적 동작을 위해 async/await 사용
+                        // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
+                        const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
+                            withCredentials: true
+                        })
 
-                        // 새로고침
-                        this.$router.go(this.$router.currentRoute);
+                        // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
+                        if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
+                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                            localStorage.removeItem("accessToken");
+                            // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
+                            localStorage.removeItem("authority");
+
+                            // 로그인 만료 알림
+                            alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+
+                            // 유저에게 바로 로그인 페이지로 이동할지 묻기
+                            if(confirm("다시 로그인하시겠습니까?")){
+                                // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
+                                localStorage.setItem("previousPage", this.$route.fullPath);
+
+                                // 확인 버튼 누른 경우 로그인 페이지로 이동
+                                this.$router.push({path: "/signin"});
+                            }
+
+                            // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
+                            if(this.$route.path === "/board/writing"
+                                || this.$route.path === "/board/modifying"
+                                || this.$route.path === "/mypage" 
+                                || this.$route.path === "/mypage/deletingAccount" 
+                                || this.$route.path === "/admin"){
+                                this.$router.push({path: "/"});
+                            }
+
+                            // header 메뉴 갱신을 위해 새로고침
+                            this.$router.go(this.$router.currentRoute);
+                        }else{
+                            // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
+
+                            // 재발급 받은 accessToken 로컬 스토리지에 저장
+                            localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
+
+                            // accessToken + 게시글 id로 게시글 삭제 delete 재요청
+                            const reDeleteArticleResponse = await axios.delete('http://localhost:8090/api/board/article', {
+                                params: {articleId: this.articleId},
+                                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                            })
+
+                            if(reDeleteArticleResponse.data !== 'invalidAccessToken'){
+                                // accessToken이 유효한 경우
+                                this.$router.push({path: '/board', query: {page: 1}}); // 삭제 후 게시판 페이지로 이동
+                                this.$router.go(this.$router.currentRoute); // 새로고침
+                            }
+                        }
+                    }else{
+                        this.$router.push({path: '/board', query: {page: 1}}); // 삭제 후 게시판 페이지로 이동
+                        this.$router.go(this.$router.currentRoute); // 새로고침
                     }
                 } catch (error) {
                     console.log(error);

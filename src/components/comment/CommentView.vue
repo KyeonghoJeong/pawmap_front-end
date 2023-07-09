@@ -45,7 +45,7 @@
                     <!-- 페이지 번호 클릭 시 pageActive = i로 저장하고 둘이 같을 때 active 즉, 선택한 페이지 번호는 active로 출력 -->
                     <!-- 페이지 번호 클릭 시 getArticles 메소드에 해당하는 페이지 번호(i-1)의 게시글 데이터를 백엔드로부터 받아와 출력 -->
                     <li v-for="i in pageNumbers" :key="i" :class="['page-item', pageActive === i ? 'active' : '']" @click="pageActive = i">
-                        <button class="page-link" @click="getCommentInfos(i-1)">{{i}}</button>
+                        <button class="page-link" @click="getComments(i-1)">{{i}}</button>
                     </li>
 
                     <!-- computed에서 isNextDisabled 계산 후 true면 비활성화, false면 활성화 -->
@@ -94,11 +94,13 @@ export default{
         }
     },
     methods:{
-        // 게시글에 해당하는 댓글 모두 요청하는 메소드
-        getComments(){
+        // 게시글에 해당하는 댓글 모두 요청하는 메소드 + 페이지 번호 클릭 시 해당하는 페이지의 댓글들을 가져오는 메소드
+        getComments(page){
+            this.isCommentsLoaded = false; // 댓글 데이터를 전부 가져왔는지 체크하기 위해 get 요청 전 false로 지정 
+
             // 게시글 id, pagination 설정
             axios.get('http://localhost:8090/api/board/article/comments', {
-                params: {articleId: this.articleId, page: 0, size: 10}
+                params: {articleId: this.articleId, page: page, size: 10}
             })
             .then(response => {
                 this.comments = response.data.content; // 댓글 데이터
@@ -201,7 +203,7 @@ export default{
             this.startNum = this.startNum - 5; // 시작 번호는 현재 시작 번호 - 5
             this.endNum = this.startNum + 4; // 마지막 번호는 현재 시작 번호 + 4
             this.pageActive = this.endNum; // 이전 버튼 클릭 시 선택 중인 페이지 표시를 위해 선택한 페이지 번호 리턴
-            this.getCommentInfos(this.endNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
+            this.getComments(this.endNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
         },
         // 다음 버튼 클릭 시 startNum, endNum 재설정을 위한 메소드
         setNextPageNum(){
@@ -220,25 +222,7 @@ export default{
             }
 
             this.pageActive = this.startNum; // 다음 버튼을 누르면 첫 페이지 번호를 active
-            this.getCommentInfos(this.startNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
-        },
-        // 페이지 번호 클릭 시 해당하는 페이지의 댓글들을 가져오는 메소드
-        getCommentInfos(i){
-            this.isCommentsLoaded = false; // 댓글 데이터를 전부 가져왔는지 체크하기 위해 get 요청 전 false로 지정 
-
-            // pagination에서 i(페이지 넘버)를 받아서 해당하는 페이지의 댓글 데이터 get 요청
-            axios.get('http://localhost:8090/api/board/article/comments', {
-                params: {articleId: this.articleId, page: i, size: 10}
-            })
-            .then(response => {
-                this.comments = response.data.content;
-                this.totalPages = response.data.totalPages;
-
-                this.isCommentsLoaded = true; // 댓글 데이터 저장 후 완료의 의미로 true로 변경
-            })
-            .catch(error => {
-                console.log(error);
-            }) 
+            this.getComments(this.startNum-1); // 시설 리스트 출력을 위해 현재 page 번호를 넘기기
         },
     },
     computed:{
@@ -282,7 +266,7 @@ export default{
     },
     mounted(){
         // 해당 게시글 id에 맞는 댓글 모두 가져오기
-        this.getComments(this.articleId);
+        this.getComments(0);
     }
 }
 </script>

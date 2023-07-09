@@ -81,6 +81,8 @@ export default {
         // 회원이 등록한 북마크 요청 메소드
         // 동기적 동작을 위해 async 지정
         async getBookmarks(page){
+            this.isBookmarksLoaded = false; // 데이터 로드 전 다시 false 지정
+
             try {
                 // accessToken으로 북마크 get 요청
                 const getBookmarksResponse = await axios.get('http://localhost:8090/api/map/bookmarks', {

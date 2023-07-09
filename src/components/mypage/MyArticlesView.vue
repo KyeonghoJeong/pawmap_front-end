@@ -15,7 +15,8 @@
                     <th scope="col" class="th-MyArticles-del">삭제</th>
                 </tr>
             </thead>
-            <tbody>
+            <!-- 데이터 로드 완료 여부를 가지고 있는 AreArticlesAndCommentsLoaded가 true인 경우만 테이블 바디 출력 -->
+            <tbody v-if="AreArticlesAndCommentsLoaded">
                 <!-- 테이블 row 반복문으로 출력 -->
                 <!-- articles는 백엔드로부터 받은 게시글 데이터 -->
                 <tr v-for="(article, index) in articles" :key="article.articleId">
@@ -105,6 +106,7 @@ export default {
     data(){
         return{
             articles: [], // 게시글 저장할 배열
+            AreArticlesAndCommentsLoaded: false, // 전체 게시글 로드 완료 여부
             totalPages: '', // 총 게시글 페이지 수
             pageActive: 1, // pagination 초기 선택 페이지
             startNum: 0, // pagination 초기 시작 숫자
@@ -199,6 +201,8 @@ export default {
         // 페이지 번호에 맞는 게시글 요청 메소드
         // 동기적 동작을 위해 async/await 사용
         async getArticles(page){
+            this.AreArticlesAndCommentsLoaded = false; // 데이터 로드 전 다시 false 지정
+
             try {
                 // 각 검색 옵션 + 회원 id + pagination 옵션으로 게시글 get 요청
                 const getArticlesResponse = await axios.get('http://localhost:8090/api/board/articles', {
@@ -226,13 +230,15 @@ export default {
                 const articleIdsString = this.articleIds.join(',');
 
                 // 각 게시글의 댓글 수 get 요청
-                const commentNumbersResponse = await axios.get('http://localhost:8090/api/board/articles/comments/numbers', {
+                const commentNumbersResponse = await axios.get('http://localhost:8090/api/board/article/comment/numbers', {
                     params: {articleIds: articleIdsString}
                 })
 
                 // 각 게시글의 댓글 수 저장
                 // articles와 commentNumbers의 값은 인덱스가 동일하게 매치
                 this.commentNumbers = commentNumbersResponse.data;
+
+                this.AreArticlesAndCommentsLoaded = true; // 데이터 로드 완료
             } catch (error) {
                 console.log(error);
             }

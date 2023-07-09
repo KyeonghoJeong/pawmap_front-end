@@ -17,7 +17,8 @@
                     <th scope="col" class="th-col-board-date">날짜</th>
                 </tr>
             </thead>
-            <tbody>
+            <!-- 데이터 로드 완료 여부를 가지고 있는 AreArticlesAndCommentsLoaded가 true인 경우만 테이블 바디 출력 -->
+            <tbody v-if="AreArticlesAndCommentsLoaded">
                 <!-- 테이블 row 반복문으로 출력 -->
                 <!-- articles는 백엔드로부터 받은 게시글 데이터 -->
                 <tr v-for="(article, index) in articles" :key="article.articleId">
@@ -110,6 +111,7 @@ export default {
     data(){
         return{
             articles: [], // 해당 페이지에 해당하는 게시글 데이터를 백엔드에서 받아와서 저장할 배열
+            AreArticlesAndCommentsLoaded: false, // 전체 게시글 로드 완료 여부
             totalPages: '', // pagination을 위해 총 페이지 수를 백엔드에서 받아와서 저장할 변수
             page: '', // 쿼리로 받을 페이지 숫자
             pageActive: 1, // 첫 활성화 페이지 번호는 1로 초기화
@@ -128,20 +130,24 @@ export default {
     },
     methods:{
         // 페이지 번호에 맞는 게시글 목록을 조회하기 위한 메소드
-        getArticles(page){
-            axios.get('http://localhost:8090/api/board/articles', {
-                params: {
-                    title: this.title,
-                    writing: this.writing,
-                    nickname: this.nickname,
-                    memberId: this.memberId,
-                    page: page, 
-                    size: 10
-                }
-            })
-            .then(response => {
-                this.articles = response.data.content; // 게시글 목록 저장
-                this.totalPages = response.data.totalPages; // 총 페이지수 저장
+        // 동기적 동작을 위해 async/await 사용
+        async getArticles(page){
+            this.AreArticlesAndCommentsLoaded = false; // 데이터 로드 전 다시 false 지정
+
+            try {
+                const getArticlesResponse = await axios.get('http://localhost:8090/api/board/articles', {
+                    params: {
+                        title: this.title,
+                        writing: this.writing,
+                        nickname: this.nickname,
+                        memberId: this.memberId,
+                        page: page, 
+                        size: 10
+                    }
+                })
+
+                this.articles = getArticlesResponse.data.content; // 게시글 목록 저장
+                this.totalPages = getArticlesResponse.data.totalPages; // 총 페이지수 저장
 
                 // 댓글수 표기를 위한 코드
                 this.articleIds = []; // 초기화
@@ -153,21 +159,18 @@ export default {
                 // get 요청에 array을 같이 보내기 위해서 배열 내의 값들을 콤마로 결합
                 const articleIdsString = this.articleIds.join(',');
 
-                axios.get('http://localhost:8090/api/board/articles/comments/numbers', {
+                const commentNumbersResponse = await axios.get('http://localhost:8090/api/board/article/comment/numbers', {
                     params: {articleIds: articleIdsString}
                 })
-                .then(response => {
-                    this.commentNumbers = response.data; // 각 게시글의 댓글수 저장
 
-                    this.$router.replace({query: {page: page + 1}}).catch(()=>{}); // 쿼리 변경
-                })
-                .catch(error => {
-                    console.log(error);
-                })
-            })
-            .catch(error => {
+                this.commentNumbers = commentNumbersResponse.data; // 각 게시글의 댓글수 저장
+
+                this.AreArticlesAndCommentsLoaded = true; // 데이터 로드 완료
+
+                this.$router.replace({query: {page: page + 1}}).catch(()=>{}); // 쿼리 변경
+            } catch (error) {
                 console.log(error);
-            })
+            }
         },
         // 검색 시 게시판 하단의 검색바와 셀렉트의 값에 따라 게시글 요청을 위한 파라미터의 값을 설정하고 게시물을 요청하는 메소드
         getArticlesByQuery(){
