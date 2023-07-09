@@ -12,7 +12,8 @@
                     <th scope="col" class="th-bookmark-del">삭제</th>
                 </tr>
             </thead>
-            <tbody>
+            <!-- 북마크 데이터가 전부 로드되고 isBookmarksLoaded가 true인 경우만 테이블 바디 출력 -->
+            <tbody v-if="isBookmarksLoaded">
                 <!-- 북마크 수만큼 반복, 인덱스 포함-->
                 <tr v-for="(bookmarkInfo, index) in bookmarks" :key="bookmarkInfo.facilityId">
                     <th scope="row" class="th-bookmark-cat">{{bookmarkInfo.cat}}</th>
@@ -67,6 +68,7 @@ export default {
     data(){
         return{
             bookmarks: [], // 회원이 등록한 북마크를 저장할 배열
+            isBookmarksLoaded: false,
             checkedBookmarkIndex: [], // 체크박스로 체크한 북마크의 인덱스로 값을 저장할 배열
             checkedBookmarks: [], // 삭제할 북마크를 저장할 배열
             totalPages: '', // 총 북마크 페이지 수
@@ -81,9 +83,9 @@ export default {
         async getBookmarks(page){
             try {
                 // accessToken으로 북마크 get 요청
-                const getBookmarksResponse = await axios.get('http://localhost:8090/api/bookmarks', {
-                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
-                    params: {page: page, size: 10}
+                const getBookmarksResponse = await axios.get('http://localhost:8090/api/map/bookmarks', {
+                    params: {page: page, size: 10},
+                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                 })
 
                 // 응답 결과 유효하지 않은 acccessToken인 경우
@@ -132,20 +134,24 @@ export default {
                         localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
 
                         // accessToken으로 북마크 get 재요청
-                        const reGetBookmarksResponse = await axios.get('http://localhost:8090/api/bookmarks', {
-                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
-                            params: {page: 0, size: 10}
+                        const reGetBookmarksResponse = await axios.get('http://localhost:8090/api/map/bookmarks', {
+                            params: {page: page, size: 10},
+                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                         })
 
                         // accessToken이 유효한 경우 => post 요청 성공
                         if(reGetBookmarksResponse.data !== 'invalidAccessToken'){
                             this.bookmarks = reGetBookmarksResponse.data.content;
                             this.totalPages = reGetBookmarksResponse.data.totalPages;
+
+                            this.isBookmarksLoaded = true; // 데이터 수신 완료
                         }
                     }
                 }else{
                     this.bookmarks = getBookmarksResponse.data.content;
                     this.totalPages = getBookmarksResponse.data.totalPages;
+
+                    this.isBookmarksLoaded = true; // 데이터 수신 완료
                 }
             } catch (error) {
                 console.log(error);
@@ -172,10 +178,10 @@ export default {
                 }else{
                     try {
                         // accessToken + 체크한 시설 id로 delete 요청
-                        const deleteBookmarkResponse = await axios.delete('http://localhost:8090/api/bookmark', {
-                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
-                            data: this.checkedBookmarks
-                        })
+                        const deleteBookmarkResponse = await axios.delete('http://localhost:8090/api/map/bookmarks', {
+                            data: this.checkedBookmarks,
+                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                        });
 
                         // 응답 결과 유효하지 않은 acccessToken인 경우
                         if(deleteBookmarkResponse.data === 'invalidAccessToken'){
@@ -223,10 +229,10 @@ export default {
                                 localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
 
                                 // accessToken + 체크한 시설 id로 delete 재요청
-                                const reDeleteBookmarkResponse = await axios.delete('http://localhost:8090/api/bookmark', {
-                                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
-                                    data: this.checkedBookmarks
-                                })
+                                const reDeleteBookmarkResponse = await axios.delete('http://localhost:8090/api/map/bookmarks', {
+                                    data: this.checkedBookmarks,
+                                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                                });
 
                                 // accessToken이 유효한 경우 => 재요청 성공
                                 if(reDeleteBookmarkResponse.data !== 'invalidAccessToken'){

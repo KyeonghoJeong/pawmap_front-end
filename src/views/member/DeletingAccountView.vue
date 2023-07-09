@@ -114,16 +114,14 @@ export default{
                                     this.$router.push({path: "/"}); // 메인 페이지로 이동
                                     this.$router.go(this.$router.currentRoute); // 새로고침
                                 }
-                            }
+                            }   
                         }else{
-                            if(deleteAccountResponse.data === 'Success'){
-                                alert("회원탈퇴가 완료되었습니다.");
+                            alert("회원탈퇴가 완료되었습니다.");
 
-                                    localStorage.clear(); // 로컬 스토리지 클리어
+                            localStorage.clear(); // 로컬 스토리지 클리어
 
-                                    this.$router.push({path: "/"}); // 메인 페이지로 이동
-                                    this.$router.go(this.$router.currentRoute); // 새로고침
-                            }
+                            this.$router.push({path: "/"}); // 메인 페이지로 이동
+                            this.$router.go(this.$router.currentRoute); // 새로고침
                         }
                     } catch (error) {
                         if(error.response.status === 403){

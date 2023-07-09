@@ -169,11 +169,11 @@ export default {
                 if(confirm("정말 북마크에 등록하시겠습니까?")){
                     try {
                         // acccessToken + 시설 id로 post 요청
-                        const addBookmarkResponse = await axios.post('http://localhost:8090/api/bookmark', {
+                        const addBookmarkResponse = await axios.post('http://localhost:8090/api/map/bookmark', {
                             facilityId: facilityId
-                        },{
+                        }, {
                             headers:{'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                        })
+                        });
 
                         if(addBookmarkResponse.data === 'addedBookmark'){
                             alert("이미 북마크에 등록되어 있는 시설입니다.");
@@ -224,11 +224,11 @@ export default {
                                 localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
 
                                 // acccessToken + 시설 id로 post 재요청
-                                const reAddBookmarkResponse = await axios.post('http://localhost:8090/api/bookmark', {
+                                const reAddBookmarkResponse = await axios.post('http://localhost:8090/api/map/bookmark', {
                                     facilityId: facilityId
-                                },{
+                                }, {
                                     headers:{'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                                })
+                                });
 
                                 // accessToken이 유효한 경우 => post 요청 성공
                                 if(reAddBookmarkResponse.data !== 'invalidAccessToken'){
@@ -246,7 +246,7 @@ export default {
                 }
             }else{
                 // 로그인 상태가 아닌 경우 로그인 요청
-                alert("게시글 등록을 위해서는 로그인하셔야 합니다.");
+                alert("북마크 추가를 위해서는 로그인하셔야 합니다.");
                 
                 // 유저에게 바로 로그인 페이지로 이동할 지 묻기
                 if(confirm("로그인 하시겠습니까?")){
@@ -266,7 +266,7 @@ export default {
             marker.setZIndex(3);
             
             // 시설 정보 데이터 가져오기
-            axios.get('http://localhost:8090/api/facility', {params:{facilityId: facilityId}})
+            axios.get('http://localhost:8090/api/map/facility/information', {params:{facilityId: facilityId}})
             .then(response =>{
                 // 응답 데이터(해당 시설 id로 받아온 시설 정보) 설정
                 const facility = response.data;
@@ -486,116 +486,100 @@ export default {
         // 화면 왼쪽 시설 리스트와 화면 오른쪽 지도 위의 마커 설정을 위한 메소드
         // 읍면동 검색, select 선택 등 조건이 바뀔 때 시설 정보, 시설 위치 정보를 백엔드에서 받아와서 설정해주기 위한 메소드 
         async setListAndMarker(facilitiesUrl, facilityLocationsUrl, maxLevel, level){
-            // 시설 목록을 새로 받아와서 맵 이동, 마커 표시를 할 때 기존에 마커가 있는 상태인 경우
-            // 화면에 마커가 있는 상태에서 맵 이동을 하게 되어 부자연스러우므로 기존 마커 먼저 제거
-            // 기존 마커 제거 => markers 배열의 길이가 0보다 큰 경우 마커 정보가 들어있는 경우
-            if (this.markers.length > 0) {
-                // markers 배열에 있는 marker 수만큼 반복 => 각 marker 맵에서 지우기 
-                this.markers.forEach((marker) => {
-                    marker.setMap(null);
-                })
-                this.markers = []; // 마커 전부 초기화
-            }
-
             try {
                 const facilitiesResponse = await axios.get(facilitiesUrl);
 
-                this.facilities = facilitiesResponse.data.content; // 시설 정보 => 리스트 출력
-                this.totalPages = facilitiesResponse.data.totalPages; // => 페이지네이션을 위한 총 페이지 수
+                // 시설 정보 임시 변수에 담아 검색 결과에 존재하는지 먼저 체크
+                const tempFacilities = facilitiesResponse.data.content; // 시설 정보 => 리스트 출력   
 
-                // 리스트 출력 div 내부에 스크롤이 있는 경우 리스트 재출력 시 스크롤 상단으로 위치
-                if(typeof this.$refs.scrollController !== 'undefined'){
-                    this.$refs.scrollController.scrollTop = 0;
-                }
-
-                // pagination 변수 설정
-                // 페이지 번호 1~5까지 설정 
-                // startNum, endNum, pageActive 재설정
-                if(this.totalPages != 0){
-                    this.startNum = 1; // pagination 시작 번호
-                    this.endNum = this.totalPages; // 처음은 pagination 마지막 번호가 5이하라고 가정
-
-                    // 만약 마지막 번호가 5를 넘는 경우는 다음 pagination이므로 첫 번째 pagination의 최대치인 5로 설정 
-                    if(this.endNum > 5){
-                        this.endNum = 5;
-                    }
-                }
-                this.pageActive = this.startNum; // 첫 출력이므로 현재 선택 중인 페이지 1로 설정
-
-                this.zoomByWheel = false;
-                // 이전 출력 중인 맵의 레벨이 새로 지정할 최대 레벨보다 크면 줌 변화가 2번 발생하므로 체크
-                if(this.map.getLevel() > maxLevel){
-                    this.map.setLevel(level); // 지도 줌 레벨 먼저 설정
-                    this.map.setMaxLevel(maxLevel); // 지도 줌 변경 최대 레벨 설정
+                if(tempFacilities.length === 0) {
+                    // 검색 결과에 맞는 시설이 없는 경우
+                    alert("검색 결과가 존재하지 않습니다.");
                 }else{
-                    this.map.setMaxLevel(maxLevel); // 지도 줌 변경 최대 레벨 설정
-                    this.map.setLevel(level); // 지도 줌 레벨 설정
+                    this.facilities = tempFacilities; // 임시 변수 => 시설 정보 변수에 저장
+                    this.totalPages = facilitiesResponse.data.totalPages; // => 페이지네이션을 위한 총 페이지 수
+
+                    // 시설 목록을 새로 받아와서 맵 이동, 마커 표시를 할 때 기존에 마커가 있는 상태인 경우
+                    // 화면에 마커가 있는 상태에서 맵 이동을 하게 되어 부자연스러우므로 기존 마커 먼저 제거
+                    // 기존 마커 제거 => markers 배열의 길이가 0보다 큰 경우 마커 정보가 들어있는 경우
+                    if (this.markers.length > 0) {
+                        // markers 배열에 있는 marker 수만큼 반복 => 각 marker 맵에서 지우기 
+                        this.markers.forEach((marker) => {
+                            marker.setMap(null);
+                        })
+                        this.markers = []; // 마커 전부 초기화
+                    }
+
+                    // 리스트 출력 div 내부에 스크롤이 있는 경우 리스트 재출력 시 스크롤 상단으로 위치
+                    if(typeof this.$refs.scrollController !== 'undefined'){
+                        this.$refs.scrollController.scrollTop = 0;
+                    }
+
+                    // pagination 변수 설정
+                    // 페이지 번호 1~5까지 설정 
+                    // startNum, endNum, pageActive 재설정
+                    if(this.totalPages != 0){
+                        this.startNum = 1; // pagination 시작 번호
+                        this.endNum = this.totalPages; // 처음은 pagination 마지막 번호가 5이하라고 가정
+
+                        // 만약 마지막 번호가 5를 넘는 경우는 다음 pagination이므로 첫 번째 pagination의 최대치인 5로 설정 
+                        if(this.endNum > 5){
+                            this.endNum = 5;
+                        }
+                    }
+                    this.pageActive = this.startNum; // 첫 출력이므로 현재 선택 중인 페이지 1로 설정
+
+                    this.zoomByWheel = false;
+                    // 이전 출력 중인 맵의 레벨이 새로 지정할 최대 레벨보다 크면 줌 변화가 2번 발생하므로 체크
+                    if(this.map.getLevel() > maxLevel){
+                        this.map.setLevel(level); // 지도 줌 레벨 먼저 설정
+                        this.map.setMaxLevel(maxLevel); // 지도 줌 변경 최대 레벨 설정
+                    }else{
+                        this.map.setMaxLevel(maxLevel); // 지도 줌 변경 최대 레벨 설정
+                        this.map.setLevel(level); // 지도 줌 레벨 설정
+                    }
+                    this.zoomByWheel = true;
+
+                    // 시설 목록 중 제일 처음 시설 위치를 기준으로 맵 이동
+                    this.map.setCenter(new kakao.maps.LatLng(this.facilities[0].lat, this.facilities[0].lng));
+
+                    // 마커 설정을 위해 위치 정보 받기
+                    const facilityLocationsResponse = await axios.get(facilityLocationsUrl);
+
+                    this.facilityLocations = facilityLocationsResponse.data; // 해당 검색 조건에 맞는 시설들의 위치를 전부 받아옴
+
+                    this.markerPositions = []; // 마커 정보를 담을 리스트 초기화
+
+                    // 시설의 수 만큼 반복
+                    for(var i = 0; i < this.facilityLocations.length; i++){
+                        // 마커 생성을 위해 마커 정보 리스트에 각 시설의 id, 시설명, 위도, 경도 넣기
+                        this.markerPositions.push([
+                            this.facilityLocations[i].facilityId,
+                            this.facilityLocations[i].facilityName,
+                            this.facilityLocations[i].lat, 
+                            this.facilityLocations[i].lng
+                        ]);
+                    }
+
+                    // 마커 출력 메소드 호출
+                    this.displayMarker();
                 }
-                this.zoomByWheel = true;
-
-                // 시설 목록 중 제일 처음 시설 위치를 기준으로 맵 이동
-                this.map.setCenter(new kakao.maps.LatLng(this.facilities[0].lat, this.facilities[0].lng));
-
-                // 마커 설정을 위해 위치 정보 받기
-                const facilityLocationsResponse = await axios.get(facilityLocationsUrl);
-
-                this.facilityLocations = facilityLocationsResponse.data; // 해당 검색 조건에 맞는 시설들의 위치를 전부 받아옴
-
-                this.markerPositions = []; // 마커 정보를 담을 리스트 초기화
-
-                // 시설의 수 만큼 반복
-                for(var i = 0; i < this.facilityLocations.length; i++){
-                    // 마커 생성을 위해 마커 정보 리스트에 각 시설의 id, 시설명, 위도, 경도 넣기
-                    this.markerPositions.push([
-                        this.facilityLocations[i].facilityId,
-                        this.facilityLocations[i].facilityName,
-                        this.facilityLocations[i].lat, 
-                        this.facilityLocations[i].lng
-                    ]);
-                }
-
-                // 마커 출력 메소드 호출
-                this.displayMarker();
             } catch (error) {
                 console.log(error);
             }
         },
         // 동 이름 검색 시 화면 설정 메소드
         setMapByEmd(){
-            // 읍면동 검색값에 해당하는 시설이 있는지 체크 
-            axios.get('http://localhost:8090/api/facilities/availability', {params:{emd: this.emd}})
-            .then(response =>{
-                // 해당하는 시설 갯수 리턴 받기
-                const count = response.data;
+            // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
+            this.contentUrl = `http://localhost:8090/api/map/facilities?emd=${this.emd}`;
 
-                // 해당 시설 없는 경우 안내
-                if(count == 0){
-                    alert("존재하지 않는 동 이름입니다.");
-
-                    this.emd = '';
-                }else{
-                    // 해당 시설이 있는 경우
-
-                    // 검색 시 select 메뉴 모두 초기화
-                    this.selectedCat = '';
-                    this.selectedSido = '';
-                    this.selectedSigungu = '';
-                    this.selectedEmd = '';
-
-                    this.contentUrl = `http://localhost:8090/api/facilities?emd=${this.emd}`;
-
-                    // 시설 리스트, 마커 설정 메소드 호출
-                    this.setListAndMarker(
-                        `http://localhost:8090/api/facilities?emd=${this.emd}&page=0&size=${this.size}`,
-                        `http://localhost:8090/api/facilities/locations?emd=${this.emd}`,
-                        8,
-                        5
-                    );
-                }
-            })
-            .catch(error =>{
-                console.log(error);
-            })
+            // 시설 리스트, 마커 설정 메소드 호출
+            this.setListAndMarker(
+                `http://localhost:8090/api/map/facilities?emd=${this.emd}&page=0&size=${this.size}`,
+                `http://localhost:8090/api/map/facility/locations?emd=${this.emd}`,
+                8,
+                5
+            );
 
             this.$router.replace({query: {emd: this.emd}}); // 쿼리 바꾸기
         },
@@ -667,49 +651,43 @@ export default {
         // 위치 지정 or not => 시설 정보 데이터 받기 => 시설 위치 데이터 받기 => displayMap() => displayMarker()
         // 동기적 동작을 위해 async 지정
         async initMap() {
+            let currentLat; // 현재 위치 위도
+            let currentLng; // 현재 위치 경고
+
+            // 현재 위치의 위도 및 경도 설정
+            try {
+                // 현재 또는 기본 위치 정보 받기
+                const position = await this.getPosition();
+
+                currentLat = position.latitude; // 현재 위치 또는 기본값 위도
+                currentLng = position.longitude; // 현재 위치 또는 기본값 경도
+            } catch (error) {
+                console.log(error);
+            }
+
             if(typeof this.emd === 'undefined' && typeof this.cat === 'undefined'){
-                // 동 이름 검색도 카테고리를 선택한 경우도 아닌 경우 = 헤더의 메뉴 버튼을 누른 경우
-                try {
-                    // 현재 또는 기본 위치 정보 받기
-                    const position = await this.getPosition();
-
-                    const lat = position.latitude; // 현재 위치 또는 기본값 위도
-                    const lng = position.longitude; // 현재 위치 또는 기본값 경도
-
-                    // 카카오맵 객체 생성 메소드
-                    this.displayMap(lat, lng);
-                } catch (error) {
-                    console.log(error);
-                }
+                // 지도 메뉴를 클릭한 경우
+                this.displayMap(currentLat, currentLng);
             }else{
                 let facilitiesUrl; // 시설 정보 데이터 get 요청 주소
                 let facilityLocationsUrl; // 시설 위치 데이터 get 요청 주소
 
                 if(typeof this.emd !== 'undefined'){
                     // 메인 페이지에서 동 이름을 검색한 경우
-                    facilitiesUrl = `http://localhost:8090/api/facilities?emd=${this.emd}&page=0&size=${this.size}`;
-                    facilityLocationsUrl = `http://localhost:8090/api/facilities/locations?emd=${this.emd}`;
+                    facilitiesUrl = `http://localhost:8090/api/map/facilities?emd=${this.emd}&page=0&size=${this.size}`;
+                    facilityLocationsUrl = `http://localhost:8090/api/map/facility/locations?emd=${this.emd}`;
 
                     // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
-                    this.contentUrl = `http://localhost:8090/api/facilities?emd=${this.emd}`;
+                    this.contentUrl = `http://localhost:8090/api/map/facilities?emd=${this.emd}`;
                 }else if(typeof this.cat !== 'undefined'){
                     // 메인 페이지에서 카테고리를 클릭한 경우
-                    try {
-                        // 현재 또는 기본 위치 정보 받기
-                        const position = await this.getPosition();
+                    facilitiesUrl = `http://localhost:8090/api/map/facilities?cat=${this.cat}&lat=${currentLat}&lng=${currentLng}&page=0&size=${this.size}`;
+                    facilityLocationsUrl = `http://localhost:8090/api/map/facility/locations?cat=${this.cat}`;
 
-                        const lat = position.latitude; // 현재 위치 또는 기본값 위도
-                        const lng = position.longitude; // 현재 위치 또는 기본값 경도
+                    // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
+                    this.contentUrl = `http://localhost:8090/api/map/facilities?cat=${this.cat}&lat=${currentLat}&lng=${currentLng}`;
 
-                        facilitiesUrl = `http://localhost:8090/api/facilities?cat=${this.cat}&lat=${lat}&lng=${lng}&page=0&size=${this.size}`;
-                        facilityLocationsUrl = `http://localhost:8090/api/facilities/locations?cat=${this.cat}`;
-
-                        // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
-                        this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.cat}&lat=${lat}&lng=${lng}`;
-                    } catch(error) {
-                        console.log(error);
-                    }
-
+                    // 쿼리에 따라 카테고리 select 출력 변경
                     if(this.cat === '동물용품'){
                         this.selectedCat = '반려동물용품';
                     }else{
@@ -721,26 +699,37 @@ export default {
                     // 시설 정보 get 요청
                     const facilitiesResponse = await axios.get(facilitiesUrl);
 
-                    this.facilities = facilitiesResponse.data.content; // 시설 정보 데이터 받기
-                    this.totalPages = facilitiesResponse.data.totalPages; // 총 페이지 수 받기
+                    // 시설 정보 임시 변수에 담아 검색 결과에 존재하는지 먼저 체크
+                    const tempFacilities = facilitiesResponse.data.content;
 
-                    // 시설 위치 정보 get 요청
-                    const facilityLocationsResponse = await axios.get(facilityLocationsUrl);
+                    if(tempFacilities.length === 0){
+                        // 동 이름 검색 시 해당하는 시설이 없는 경우 안내
+                        alert("검색 결과가 존재하지 않습니다.");
 
-                    this.facilityLocations = facilityLocationsResponse.data; // 시설 위치 정보 받기
+                        // 지도만 출력
+                        this.displayMap(currentLat, currentLng);
+                    }else{
+                        this.facilities = tempFacilities; // 임시 변수 => 시설 정보 변수에 저장
+                        this.totalPages = facilitiesResponse.data.totalPages; // => 페이지네이션을 위한 총 페이지 수
 
-                    // 시설 위치의 수만큼 반복하여 마커 위치를 담는 배열에 위치 정보 데이터 저장
-                    for(let i = 0; i < this.facilityLocations.length; i++){
-                        this.markerPositions.push([
-                            this.facilityLocations[i].facilityId,
-                            this.facilityLocations[i].facilityName,
-                            this.facilityLocations[i].lat, 
-                            this.facilityLocations[i].lng
-                        ]);
+                        // 시설 위치 정보 get 요청
+                        const facilityLocationsResponse = await axios.get(facilityLocationsUrl);
+
+                        this.facilityLocations = facilityLocationsResponse.data; // 시설 위치 정보 받기
+
+                        // 시설 위치의 수만큼 반복하여 마커 위치를 담는 배열에 위치 정보 데이터 저장
+                        for(let i = 0; i < this.facilityLocations.length; i++){
+                            this.markerPositions.push([
+                                this.facilityLocations[i].facilityId,
+                                this.facilityLocations[i].facilityName,
+                                this.facilityLocations[i].lat, 
+                                this.facilityLocations[i].lng
+                            ]);
+                        }
+
+                        this.displayMap(this.facilities[0].lat, this.facilities[0].lng); // displayMap 메소드 호출
+                        this.displayMarker(); // 마커 그리기
                     }
-
-                    this.displayMap(this.facilities[0].lat, this.facilities[0].lng); // displayMap 메소드 호출
-                    this.displayMarker(); // 마커 그리기
                 } catch (error) {
                     console.log(error);
                 }
@@ -930,7 +919,7 @@ export default {
                 alert("카테고리를 먼저 선택해주세요");
             }else{
                 // select에 올 수 있는 시도 목록 요청
-                axios.get('http://localhost:8090/api/districts/sido')
+                axios.get('http://localhost:8090/api/map/district/sidos')
                 .then(response =>{
                     this.sidoOptions = response.data;
                 })
@@ -946,7 +935,7 @@ export default {
                 alert("시도를 먼저 선택해주세요");
             }else{
                 // select에 올 수 있는 시군구 목록 요청 => 선택된 시도의 id를 보내서 해당 id 값을 같이 가지고 있는 시군구 옵션만 받음
-                axios.get('http://localhost:8090/api/districts/sigungu', {params:{sidoId: this.selectedSido.sidoId}})
+                axios.get('http://localhost:8090/api/map/district/sigungus', {params:{sidoId: this.selectedSido.sidoId}})
                 .then(response =>{
                     this.sigunguOptions = response.data;
                 })
@@ -962,7 +951,7 @@ export default {
                 alert("시군구를 먼저 선택해주세요");
             }else{
                 // select에 올 수 있는 읍면동 목록 요청 => 선택된 시군구의 id를 보내서 해당 id 값을 같이 가지고 있는 읍면동 옵션만 받음
-                axios.get('http://localhost:8090/api/districts/emd', {params:{sigunguId: this.selectedSigungu.sigunguId}})
+                axios.get('http://localhost:8090/api/map/district/emds', {params:{sigunguId: this.selectedSigungu.sigunguId}})
                 .then(response =>{
                     this.emdOptions = response.data;
                 })
@@ -972,51 +961,25 @@ export default {
             }
         },
         // select 메뉴에서 카테고리 선택 시 실행되는 메소드 => 카테고리에 맞는 시설 목록/마커 출력
-        getFacilitiesByCat(){
+        // getPosition() 메소드 사용을 위해 동기적 동작 => async/await
+        async getFacilitiesByCat(){
             // select 디폴트 값 선택한 경우 제외
             if(this.selectedCat !== ''){
+                const position = await this.getPosition(); // 현재 위치의 위도, 경도 받기
+
+                const currentLat = position.latitude; // 현재 위치 또는 기본값 위도
+                const currentLng = position.longitude; // 현재 위치 또는 기본값 경도
+
                 // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
+                this.contentUrl = `http://localhost:8090/api/map/facilities?cat=${this.selectedCat}&lat=${currentLat}&lng=${currentLng}`;
+
                 // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url, 줌 최대 레벨, 줌 레벨
-
-                // 위치 액세스 사용 가능한 경우
-                if(navigator.geolocation){
-                    navigator.geolocation.getCurrentPosition(
-                        // 현재 위치를 가져올 수 있는 경우
-                        (position) => {
-                            this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${position.coords.latitude}&lng=${position.coords.longitude}`;
-
-                            this.setListAndMarker(
-                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${position.coords.latitude}&lng=${position.coords.longitude}&page=0&size=${this.size}`,
-                                `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`,
-                                6,
-                                5
-                            );
-                        },
-                        (error) => {
-                            // 현재 위치를 가져올 수 없는 경우
-                            console.log(error);
-
-                            this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}`;
-
-                            this.setListAndMarker(
-                                `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}&page=0&size=${this.size}`,
-                                `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`,
-                                6,
-                                5
-                            );
-                        }
-                    )
-                }else{
-                    // 위치 액세스 사용 불가한 경우
-                    this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}`;
-
-                    this.setListAndMarker(
-                        `http://localhost:8090/api/facilities?cat=${this.selectedCat}&lat=${37.566535}&lng=${126.9779692}&page=0&size=${this.size}`,
-                        `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}`,
-                        6,
-                        5
-                    );
-                }
+                this.setListAndMarker(
+                    `http://localhost:8090/api/map/facilities?cat=${this.selectedCat}&lat=${currentLat}&lng=${currentLng}&page=0&size=${this.size}`,
+                    `http://localhost:8090/api/map/facility/locations?cat=${this.selectedCat}`,
+                    6,
+                    5
+                );
 
                 // 쿼리 변경
                 if(this.selectedCat === '반려동물용품'){
@@ -1024,136 +987,54 @@ export default {
                 }else{
                     this.$router.replace({query: {cat: this.selectedCat}});
                 }
-
-                this.emd = ''; // 동 이름 검색 변수 초기화
             }
         },
         // select 메뉴에서 시도 선택(변경) 시 실행되는 메소드 => 해당 시도에 맞는 시설 목록/마커 출력
         getFacilitiesBySido(){
             // select 디폴트 값 선택한 경우 제외
             if(this.selectedSido !== ''){
-                // 먼저 카테고리 + 선택한 시도에 해당하는 시설의 수 요청
-                axios.get('http://localhost:8090/api/facilities/availability', {
-                    params:{
-                        cat: this.selectedCat,
-                        sido: this.selectedSido.sidoName
-                    }
-                })
-                .then(response =>{
-                    const count = response.data;
-
-                    // 해당하는 시설의 수가 0인 경우
-                    if(count === 0){
-                        alert("해당하는 시설이 없습니다.");
-
-                        this.selectedSido = ''; // 시도 선택 초기화
-                    }else{
-                        // 해당하는 시설이 있는 경우
-
-                        // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
-                        this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`;
-                        
-                        // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url, 줌 최대 레벨, 줌 레벨
-                        this.setListAndMarker(
-                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&page=0&size=${this.size}`,
-                            `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`,
-                            8,
-                            8
-                        );
-                    }
-                })
-                .catch(error =>{
-                    console.log(error);
-                })
-
-                this.emd = ''; // 동 이름 검색 변수 초기화
+                // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
+                this.contentUrl = `http://localhost:8090/api/map/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`;
+                
+                // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url, 줌 최대 레벨, 줌 레벨
+                this.setListAndMarker(
+                    `http://localhost:8090/api/map/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&page=0&size=${this.size}`,
+                    `http://localhost:8090/api/map/facility/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}`,
+                    8,
+                    8
+                );
             }
         },
         // select 메뉴에서 시군구 선택(변경) 시 실행되는 메소드 => 해당 시군구에 맞는 시설 목록/마커 출력
         getFacilitiesBySigungu(){
             // select 디폴트 값 선택한 경우 제외
             if(this.selectedSigungu !== ''){
-                // 먼저 카테고리 + 선택 시도 + 선택 시군구에 해당하는 시설의 수 요청
-                axios.get('http://localhost:8090/api/facilities/availability', {
-                    params:{
-                        cat: this.selectedCat,
-                        sido: this.selectedSido.sidoName,
-                        sigungu: this.selectedSigungu.sigunguName
-                    }
-                })
-                .then(response =>{
-                    const count = response.data;
+                // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
+                this.contentUrl = `http://localhost:8090/api/map/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`;
 
-                    // 해당하는 시설의 수가 0인 경우
-                    if(count === 0){
-                        alert("해당하는 시설이 없습니다.");
-
-                        this.selectedSigungu = '';
-                    }else{
-                        // 해당하는 시설이 있는 경우
-
-                        // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
-                        // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url
-
-                        this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`;
-
-                        this.setListAndMarker(
-                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&page=0&size=${this.size}`,
-                            `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`,
-                            8,
-                            6
-                        );
-                    }
-                })
-                .catch(error =>{
-                    console.log(error);
-                })
-
-                this.emd = ''; // 동 이름 검색 변수 초기화
+                // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url
+                this.setListAndMarker(
+                    `http://localhost:8090/api/map/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&page=0&size=${this.size}`,
+                    `http://localhost:8090/api/map/facility/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}`,
+                    8,
+                    6
+                );
             }
         },
         // select 메뉴에서 읍면동 선택(변경) 시 실행되는 메소드 => 해당 읍면동에 맞는 시설 목록/마커 출력
         getFacilityByEmd(){
             // select 디폴트 값 선택한 경우 제외
             if(this.selectedEmd !== ''){
-                // 먼저 카테고리 + 선택 시도 + 선택 시군구 + 선택 읍면동에 해당하는 시설의 수 요청
-                axios.get('http://localhost:8090/api/facilities/availability', {
-                    params:{
-                        cat: this.selectedCat,
-                        sido: this.selectedSido.sidoName,
-                        sigungu: this.selectedSigungu.sigunguName,
-                        emd: this.selectedEmd.emdName
-                    }
-                })
-                .then(response =>{
-                    const count = response.data;
+                // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
+                this.contentUrl = `http://localhost:8090/api/map/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`;
 
-                    // 해당하는 시설의 수가 0인 경우
-                    if(count === 0){
-                        alert("해당하는 시설이 없습니다.");
-
-                        this.selectedEmd = '';
-                    }else{
-                        // 해당하는 시설이 있는 경우
-
-                        // contentUrl => pagination 페이지 번호, 사이즈를 제외한 get 요청 url
-                        // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url
-
-                        this.contentUrl = `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`;
-
-                        this.setListAndMarker(
-                            `http://localhost:8090/api/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}&page=0&size=${this.size}`,
-                            `http://localhost:8090/api/facilities/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`,
-                            8,
-                            5
-                        );
-                    }
-                })
-                .catch(error =>{
-                    console.log(error);
-                })   
-                
-                this.emd = ''; // 동 이름 검색 변수 초기화
+                // setListAndMarker 파라미터 => 시설 정보 get 요청 url, 시설 위치 정보 get 요청 url
+                this.setListAndMarker(
+                    `http://localhost:8090/api/map/facilities?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}&page=0&size=${this.size}`,
+                    `http://localhost:8090/api/map/facility/locations?cat=${this.selectedCat}&sido=${this.selectedSido.sidoName}&sigungu=${this.selectedSigungu.sigunguName}&emd=${this.selectedEmd.emdName}`,
+                    8,
+                    5
+                );
             }
         },
         // 이전 버튼 클릭 시 startNum, endNum 재설정을 위한 메소드

@@ -318,12 +318,13 @@ export default ({
         /* 아이디, 닉네임, 이메일, 인증코드 각 버튼의 너비 및 색 지정 */
         width: 25%;
         background-color: #fd7e14;
-        border-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
+        color: white;
     }
     .button-SignUp-id:hover, .button-SignUp-nickname:hover, .button-SignUp-email:hover, .button-SignUp-authcode:hover{
         /* 아이디, 닉네임, 이메일, 인증코드 각 버튼의 마우스오버 시 색 변경 */
         background-color: white;
-        border-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
         color: black;
     }
     .div-SignUp-confirm{
@@ -334,12 +335,13 @@ export default ({
         /* 확인 버튼 너비 및 색 지정 */
         width: 100%;
         background-color: #fd7e14;
-        border-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
+        color: white;
     }
     .button-SignUp-confirm:hover{
         /* 확인 버튼 마우스오버 시 색 변경 */
         background-color: white;
-        border-color: #fd7e14;
+        border-color: rgb(219, 219, 219);
         color: black;
     }
     /* 너비가 992 이하 시 div 재조정 */

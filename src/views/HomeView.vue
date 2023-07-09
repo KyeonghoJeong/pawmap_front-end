@@ -46,38 +46,21 @@
 </template>
 
 <script>
-import axios from 'axios';
-
-export default{
-    data(){
-        return{
-            emd: '', // 읍면동 검색 시 저장 변수
-            cat: '', // 카테고리 클릭 시 저장 변수
-            categories: ['동물병원', '동물약국', '동물용품', '위탁관리', '미용', '카페', '펜션', '여행지'], // 카테고리 이름 배열
-        }
-    },
-    methods:{
-        toMapWithEmd(){
-            // 검색한 읍면동 이름이 DB 테이블에 등록되어 있는 지 유효성 확인
-            axios.get('http://localhost:8090/api/facilities/availability', {params:{emd: this.emd}})
-            .then(response =>{
-                const count = response.data;
-
-                // 수신한 count의 값이 0이면 검색한 읍면동 이름이 DB 테이블에 등록되어 있지 않은 경우로 안내 메시지 출력 
-                if(count == 0){
-                    alert("존재하지 않는 동 이름입니다.");
-                }else{
-                    // 수신한 count의 값이 0이 아니면 검색한 읍면동 이름이 DB 테이블에 등록되어 있는 경우
-                    // 해당 읍면동 이름을 쿼리로 /map에 전달
-                    this.$router.push({ path: "/map", query: {emd: this.emd}});
-                }
-            })
-            .catch(error =>{
-                console.log(error);
-            })
+    export default{
+        data(){
+            return{
+                emd: '', // 읍면동 검색 시 저장 변수
+                cat: '', // 카테고리 클릭 시 저장 변수
+                categories: ['동물병원', '동물약국', '동물용품', '위탁관리', '미용', '카페', '펜션', '여행지'], // 카테고리 이름 배열
+            }
+        },
+        methods:{
+            toMapWithEmd(){
+                // 해당 읍면동 이름을 쿼리로 /map에 전달
+                this.$router.push({ path: "/map", query: {emd: this.emd}});
+            }
         }
     }
-}
 </script>
 
 <style>
