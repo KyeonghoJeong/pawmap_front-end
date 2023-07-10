@@ -107,21 +107,37 @@ export default{
 
                                 // accessToken이 유효한 경우 => 재요청 성공
                                 if(reDeleteAccountResponse.data !== 'invalidAccessToken'){
-                                    alert("회원탈퇴가 완료되었습니다.");
+                                    // 이전 과정에서 토큰 인증되었으므로 바로 토큰 검증없이 삭제 요청
+                                    const deleteBookmarksResponse = await axios.delete('http://localhost:8090/api/member/bookmarks', {
+                                        headers: {'Authorization': `Bearer ${localhost.getItem("accessToken")}`}
+                                    })
 
-                                    localStorage.clear(); // 로컬 스토리지 클리어
+                                    // 요청 및 응답 성공 시
+                                    if(deleteBookmarksResponse.status === 200){
+                                        alert("회원탈퇴가 완료되었습니다.");
 
-                                    this.$router.push({path: "/"}); // 메인 페이지로 이동
-                                    this.$router.go(this.$router.currentRoute); // 새로고침
+                                        localStorage.clear(); // 로컬 스토리지 클리어
+
+                                        this.$router.push({path: "/"}); // 메인 페이지로 이동
+                                        this.$router.go(this.$router.currentRoute); // 새로고침
+                                    }
                                 }
                             }   
                         }else{
-                            alert("회원탈퇴가 완료되었습니다.");
+                            // 이전 과정에서 토큰 인증되었으므로 바로 토큰 검증없이 삭제 요청
+                            const deleteBookmarksResponse = await axios.delete('http://localhost:8090/api/member/bookmarks', {
+                                headers: {'Authorization': `Bearer ${localhost.getItem("accessToken")}`}
+                            })
 
-                            localStorage.clear(); // 로컬 스토리지 클리어
+                            // 요청 및 응답 성공 시
+                            if(deleteBookmarksResponse.status === 200){
+                                alert("회원탈퇴가 완료되었습니다.");
 
-                            this.$router.push({path: "/"}); // 메인 페이지로 이동
-                            this.$router.go(this.$router.currentRoute); // 새로고침
+                                localStorage.clear(); // 로컬 스토리지 클리어
+
+                                this.$router.push({path: "/"}); // 메인 페이지로 이동
+                                this.$router.go(this.$router.currentRoute); // 새로고침
+                            }
                         }
                     } catch (error) {
                         if(error.response.status === 403){
