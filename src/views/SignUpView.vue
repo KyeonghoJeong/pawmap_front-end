@@ -69,7 +69,7 @@ export default ({
             validMemberId: false, // 회원 아이디 유효성 확인
             validNickname: false, // 닉네임 유효성 확인
             validEmail: false, // 이메일 유효성 확인
-            authCode: '', // 인증코드
+            emailAuthCode: '', // 인증코드
             inputCode: '', // 유저가 입력한 인증코드
         }
     },
@@ -84,7 +84,9 @@ export default ({
 
             if(pattern.test(this.memberId) && this.memberId.length >= minLength && this.memberId.length <= maxLength){
                 // 입력한 아이디(memberId)의 패턴, 길이 체크 후 모두 참일 때 중복 확인을 위해 입력 아이디로 get 요청
-                axios.get('http://localhost:8090/api/validation/memberid', {params:{memberId: this.memberId}})
+                axios.get('http://localhost:8090/api/member/member-id/number', {
+                    params: {memberId: this.memberId}
+                })
                 .then(reponse => {
                     if(reponse.data === 0){
                         // 입력 아이디가 DB에 없는 경우
@@ -119,7 +121,9 @@ export default ({
             
             if(pattern.test(this.nickname) && this.nickname.length >= minLength && this.nickname.length <= maxLength){
                 // 입력한 닉네임(nickname)의 패턴, 길이 체크 후 모두 참일 때 중복 확인을 위해 입력 닉네임으로 get 요청
-                axios.get('http://localhost:8090/api/validation/nickname', {params:{nickname: this.nickname}})
+                axios.get('http://localhost:8090/api/member/nickname/number', {
+                    params: {nickname: this.nickname}
+                })
                 .then(response => {
                     if(response.data === 0){
                         // 입력 닉네임이 DB에 없는 경우
@@ -153,15 +157,19 @@ export default ({
                 // 입력 이메일이 패턴에 부합하는 경우
                 try {
                     // 입력한 이메일(email)의 패턴 체크 후 참일 때 중복 확인을 위해 입력 이메일로 get 요청
-                    const checkEmailResponse = await axios.get('http://localhost:8090/api/validation/email', {params:{email:this.email}});
+                    const checkEmailResponse = await axios.get('http://localhost:8090/api/member/email/number', {
+                        params: {email: this.email}
+                    });
                     
                     if(checkEmailResponse.data === 0){
                         // 입력 이메일이 DB에 없는 경우
 
                         // 이메일 인증 요청
-                        const getAuthCodeResponse = await axios.get('http://localhost:8090/api/certification/email', {params:{email: this.email}});
+                        const getAuthCodeResponse = await axios.get('http://localhost:8090/api/auth/email-auth-code', {
+                            params: {email: this.email}
+                        });
 
-                        this.authCode = getAuthCodeResponse.data; // 이메일 인증 코드
+                        this.emailAuthCode = getAuthCodeResponse.data; // 이메일 인증 코드
                         
                         alert("인증 메일이 발송되었습니다.");
                     }else{
@@ -183,11 +191,11 @@ export default ({
         },
         // 이메일 인증 코드를 확인하는 메소드
         certifyEmail(){
-            if(this.authCode == ''){
+            if(this.emailAuthCode == ''){
                 alert("메일 인증 버튼을 클릭해서 인증 메일을 발송해주세요.");
             }else{
                 // 유저 입력 코드와 이메일 인증 코드를 String으로 형변환해서 비교
-                if(String(this.inputCode) === String(this.authCode)){
+                if(String(this.inputCode) === String(this.emailAuthCode)){
                     // 유저 입력 코드와 이메일 인증 코드가 같은 경우
                     this.validEmail = true; // 유효한 이메일 최종 확인(true)
                     
@@ -241,7 +249,7 @@ export default ({
                 alert("이메일을 인증해주세요.");
             }else {
                 if(this.checkPassword()){
-                    axios.post('http://localhost:8090/api/member/signup', {
+                    axios.post('http://localhost:8090/api/auth/member', {
                         memberId: this.memberId,
                         pw: this.password,
                         nickname: this.nickname,

@@ -183,38 +183,19 @@ export default {
                             // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
                             // axios의 동기적 동작을 위해 async/await 사용
                             // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                            const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
+                            const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
                                 withCredentials: true
                             })
 
                             // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
                             if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
                                 localStorage.removeItem("accessToken");
-                                // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
-                                localStorage.removeItem("authority");
+                                localStorage.removeItem("role");
 
                                 // 로그인 만료 알림
                                 alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-
-                                // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                                if(confirm("다시 로그인하시겠습니까?")){
-                                    // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                                    localStorage.setItem("previousPage", this.$route.fullPath);
-
-                                    // 확인 버튼 누른 경우 로그인 페이지로 이동
-                                    this.$router.push({path: "/signin"});
-                                }
-
-                                // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
-                                if(this.$route.path === "/board/writing"
-                                    || this.$route.path === "/board/modifying"
-                                    || this.$route.path === "/mypage" 
-                                    || this.$route.path === "/mypage/deletingAccount" 
-                                    || this.$route.path === "/admin"){
-                                    this.$router.push({path: "/"});
-                                }
-
+                                
                                 // header 메뉴 갱신을 위해 새로고침
                                 this.$router.go(this.$router.currentRoute);
                             }else {
@@ -246,16 +227,7 @@ export default {
                 }
             }else{
                 // 로그인 상태가 아닌 경우 로그인 요청
-                alert("북마크 추가를 위해서는 로그인하셔야 합니다.");
-                
-                // 유저에게 바로 로그인 페이지로 이동할 지 묻기
-                if(confirm("로그인 하시겠습니까?")){
-                    // 로그인 후 현재 페이지로 돌아오기 위해 로컬 스토리지에 현재 페이지 주소 저장
-                    localStorage.setItem("previousPage", this.$route.fullPath);
-                    
-                    // 로그인 페이지로 이동
-                    this.$router.push('/signin');
-                }
+                alert("북마크 추가를 위해서는 로그인해야 합니다.");
             }
         },
         // 마커 클릭 또는 상세보기 클릭 시 마커 옆에 출력할 오버레이 설정 메소드
@@ -266,7 +238,9 @@ export default {
             marker.setZIndex(3);
             
             // 시설 정보 데이터 가져오기
-            axios.get('http://localhost:8090/api/map/facility/information', {params:{facilityId: facilityId}})
+            axios.get('http://localhost:8090/api/map/facility', {
+                params: {facilityId: facilityId}
+            })
             .then(response =>{
                 // 응답 데이터(해당 시설 id로 받아온 시설 정보) 설정
                 const facility = response.data;

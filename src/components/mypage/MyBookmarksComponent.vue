@@ -70,7 +70,7 @@ export default {
             bookmarks: [], // 회원이 등록한 북마크를 저장할 배열
             isBookmarksLoaded: false,
             checkedBookmarkIndex: [], // 체크박스로 체크한 북마크의 인덱스로 값을 저장할 배열
-            checkedBookmarks: [], // 삭제할 북마크를 저장할 배열
+            checkedFacilityIds: [], // 삭제할 북마크를 저장할 배열
             totalPages: '', // 총 북마크 페이지 수
             pageActive: 1, // pagination 초기 선택 페이지
             startNum: 0, // pagination 초기 시작 숫자 
@@ -82,6 +82,7 @@ export default {
         // 동기적 동작을 위해 async 지정
         async getBookmarks(page){
             this.isBookmarksLoaded = false; // 데이터 로드 전 다시 false 지정
+            this.checkedBookmarkIndex = []; // 체크박스 초기화
 
             try {
                 // accessToken으로 북마크 get 요청
@@ -95,37 +96,18 @@ export default {
                     // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
                     // axios의 동기적 동작을 위해 async/await 사용
                     // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                    const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
+                    const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
                         withCredentials: true
                     })
 
                     // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
                     if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
                         localStorage.removeItem("accessToken");
-                        // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
-                        localStorage.removeItem("authority");
+                        localStorage.removeItem("role");
 
                         // 로그인 만료 알림
                         alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-
-                        // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                        if(confirm("다시 로그인하시겠습니까?")){
-                            // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                            localStorage.setItem("previousPage", this.$route.fullPath);
-
-                            // 확인 버튼 누른 경우 로그인 페이지로 이동
-                            this.$router.push({path: "/signin"});
-                        }
-
-                        // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
-                        if(this.$route.path === "/board/writing"
-                            || this.$route.path === "/board/modifying"
-                            || this.$route.path === "/mypage" 
-                            || this.$route.path === "/mypage/deletingAccount" 
-                            || this.$route.path === "/admin"){
-                            this.$router.push({path: "/"});
-                        }
 
                         // header 메뉴 갱신을 위해 새로고침
                         this.$router.go(this.$router.currentRoute);
@@ -164,24 +146,26 @@ export default {
         async deleteBookmark(){
             if(confirm("정말 삭제하시겠습니까?")){
                 // 삭제할 북마크 배열 초기화
-                this.checkedBookmarks = [];
+                this.checkedFacilityIds = [];
 
                 // 현재 북마크 배열에 저장되어 있는 북마크 수 만큼 반복
                 for(let i=0; i<this.bookmarks.length; i++){
                     if(this.checkedBookmarkIndex[i] === true){
                         // checkedBookmarkIndex[i]가 true이면 체크박스 체크를 의미
-                        // checkedBookmarkIndex와 bookmarks의 인덱스는 같으므로 checkedBookmarks에 삭제할 북마크의 시설 id를 push
-                        this.checkedBookmarks.push(this.bookmarks[i].facilityId);
+                        // checkedBookmarkIndex와 bookmarks의 인덱스는 같으므로 checkedFacilityIds에 삭제할 북마크의 시설 id를 push
+                        this.checkedFacilityIds.push(this.bookmarks[i].facilityId);
                     }
                 }
 
-                if(this.checkedBookmarks.length === 0){
+                if(this.checkedFacilityIds.length === 0){
                     alert("선택된 북마크가 없습니다.");
                 }else{
                     try {
+                        const checkedFacilityIdsString = this.checkedFacilityIds.join(','); // param으로 전달하기 위해 String으로 만들기
+
                         // accessToken + 체크한 시설 id로 delete 요청
                         const deleteBookmarkResponse = await axios.delete('http://localhost:8090/api/map/bookmarks', {
-                            data: this.checkedBookmarks,
+                            params: {facilityIds: checkedFacilityIdsString},
                             headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                         });
 
@@ -190,37 +174,18 @@ export default {
                             // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
                             // axios의 동기적 동작을 위해 async/await 사용
                             // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                            const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
+                            const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
                                 withCredentials: true
                             })
 
                             // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
                             if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
                                 localStorage.removeItem("accessToken");
-                                // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
-                                localStorage.removeItem("authority");
+                                localStorage.removeItem("role");
 
                                 // 로그인 만료 알림
                                 alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-
-                                // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                                if(confirm("다시 로그인하시겠습니까?")){
-                                    // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                                    localStorage.setItem("previousPage", this.$route.fullPath);
-
-                                    // 확인 버튼 누른 경우 로그인 페이지로 이동
-                                    this.$router.push({path: "/signin"});
-                                }
-
-                                // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
-                                if(this.$route.path === "/board/writing"
-                                    || this.$route.path === "/board/modifying"
-                                    || this.$route.path === "/mypage" 
-                                    || this.$route.path === "/mypage/deletingAccount" 
-                                    || this.$route.path === "/admin"){
-                                    this.$router.push({path: "/"});
-                                }
 
                                 // header 메뉴 갱신을 위해 새로고침
                                 this.$router.go(this.$router.currentRoute);
@@ -232,7 +197,7 @@ export default {
 
                                 // accessToken + 체크한 시설 id로 delete 재요청
                                 const reDeleteBookmarkResponse = await axios.delete('http://localhost:8090/api/map/bookmarks', {
-                                    data: this.checkedBookmarks,
+                                    params: {facilityIds: checkedFacilityIdsString},
                                     headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                                 });
 

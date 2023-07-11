@@ -2,7 +2,7 @@
     <!-- div-board-container는 게시판 구성 요소를 담기 위한 div -->
     <div class="div-board-container">
         <!-- 게시판 위에 메시지 출력을 위한 컴포넌트 -->
-        <BoardTitleView></BoardTitleView>
+        <BoardTitleComponent></BoardTitleComponent>
 
         <!-- 게시판 구성요소 중 테이블을 담을 div -->
         <div class="div-board-table">
@@ -100,13 +100,13 @@
 </template>
 
 <script>
-import BoardTitleView from '../../components/board/BoardTitleView.vue'
+import BoardTitleComponent from '../../components/board/BoardTitleComponent.vue'
 
 import axios from 'axios'
 
 export default {
     components:{
-        BoardTitleView
+        BoardTitleComponent
     },
     data(){
         return{
@@ -214,21 +214,12 @@ export default {
         },
         // 글쓰기 버튼 클릭 시 호출 메소드
         toWriting(){
-            // 로컬 스토리지의 accessToken이 있는지 확인하여 있는 경우(로그인한 경우)만 글쓰기 페이지로 이동
             if(localStorage.getItem("accessToken") !== null){
-                this.$router.push('/board/writing');
+                // 글쓰기 페이지로 이동
+                this.$router.push('/board/post-article');
             }else{
                 // 로그인 상태가 아닌 경우 로그인 요청
-                alert("게시글 등록을 위해서는 로그인하셔야 합니다.");
-                
-                // 유저에게 바로 로그인 페이지로 이동할 지 묻기
-                if(confirm("로그인 하시겠습니까?")){
-                    // 로그인 후 현재 페이지로 돌아오기 위해 로컬 스토리지에 현재 페이지 주소 저장
-                    localStorage.setItem("previousPage", this.$route.fullPath);
-                    
-                    // 로그인 페이지로 이동
-                    this.$router.push('/signin');
-                }
+                alert("게시글 등록을 위해서는 로그인해야 합니다.");
             }
         },
         setPrevPageNum(){

@@ -3,21 +3,21 @@
 <template>
 <div>
   <div class="wrapper">
-    <HeaderView></HeaderView>
+    <HeaderComponent></HeaderComponent>
     <div class="content"><router-view></router-view></div>
-    <FooterView></FooterView>
+    <FooterComponent></FooterComponent>
   </div>
 </div>
 </template>
 
 <script>
-import HeaderView from './components/basics/HeaderView.vue'
-import FooterView from './components/basics/FooterView.vue'
+import HeaderComponent from './components/basics/HeaderComponent.vue'
+import FooterComponent from './components/basics/FooterComponent.vue'
 
 export default {
   components: {
-    HeaderView,
-    FooterView
+    HeaderComponent,
+    FooterComponent
   }
 }
 </script>

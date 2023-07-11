@@ -16,10 +16,10 @@
                     <span class="nav-link span-MyPage-tab" v-bind:class="{ active: activatedtab === 'bookmark' }" @click="getComponent('bookmark')">북마크</span>
                 </li>
                 <li class="nav-item li-MyPage">
-                    <span class="nav-link span-MyPage-tab" v-bind:class="{ active: activatedtab === 'myArticles' }" @click="getComponent('myArticles')">내 게시글</span>
+                    <span class="nav-link span-MyPage-tab" v-bind:class="{ active: activatedtab === 'article' }" @click="getComponent('article')">내 게시글</span>
                 </li>
                 <li class="nav-item li-MyPage">
-                    <span class="nav-link span-MyPage-tab" v-bind:class="{ active: activatedtab === 'myInfo' }" @click="getComponent('myInfo')">회원정보</span>
+                    <span class="nav-link span-MyPage-tab" v-bind:class="{ active: activatedtab === 'information' }" @click="getComponent('information')">회원정보</span>
                 </li>
             </ul>
         </div>
@@ -32,9 +32,9 @@
 </template>
 
 <script>
-import BookmarkView from '../components/mypage/BookmarkView.vue'
-import MyArticlesView from '../components/mypage/MyArticlesView.vue'
-import MyInfoView from '../components/mypage/MemberInfo.vue'
+import MyBookmarksComponent from '../components/mypage/MyBookmarksComponent.vue'
+import MyArticlesComponent from '../components/mypage/MyArticlesComponent.vue'
+import MyInformationComponent from '../components/mypage/MyInformationComponent.vue'
 
 export default {
     data(){
@@ -48,13 +48,13 @@ export default {
         getComponent(tab){
             if(tab === 'bookmark'){
                 this.activatedtab = 'bookmark';
-                this.activatedComponent = 'BookmarkView';
-            }else if(tab === 'myArticles'){
-                this.activatedtab = 'myArticles';
-                this.activatedComponent = 'MyArticlesView';
-            }else if(tab === 'myInfo'){
-                this.activatedtab = 'myInfo';
-                this.activatedComponent = 'MyInfoView';
+                this.activatedComponent = 'MyBookmarksComponent';
+            }else if(tab === 'article'){
+                this.activatedtab = 'article';
+                this.activatedComponent = 'MyArticlesComponent';
+            }else if(tab === 'information'){
+                this.activatedtab = 'information';
+                this.activatedComponent = 'MyInformationComponent';
             }
 
             // url 쿼리 바꾸기
@@ -62,9 +62,9 @@ export default {
         }
     },
     components:{
-        BookmarkView, // 북마크 컴포넌트
-        MyArticlesView, // 내 게시글 컴포넌트
-        MyInfoView, // 회원정보 컴포넌트
+        MyBookmarksComponent, // 북마크 컴포넌트
+        MyArticlesComponent, // 내 게시글 컴포넌트
+        MyInformationComponent, // 회원정보 컴포넌트
     },
     created(){
         // 쿼리 값으로 탭 선택, 컴포넌트 설정

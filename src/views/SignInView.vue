@@ -47,10 +47,10 @@ export default{
                 localStorage.removeItem("memberId");
             }
 
-            const previousPage = localStorage.getItem("previousPage"); // 로컬 스토리지에 이전 페이지 저장
-
+            const previousPage = localStorage.getItem("previousPage"); // 로컬 스토리지에서 이전 페이지 가져오기
+            
             // 회원 아이디와 비밀번호로 로그인 요청
-            axios.post('http://localhost:8090/api/member/signin', {
+            axios.post('http://localhost:8090/api/auth/sign-in', {
                 memberId: this.memberId,
                 pw: this.password
             },{
@@ -59,15 +59,13 @@ export default{
             .then(response => {
                 // 로컬 스토리지에 accessToken, 권한 저장
                 localStorage.setItem("accessToken", response.data.accessToken);
-                localStorage.setItem("authority", response.data.authority);
+                localStorage.setItem("role", response.data.role);
 
-                if(previousPage === '' || previousPage === '/signup'){
-                    // 이전 페이지가 없거나 회원가입 페이지인 경우 메인 페이지로 이동
-                    this.$router.push({path: '/'});
-                }else{
-                    // 이전 페이지가 있는 경우 이전 페이지로 이동
-                    this.$router.push(previousPage);
-                }
+                localStorage.removeItem("previousPage"); // 로그인 완료 후 로컬 스토리지에서 이전 페이지 삭제
+
+                // 이전 페이지는 헤더에서 저장함
+                // 이전 페이지로 이동
+                this.$router.push(previousPage);
 
                 // 헤더 메뉴 갱신을 위해 새로고침
                 this.$router.go(this.$router.currentRoute);
@@ -79,16 +77,9 @@ export default{
                     localStorage.removeItem("memberId"); // 로그인 실패 시 저장했던 아이디 삭제
                 }
             })
-
-            localStorage.removeItem("previousPage"); // 로그인 완료 후 로컬 스토리지에서 이전 페이지 삭제
         }
     },
-    mounted(){
-        // 이미 로그인 되어 있는 경우 로그인 페이지로의 접근을 막기 위해 한 페이지 전으로 이동
-        if(localStorage.getItem("accessToken") !== null){
-            this.$router.go(-1);
-        }
-
+    created(){
         // 저장된 아이디가 있는 경우 input에 출력 (v-model)
         if(localStorage.getItem("memberId") !== null) {
             this.memberId = localStorage.getItem("memberId");

@@ -47,7 +47,7 @@ export default{
 
                     try {
                         // accessToken + 입력 비밀번호로 회원탈퇴 put 요청
-                        const deleteAccountResponse = await axios.put('http://localhost:8090/api/member/deletion', {
+                        const deleteAccountResponse = await axios.put('http://localhost:8090/api/member/deletion-date', {
                             pw: this.password
                         },{
                             headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
@@ -58,37 +58,18 @@ export default{
                             // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
                             // axios의 동기적 동작을 위해 async/await 사용
                             // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                            const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
+                            const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
                                 withCredentials: true
                             })
 
                             // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
                             if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
                                 localStorage.removeItem("accessToken");
-                                // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
-                                localStorage.removeItem("authority");
+                                localStorage.removeItem("role");
 
                                 // 로그인 만료 알림
                                 alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-
-                                // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                                if(confirm("다시 로그인하시겠습니까?")){
-                                    // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                                    localStorage.setItem("previousPage", this.$route.fullPath);
-
-                                    // 확인 버튼 누른 경우 로그인 페이지로 이동
-                                    this.$router.push({path: "/signin"});
-                                }
-
-                                // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
-                                if(this.$route.path === "/board/writing"
-                                    || this.$route.path === "/board/modifying"
-                                    || this.$route.path === "/mypage" 
-                                    || this.$route.path === "/mypage/deletingAccount" 
-                                    || this.$route.path === "/admin"){
-                                    this.$router.push({path: "/"});
-                                }
 
                                 // header 메뉴 갱신을 위해 새로고침
                                 this.$router.go(this.$router.currentRoute);
@@ -99,7 +80,7 @@ export default{
                                 localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
 
                                 // accessToken + 입력 비밀번호로 회원탈퇴 put 재요청
-                                const reDeleteAccountResponse = await axios.put('http://localhost:8090/api/member/deletion', {
+                                const reDeleteAccountResponse = await axios.put('http://localhost:8090/api/member/deletion-date', {
                                     pw: this.password
                                 },{
                                     headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
@@ -109,16 +90,17 @@ export default{
                                 if(reDeleteAccountResponse.data !== 'invalidAccessToken'){
                                     // 이전 과정에서 토큰 인증되었으므로 바로 토큰 검증없이 삭제 요청
                                     const deleteBookmarksResponse = await axios.delete('http://localhost:8090/api/member/bookmarks', {
-                                        headers: {'Authorization': `Bearer ${localhost.getItem("accessToken")}`}
-                                    })
+                                        headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                                    });
 
                                     // 요청 및 응답 성공 시
                                     if(deleteBookmarksResponse.status === 200){
                                         alert("회원탈퇴가 완료되었습니다.");
 
-                                        localStorage.clear(); // 로컬 스토리지 클리어
+                                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
+                                        localStorage.removeItem("accessToken");
+                                        localStorage.removeItem("role");
 
-                                        this.$router.push({path: "/"}); // 메인 페이지로 이동
                                         this.$router.go(this.$router.currentRoute); // 새로고침
                                     }
                                 }
@@ -126,16 +108,17 @@ export default{
                         }else{
                             // 이전 과정에서 토큰 인증되었으므로 바로 토큰 검증없이 삭제 요청
                             const deleteBookmarksResponse = await axios.delete('http://localhost:8090/api/member/bookmarks', {
-                                headers: {'Authorization': `Bearer ${localhost.getItem("accessToken")}`}
-                            })
+                                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                            });
 
                             // 요청 및 응답 성공 시
                             if(deleteBookmarksResponse.status === 200){
                                 alert("회원탈퇴가 완료되었습니다.");
 
-                                localStorage.clear(); // 로컬 스토리지 클리어
+                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
+                                localStorage.removeItem("accessToken");
+                                localStorage.removeItem("role");
 
-                                this.$router.push({path: "/"}); // 메인 페이지로 이동
                                 this.$router.go(this.$router.currentRoute); // 새로고침
                             }
                         }

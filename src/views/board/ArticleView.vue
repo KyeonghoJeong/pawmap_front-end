@@ -2,7 +2,7 @@
     <!-- 전체 div를 담을 div -->
     <div class="div-article-container">
         <!-- 게시판 안내 메시지 컴포넌트 -->
-        <BoardTitleView></BoardTitleView>
+        <BoardTitleComponent></BoardTitleComponent>
         <!-- 게시글 출력 요소 div들을 담을 div -->
         <div v-if="isArticleLoaded" class="div-article-main">
             <!-- 제목 관련 div들을 담을 div -->
@@ -48,8 +48,8 @@
             </div>
 
             <!-- 수정, 삭제 기능을 담을 div -->
-            <!-- isItsMember 변수는 해당 게시글 작성자와 현재 로그인 중인 작성자가 일치할 경우 true -->
-            <div v-if="isItsMember === true" class="div-article-functions">
+            <!-- itsMember 변수는 해당 게시글 작성자와 현재 로그인 중인 작성자가 일치할 경우 true -->
+            <div v-if="itsMember === true" class="div-article-functions">
                 <!-- 수정, 삭제 span 클릭 시 이벤트로 메소드 호출 -->
                 <span class="span-article-delete" @click="deleteArticle">삭제</span>&nbsp;&nbsp;
                 <span class="span-article-update" @click="updateArticle">수정</span>    
@@ -57,37 +57,37 @@
 
             <!-- 버튼을 담기 위한 div -->
             <!-- 수정, 삭제 메뉴가 없을 때 간격 유지를 위해 style 추가 -->
-            <div class="div-article-btn" :style="{ 'margin-top': isItsMember ? '0' : '24px' }">
+            <div class="div-article-btn" :style="{ 'margin-top': itsMember ? '0' : '24px' }">
                 <!-- 클릭 시 게시판으로 돌아가는 버튼 -->
                 <button type="button" class="btn btn-article-board" @click="toBoard">목록</button>
             </div>
             <!-- 댓글 출력 컴포넌트 -->
-            <CommentView :articleId="articleId" :memberId="memberId"></CommentView>
+            <CommentComponent :articleId="articleId" :memberId="memberId"></CommentComponent>
             <!-- 댓글 작성 컴포넌트 -->
-            <WritingCommentView :articleId="articleId"></WritingCommentView>
+            <PostCommentComponent :articleId="articleId"></PostCommentComponent>
         </div>
     </div>
 </template>
 
 <script>
-import BoardTitleView from '../../components/board/BoardTitleView.vue'
-import CommentView from '../../components/comment/CommentView.vue'
-import WritingCommentView from '../../components/comment/WritingCommentView.vue'
+import BoardTitleComponent from '../../components/board/BoardTitleComponent.vue'
+import CommentComponent from '../../components/comment/CommentComponent.vue'
+import PostCommentComponent from '../../components/comment/PostCommentComponent.vue'
 
 import axios from 'axios'
 
 export default {
     components:{
-        BoardTitleView, // 게시판 안내 메시지 컴포넌트
-        CommentView, // 댓글 출력 컴포넌트
-        WritingCommentView, // 댓글 작성 컴포넌트
+        BoardTitleComponent, // 게시판 안내 메시지 컴포넌트
+        CommentComponent, // 댓글 출력 컴포넌트
+        PostCommentComponent, // 댓글 작성 컴포넌트
     },
     data(){
         return{
             articleId: '', // 해당 게시글의 id
             article: '', // 해당 게시글 정보(내용)
             isArticleLoaded: false, // 백엔드로부터 해당 게시글 정보(내용)를 전부 받아왔는지 확인
-            isItsMember: false, // 현재 로그인 중인 회원과 해당 게시글의 작성자가 일치하는지 확인
+            itsMember: false, // 현재 로그인 중인 회원과 해당 게시글의 작성자가 일치하는지 확인
             memberId: '',
             comments: [], // 백엔드로부터 해당 게시글의 댓글을 받아서 저장할 배열
             totalPages: '', // 댓글 pagination을 위해 총 댓글 페이지 수를 받을 변수 
@@ -96,16 +96,16 @@ export default {
     methods:{
         // 목록 버튼 클릭 시 게시판으로 이동하는 메소드
         toBoard(){
-            this.$router.push({path:'/board'});
+            this.$router.go(-1);
         },
         // 현재 로그인 중인 회원과 해당 게시글의 작성자가 일치하는지 확인하는 메소드
         // axios의 동기적 동작을 위해 async/await 사용
         async checkMember(){
             try {
                 // accessToken + 게시글 id로 get 요청
-                const checkMemberResponse = await axios.get('http://localhost:8090/api/board/article/memberId/identification', {
-                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
-                    params: {articleId: this.articleId}
+                const checkMemberResponse = await axios.get('http://localhost:8090/api/board/article/member/identification', {
+                    params: {articleId: this.articleId},
+                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                 })
 
                 // 응답 결과 유효하지 않은 acccessToken인 경우
@@ -113,37 +113,18 @@ export default {
                      // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
                     // axios의 동기적 동작을 위해 async/await 사용
                     // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                    const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
+                    const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
                         withCredentials: true
                     })
 
                     // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
                     if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
                         localStorage.removeItem("accessToken");
-                        // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
-                        localStorage.removeItem("authority");
+                        localStorage.removeItem("role");
 
                         // 로그인 만료 알림
                         alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-
-                        // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                        if(confirm("다시 로그인하시겠습니까?")){
-                            // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                            localStorage.setItem("previousPage", this.$route.fullPath);
-
-                            // 확인 버튼 누른 경우 로그인 페이지로 이동
-                            this.$router.push({path: "/signin"});
-                        }
-
-                        // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
-                        if(this.$route.path === "/board/writing"
-                            || this.$route.path === "/board/modifying"
-                            || this.$route.path === "/mypage" 
-                            || this.$route.path === "/mypage/deletingAccount" 
-                            || this.$route.path === "/admin"){
-                            this.$router.push({path: "/"});
-                        }
 
                         // header 메뉴 갱신을 위해 새로고침
                         this.$router.go(this.$router.currentRoute);
@@ -154,17 +135,17 @@ export default {
                         localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
 
                         // accessToken + 게시글 id로 get 재요청
-                        const reCheckMemberResponse = await axios.get('http://localhost:8090/api/board/article/memberId/identification', {
-                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
-                            params: {articleId: this.articleId}
+                        const reCheckMemberResponse = await axios.get('http://localhost:8090/api/board/article/member/identification', {
+                            params: {articleId: this.articleId},
+                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                         })
 
                         this.memberId = reCheckMemberResponse.data.memberId; // accessToken으로 회원 id 받기
-                        this.isItsMember = reCheckMemberResponse.data.isItsMember; // 게시글 작성자 일치 여부 받기
+                        this.itsMember = reCheckMemberResponse.data.itsMember; // 게시글 작성자 일치 여부 받기
                     }
                 }else{
                     this.memberId = checkMemberResponse.data.memberId; // accessToken으로 회원 id 받기
-                    this.isItsMember = checkMemberResponse.data.isItsMember; // 게시글 작성자 일치 여부 받기
+                    this.itsMember = checkMemberResponse.data.itsMember; // 게시글 작성자 일치 여부 받기
                 }
             } catch (error) {
                 console.log(error);
@@ -173,7 +154,9 @@ export default {
         // 게시글 정보(내용)를 가지고 오는 메소드
         getArticle(){
             // get 요청
-            axios.get('http://localhost:8090/api/board/article', {params:{articleId: this.articleId}})
+            axios.get('http://localhost:8090/api/board/article', {
+                params:{articleId: this.articleId}
+            })
             .then(response => {
                 // 게시글 데이터 저장
                 this.article = response.data;
@@ -188,7 +171,7 @@ export default {
         // 게시글 수정 메소드
         updateArticle(){
             // 게시글 수정 페이지로 게시글 id와 함께 push
-            this.$router.push({path: '/board/modifying', query: {articleId: this.articleId}});
+            this.$router.push({path: '/board/edit-article', query: {articleId: this.articleId}});
         },
         // 게시글 삭제 메소드
         async deleteArticle(){
@@ -205,37 +188,18 @@ export default {
                         // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
                         // axios의 동기적 동작을 위해 async/await 사용
                         // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                        const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
+                        const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
                             withCredentials: true
                         })
 
                         // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
                         if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
                             localStorage.removeItem("accessToken");
-                            // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
-                            localStorage.removeItem("authority");
+                            localStorage.removeItem("role");
 
                             // 로그인 만료 알림
                             alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-
-                            // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                            if(confirm("다시 로그인하시겠습니까?")){
-                                // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                                localStorage.setItem("previousPage", this.$route.fullPath);
-
-                                // 확인 버튼 누른 경우 로그인 페이지로 이동
-                                this.$router.push({path: "/signin"});
-                            }
-
-                            // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
-                            if(this.$route.path === "/board/writing"
-                                || this.$route.path === "/board/modifying"
-                                || this.$route.path === "/mypage" 
-                                || this.$route.path === "/mypage/deletingAccount" 
-                                || this.$route.path === "/admin"){
-                                this.$router.push({path: "/"});
-                            }
 
                             // header 메뉴 갱신을 위해 새로고침
                             this.$router.go(this.$router.currentRoute);
@@ -272,16 +236,16 @@ export default {
         // 해당 게시글 id로 게시글 정보를 가져오기
         // 현재 로그인 중인 회원의 게시글인지 판단하기
         this.articleId = this.$route.query.articleId;
+    },
+    mounted(){
+        // 게시글 정보 가져오기 => 데이터 로딩 대기 필요
+        this.getArticle();
 
         // 로그인 중인 경우
         // 게시글 작성 회원과 로그인 중인 회원이 같은 지 확인 => 데이터 로딩 대기 필요
         if(localStorage.getItem("accessToken") !== null){
             this.checkMember();
         }
-    },
-    mounted(){
-        // 게시글 정보 가져오기 => 데이터 로딩 대기 필요
-        this.getArticle();
     }
 }
 </script>

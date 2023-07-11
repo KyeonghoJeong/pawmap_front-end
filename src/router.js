@@ -1,17 +1,17 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-import HomeView from './views/HomeView.vue'
-import MapView from './views/MapView.vue'
-import BoardView from './views/board/BoardView.vue'
-import SignInView from './views/member/SignInView.vue'
-import SignUpView from './views/member/SignUpView.vue'
-import WritingView from './views/board/WritingArticleView.vue'
-import ModifyingView from './views/board/ModifyingArticleView.vue'
-import ArticleView from './views/board/ArticleView.vue'
-import MyPageView from './views/MyPageView.vue'
-import DeletingAccountView from './views/member/DeletingAccountView.vue'
-import AdminPageView from './views/AdminPageView.vue'
+import HomeView from '/src/views/HomeView.vue'
+import MapView from '/src/views/MapView.vue'
+import BoardView from '/src/views/board/BoardView.vue'
+import SignInView from '/src/views/SignInView.vue'
+import SignUpView from '/src/views/SignUpView.vue'
+import PostArticleView from '/src/views/board/PostArticleView.vue'
+import EditArticleView from '/src/views/board/EditArticleView.vue'
+import ArticleView from '/src/views/board/ArticleView.vue'
+import MyPageView from '/src/views/MyPageView.vue'
+import DeleteAccount from '/src/views/DeleteAccountView.vue'
+import AdminView from '/src/views/AdminView.vue'
 
 Vue.use(VueRouter)
 
@@ -32,24 +32,54 @@ const routes = [
         component: BoardView
     },
     {
-        path: '/signin',
-        name: 'signin',
-        component: SignInView
+        path: '/sign-in',
+        name: 'sign-in',
+        component: SignInView,
+        beforeEnter: (to, from, next) => {
+            if(localStorage.getItem("accessToken") === null){
+                // 로컬 스토리지에 accessToken이 없는 경우 (비로그인 상태)
+                next(); // 페이지 진행
+            }else{
+                next('/'); // 접근 불가인 경우 메인 페이지로 이동
+            }
+        }
     },
     {
-        path: '/signup',
-        name: 'signup',
-        component: SignUpView
+        path: '/sign-up',
+        name: 'sign-up',
+        component: SignUpView,
+        beforeEnter: (to, from, next) => {
+            if(localStorage.getItem("accessToken") === null){
+                // 로컬 스토리지에 accessToken이 없는 경우 (비로그인 상태)
+                next(); // 페이지 진행
+            }else{  
+                next('/'); // 접근 불가인 경우 메인 페이지로 이동
+            }
+        }
     },
     {
-        path: '/board/writing',
-        name: 'writing',
-        component: WritingView
+        path: '/board/post-article',
+        name: 'post-article',
+        component: PostArticleView,
+        beforeEnter: (to, from, next) => {
+            if(localStorage.getItem("accessToken") !== null){ // 로컬 스토리지에 accessToken이 있는 경우만 접근 허용
+                next();
+            }else{  
+                next('/'); // 접근 불가인 경우 메인 페이지로 이동
+            }
+        }
     },
     {
-        path: '/board/modifying',
-        name: 'modifying',
-        component: ModifyingView
+        path: '/board/edit-article',
+        name: 'edit-article',
+        component: EditArticleView,
+        beforeEnter: (to, from, next) => {
+            if(localStorage.getItem("accessToken") !== null){ // 로컬 스토리지에 accessToken이 있는 경우만 접근 허용
+                next(); // 페이지 진행
+            }else{  
+                next('/'); // 접근 불가인 경우 메인 페이지로 이동
+            }
+        }
     },
     {
         path: '/board/article',
@@ -57,19 +87,44 @@ const routes = [
         component: ArticleView
     },
     {
-        path: '/mypage',
-        name: 'mypage',
-        component: MyPageView
+        path: '/my-page',
+        name: 'my-page',
+        component: MyPageView,
+        beforeEnter: (to, from, next) => {
+            if(localStorage.getItem("accessToken") !== null){ // 로컬 스토리지에 accessToken이 있는 경우만 접근 허용
+                next(); // 페이지 진행
+            }else{  
+                next('/'); // 접근 불가인 경우 메인 페이지로 이동
+            }
+        }
     },
     {
-        path: '/mypage/deletingAccount',
-        name: 'deletingAccount',
-        component: DeletingAccountView
+        path: '/my-page/delete-account',
+        name: 'delete-account',
+        component: DeleteAccount,
+        beforeEnter: (to, from, next) => {
+            if(localStorage.getItem("accessToken") !== null){ // 로컬 스토리지에 accessToken이 있는 경우만 접근 허용
+                next(); // 페이지 진행
+            }else{  
+                next('/'); // 접근 불가인 경우 메인 페이지로 이동
+            }
+        }
     },
     {
         path: '/admin',
         name: 'admin',
-        component: AdminPageView
+        component: AdminView,
+        beforeEnter: (to, from, next) => {
+            if(localStorage.getItem("accessToken") !== null){ // 로컬 스토리지에 accessToken이 있는 경우만 접근 허용
+                if(localStorage.getItem("role") === 'ROLE_ADMIN'){ // 권한이 ROLE_ADMIN인 경우만 접근 허용
+                    next(); // 페이지 진행
+                }else{
+                    next('/'); // 접근 불가인 경우 메인 페이지로 이동
+                }
+            }else{
+                next('/'); // 접근 불가인 경우 메인 페이지로 이동
+            }
+        }
     },
 ]
 

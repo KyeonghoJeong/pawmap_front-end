@@ -13,10 +13,10 @@
                 <!-- activatedTab 변수의 값이 각 span에 할당된 값과 같으면 active 클래스 적용 -->
                 <!-- span 클릭 시 getComponent 호출, 매개변수는 각 탭에 해당하는 쿼리 -->
                 <li class="nav-item li-AdminPage">
-                    <span class="nav-link span-AdminPage-tab" v-bind:class="{ active: activatedTab === 'articleManagement' }" @click="getComponent('articleManagement')">게시글 관리</span>
+                    <span class="nav-link span-AdminPage-tab" v-bind:class="{ active: activatedTab === 'article' }" @click="getComponent('article')">게시글 관리</span>
                 </li>
                 <li class="nav-item li-AdminPage">
-                    <span class="nav-link span-AdminPage-tab" v-bind:class="{ active: activatedTab === 'memberManagement' }" @click="getComponent('memberManagement')">회원 관리</span>
+                    <span class="nav-link span-AdminPage-tab" v-bind:class="{ active: activatedTab === 'member' }" @click="getComponent('member')">회원 관리</span>
                 </li>
             </ul>
         </div>
@@ -29,8 +29,8 @@
 </template>
 
 <script>
-import ArticleManagementView from '/src/components/admin/ArticleManagementView.vue'
-import MemberManagementView from '/src/components/admin/MemberManagementView.vue'
+import ManageArticlesComponent from '/src/components/admin/ManageArticlesComponent.vue'
+import ManageMembersComponent from '/src/components/admin/ManageMembersComponent.vue'
 
 export default {
     data(){
@@ -42,12 +42,12 @@ export default {
     methods:{
         // 매개변수(쿼리)에 따라 선택한 탭을 바꾸고 해당 컴포넌트로 이동하는 메소드
         getComponent(tab){
-            if(tab === 'articleManagement'){
-                this.activatedTab = 'articleManagement';
-                this.activatedComponent = 'ArticleManagementView';
-            }else if(tab === 'memberManagement'){
-                this.activatedTab = 'memberManagement';
-                this.activatedComponent = 'MemberManagementView';
+            if(tab === 'article'){
+                this.activatedTab = 'article';
+                this.activatedComponent = 'ManageArticlesComponent';
+            }else if(tab === 'member'){
+                this.activatedTab = 'member';
+                this.activatedComponent = 'ManageMembersComponent';
             }
 
             // url 쿼리 바꾸기
@@ -55,8 +55,8 @@ export default {
         }
     },
     components:{
-        ArticleManagementView, // 게시글 관리 컴포넌트
-        MemberManagementView, // 회원 관리 컴포넌트
+        ManageArticlesComponent, // 게시글 관리 컴포넌트
+        ManageMembersComponent, // 회원 관리 컴포넌트
     },
     created(){
         // 쿼리 값으로 탭 선택, 컴포넌트 설정

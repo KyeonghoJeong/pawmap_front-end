@@ -117,14 +117,14 @@ export default {
             try {
                 // accessToken + 검색 옵션 + pagination 옵션으로 회원 정보 get 요청
                 const getMembersResponse = await axios.get('http://localhost:8090/api/members', {
-                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
                     params: {
                         memberId: this.memberId,
                         nickname: this.nickname,
                         email: this.email,
                         page: page, 
                         size: 10,
-                    }
+                    },
+                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                 })
 
                 // 응답 결과 유효하지 않은 acccessToken인 경우
@@ -132,37 +132,18 @@ export default {
                     // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
                     // axios의 동기적 동작을 위해 async/await 사용
                     // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                    const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
+                    const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
                         withCredentials: true
                     })
 
                     // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
                     if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
                         localStorage.removeItem("accessToken");
-                        // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
-                        localStorage.removeItem("authority");
+                        localStorage.removeItem("role");
 
                         // 로그인 만료 알림
                         alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-
-                        // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                        if(confirm("다시 로그인하시겠습니까?")){
-                            // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                            localStorage.setItem("previousPage", this.$route.fullPath);
-
-                            // 확인 버튼 누른 경우 로그인 페이지로 이동
-                            this.$router.push({path: "/signin"});
-                        }
-
-                        // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
-                        if(this.$route.path === "/board/writing"
-                            || this.$route.path === "/board/modifying"
-                            || this.$route.path === "/mypage" 
-                            || this.$route.path === "/mypage/deletingAccount" 
-                            || this.$route.path === "/admin"){
-                            this.$router.push({path: "/"});
-                        }
 
                         // header 메뉴 갱신을 위해 새로고침
                         this.$router.go(this.$router.currentRoute);
@@ -174,14 +155,14 @@ export default {
 
                         // accessToken + 검색 옵션 + pagination 옵션으로 회원 정보 get 재요청
                         const reGetMembersResponse = await axios.get('http://localhost:8090/api/members', {
-                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`},
                             params: {
                                 memberId: this.memberId,
                                 nickname: this.nickname,
                                 email: this.email,
                                 page: page, 
                                 size: 10,
-                            }
+                            },
+                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                         })
 
                         // accessToken이 유효한 경우 => 재요청 성공
@@ -244,7 +225,7 @@ export default {
             if(confirm("해당 회원을 "+word+"하시겠습니까?")){
                 try {
                     // accessToken + 회원 아이디 + ban or unban 데이터로 put 요청
-                    const banMemberResponse = await axios.put('http://localhost:8090/api/member/ban', {
+                    const banMemberResponse = await axios.put('http://localhost:8090/api/member/ban-date', {
                         memberId: memberId,
                         order: order,
                     }, {
@@ -256,37 +237,18 @@ export default {
                         // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
                         // axios의 동기적 동작을 위해 async/await 사용
                         // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                        const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/member/accesstoken', {
+                        const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
                             withCredentials: true
                         })
 
                         // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
                         if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
                             localStorage.removeItem("accessToken");
-                            // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
-                            localStorage.removeItem("authority");
+                            localStorage.removeItem("role");
 
                             // 로그인 만료 알림
                             alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-
-                            // 유저에게 바로 로그인 페이지로 이동할지 묻기
-                            if(confirm("다시 로그인하시겠습니까?")){
-                                // 로그인 후 보고 있던 페이지로 돌아오기 위해 현재 페이지 경로 저장 
-                                localStorage.setItem("previousPage", this.$route.fullPath);
-
-                                // 확인 버튼 누른 경우 로그인 페이지로 이동
-                                this.$router.push({path: "/signin"});
-                            }
-
-                            // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
-                            if(this.$route.path === "/board/writing"
-                                || this.$route.path === "/board/modifying"
-                                || this.$route.path === "/mypage" 
-                                || this.$route.path === "/mypage/deletingAccount" 
-                                || this.$route.path === "/admin"){
-                                this.$router.push({path: "/"});
-                            }
 
                             // header 메뉴 갱신을 위해 새로고침
                             this.$router.go(this.$router.currentRoute);
@@ -297,7 +259,7 @@ export default {
                             localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
 
                             // accessToken + 회원 아이디 + ban or unban 데이터로 put 재요청
-                            const reBanMemberResponse = await axios.put('http://localhost:8090/api/member/ban', {
+                            const reBanMemberResponse = await axios.put('http://localhost:8090/api/member/ban-date', {
                                 memberId: memberId,
                                 order: order,
                             }, {

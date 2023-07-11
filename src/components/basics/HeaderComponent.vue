@@ -20,32 +20,32 @@
         <ul class="navbar-nav ms-auto ul-header-menu">
           <!-- router-header-menu는 마우스오버 시 효과를 위한 클래스 -->
 
-          <!-- authority 변수를 참조하여 권한 확인 후 권한에 맞게 메뉴 출력 -->
+          <!-- role 변수를 참조하여 권한 확인 후 권한에 맞게 메뉴 출력 -->
           <!-- 권한이 'ROLE_USER'인 경우 메뉴는 지도, 게시판, 로그인, 가입 -->
           <!-- 권한이 'ROLE_MEMBER'인 경우 메뉴는 지도, 게시판, 로그아웃, 마이페이지 -->
           <!-- 권한이 'ROLE_ADMIN'인 경우 메뉴는 지도, 게시판, 로그아웃, 마이페이지, 관리페이지 -->
 
           <!-- 메뉴를 클릭 시 해당하는 라우터 링크로 이동 -->
           <!-- 로그인, 로그아웃 메뉴는 signIn, signOut 메소드 실행 -->
-          <li v-if="this.authority === 'ROLE_USER' || this.authority === 'ROLE_MEMBER' || this.authority === 'ROLE_ADMIN'" class="nav-item">
+          <li v-if="this.role === 'ROLE_USER' || this.role === 'ROLE_MEMBER' || this.role === 'ROLE_ADMIN'" class="nav-item">
             <span @click="toMap" class="nav-link active router-header-menu">지도</span>
           </li>
-          <li v-if="this.authority === 'ROLE_USER' || this.authority === 'ROLE_MEMBER' || this.authority === 'ROLE_ADMIN'" class="nav-item">
+          <li v-if="this.role === 'ROLE_USER' || this.role === 'ROLE_MEMBER' || this.role === 'ROLE_ADMIN'" class="nav-item">
             <span @click="toBoard" class="nav-link active router-header-menu">게시판</span>
           </li>
-          <li v-if="this.authority === 'ROLE_MEMBER' || this.authority === 'ROLE_ADMIN'" class="nav-item">
+          <li v-if="this.role === 'ROLE_MEMBER' || this.role === 'ROLE_ADMIN'" class="nav-item">
             <span @click="toMyPage" class="nav-link active router-header-menu">마이페이지</span>
           </li>
-          <li v-if="this.authority === 'ROLE_ADMIN'" class="nav-item">
+          <li v-if="this.role === 'ROLE_ADMIN'" class="nav-item">
             <span @click="toAdmin" class="nav-link active router-header-menu">관리페이지</span>
           </li>
-          <li v-if="this.authority === 'ROLE_USER'" class="nav-item">
+          <li v-if="this.role === 'ROLE_USER'" class="nav-item">
             <span @click="toSignIn" class="nav-link active router-header-menu">로그인</span>
           </li>
-          <li v-if="this.authority === 'ROLE_MEMBER' || this.authority === 'ROLE_ADMIN'" class="nav-item">
+          <li v-if="this.role === 'ROLE_MEMBER' || this.role === 'ROLE_ADMIN'" class="nav-item">
             <span @click="signOut" class="nav-link active router-header-menu">로그아웃</span>
           </li>
-          <li v-if="this.authority === 'ROLE_USER'" class="nav-item">
+          <li v-if="this.role === 'ROLE_USER'" class="nav-item">
             <span @click="toSignUp" class="nav-link active router-header-menu">가입</span>
           </li>
         </ul>
@@ -59,7 +59,7 @@
 export default{
   data(){
     return{
-      authority: '',
+      role: '',
     }
   },
   methods:{
@@ -83,15 +83,11 @@ export default{
     },
     // 로그인 메소드
     toSignIn(){
-      // 로그인 페이지에서 또 로그인 메뉴를 누른 경우 제외
-      // 로그인 후 이전 페이지로 돌아가기 위해 로컬 스토리지에 fullPath 저장
-      if(this.$route.fullPath !== '/signin'){
-        localStorage.setItem("previousPage", this.$route.fullPath);
-      }
-
       // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /signin인 경우 이동 X
-      if(this.$route.path !== '/signin'){
-        this.$router.push({path: '/signin'});
+      if(this.$route.path !== '/sign-in'){
+        // 로그인 후 이전 페이지로 돌아가기 위해 로컬 스토리지에 fullPath 저장
+        localStorage.setItem("previousPage", this.$route.fullPath);
+        this.$router.push({path: '/sign-in'});
       }else{
         this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
       }
@@ -100,29 +96,18 @@ export default{
     signOut(){
       // 로그아웃 확인
       if(confirm("로그아웃 하시겠습니까?")){
-        // 기존에 로컬 스토리지에 저장되어 있던 accessToken 삭제
+        // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
         localStorage.removeItem("accessToken");
-        // 기존에 로컬 스토리지에 저장되어 있던 authority 삭제
-        localStorage.removeItem("authority");
-        
-        // 로그인 상태일 때만 볼 수 있는 페이지에서 로그아웃 버튼을 누른 경우는 메인 페이지로 이동
-        if(this.$route.path === "/board/writing"
-            || this.$route.path === "/board/modifying"
-            || this.$route.path === "/mypage" 
-            || this.$route.path === "/mypage/deletingAccount" 
-            || this.$route.path === "/admin"){
-            this.$router.push({path: "/"});
-        }
-        
-        // 새로고침
-        this.$router.go(this.$router.currentRoute);
+        localStorage.removeItem("role");
+
+        this.$router.go(this.$router.currentRoute); // 헤더 갱신을 위해 새로고침
       }
     },
     // 회원가입 메뉴 이동 메소드
     toSignUp(){
       // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /signup인 경우 이동 X
-      if(this.$route.path !== '/signup'){
-        this.$router.push({path: '/signup'});
+      if(this.$route.path !== '/sign-up'){
+        this.$router.push({path: '/sign-up'});
       }else{
         this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
       }
@@ -130,8 +115,8 @@ export default{
     // 마이페이지 메뉴 이동 메소드
     toMyPage(){
       // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /mypage인 경우 이동 X
-      if(this.$route.path !== '/mypage'){
-        this.$router.push({path: '/mypage', query: {tab: 'bookmark'}});
+      if(this.$route.path !== '/my-page'){
+        this.$router.push({path: '/my-page', query: {tab: 'bookmark'}});
       }else{
         this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
       }
@@ -140,20 +125,24 @@ export default{
     toAdmin(){
       // 라우터 현재 path로 재이동 에러 방지를 위해 이미 path가 /admin인 경우 이동 X
       if(this.$route.path !== '/admin'){
-        this.$router.push({path: '/admin', query: {tab: 'articleManagement'}});
+        this.$router.push({path: '/admin', query: {tab: 'article'}});
       }else{
         this.$router.go(this.$router.currentRoute); // 이미 해당 메뉴 페이지에 접속중인 경우 새로고침
       }
     }
   },
   created() {
-    // 권한 설정
-    // 로컬 스토리지에서 accessToken 확인 후 null 값이 아니면(로그인 상태) 로컬 스토리지에서 권한 가져오기
+    // 권한 설정 => 순차 적용
+    this.role = 'ROLE_USER'; // 1. 비회원
+
+    // 로컬 스토리지에서 accessToken 확인 후 null 값이 아니면 로그인 상태
     if(localStorage.getItem("accessToken") !== null){
-      this.authority = localStorage.getItem("authority");
-    }else{
-      // 로그인 상태가 아닌 경우 일반 유저로 권한 설정
-      this.authority = "ROLE_USER";
+      this.role = 'ROLE_MEMBER'; // 2. 회원
+
+      // 권한 조회 결과 ROLE_ADMIN인 경우
+      if(localStorage.getItem("role") === 'ROLE_ADMIN'){
+        this.role = 'ROLE_ADMIN'; // 3. 관리자 
+      }
     }
   },
 }
