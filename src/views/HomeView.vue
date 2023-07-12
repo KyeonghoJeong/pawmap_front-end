@@ -100,11 +100,12 @@
     }
     .div-home-card {
         background-color: #fd7e14;
-        border-color: rgb(219, 219, 219);
+        border-color: white;
         color: white;
     }
     .div-home-card:hover{
         background-color: white;
+        border-color: rgb(219, 219, 219);
         color: black;
     }
     /* 카드 내부 폰트 설정 */

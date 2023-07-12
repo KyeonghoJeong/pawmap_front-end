@@ -182,7 +182,6 @@ export default {
     .btn-Modifying-confirm{ /* 버튼 색, 너비 지정 */
         width: 80px;
         background-color: #fd7e14;
-        border-color: rgb(219, 219, 219);
         color: white;
     }
     .btn-Modifying-confirm:hover{ /* 버튼 마우스오버 시 색 변경 */

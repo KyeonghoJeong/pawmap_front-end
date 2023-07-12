@@ -256,7 +256,7 @@ export default{
     .button-MemberInfo-mod{ /* 수정 버튼 색, 사이즈 변경 */
         width: 100%;
         background-color: #fd7e14;
-        border-color: rgb(219, 219, 219);
+        border-color: #fd7e14;
         color: white;
     }
     .button-MemberInfo-mod:hover{ /* 버튼 마우스오버시 색 변경 */

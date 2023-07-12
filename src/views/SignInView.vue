@@ -120,7 +120,7 @@ export default{
     .button-SignIn-signin{ /* 버튼 너비, 색, 테두리 색 변경 */
         width: 100%;
         background-color: #fd7e14;
-        border-color: rgb(219, 219, 219);
+        border-color: #fd7e14;
         color: white;
     }
     .button-SignIn-signin:hover{ /* 버튼 마우스오버 시 색, 테두리 색, 글자 색 변경 */

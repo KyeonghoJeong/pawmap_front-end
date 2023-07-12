@@ -165,7 +165,7 @@ export default{
         /* 확인 버튼 너비 및 색 지정 */
         width: 100%;
         background-color: #fd7e14;
-        border-color: rgb(219, 219, 219);
+        border-color: #fd7e14;
         color: white;
     }
     .button-DeletingAccount-confirm:hover{

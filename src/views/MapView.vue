@@ -1307,7 +1307,6 @@ export default {
     }
     .page-link{ /* pagination에서 각 버튼 */
         background-color: white;
-        border-color: rgb(219, 219, 219);
         color: black;
     }
     .page-link:hover{ /* pagination에서 각 버튼 마우스오버 시 색 변경 */

@@ -441,7 +441,6 @@ export default {
     .button-ArticleManagement-del{ /* 버튼 색, 비율(사이즈) 지정 */
         width: 80px;
         background-color: #fd7e14;
-        border-color: rgb(219, 219, 219);
         color: white;
     }
     .button-ArticleManagement-del:hover{ /* 마우스오버 시 색 변경 */

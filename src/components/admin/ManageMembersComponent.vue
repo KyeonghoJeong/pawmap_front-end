@@ -392,7 +392,6 @@ export default {
     .button-MemberManagement-ban, .button-MemberManagement-unban{ /* 차단, 해제 버튼 색 및 사이즈 변경 */
         width: 80px;
         background-color: #fd7e14;
-        border-color: rgb(219, 219, 219);
         color: white;
     }
     .button-MemberManagement-ban:hover, .button-MemberManagement-unban:hover{ /* 마우스오버 시 색 변경 */

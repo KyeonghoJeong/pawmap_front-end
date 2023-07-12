@@ -366,7 +366,6 @@ export default {
     .button-board-writing{ /* 버튼 색, 비율(사이즈) 지정 */
         width: 80px;
         background-color: #fd7e14;
-        border-color: rgb(219, 219, 219);
         color: white;
     }
     .button-board-writing:hover{ /* 글쓰기 버튼 마우스오버 시 색 변경 */
