@@ -16,7 +16,7 @@
                 
                 <div class="div-SignIn-features">
                     <label><input type="checkbox" v-model="checkedId"> 아이디 저장</label>
-                    <router-link to="/signup" class="router-SignIn-signup">회원가입</router-link>
+                    <router-link to="/sign-up" class="router-SignIn-signup">회원가입</router-link>
                 </div>
                 
                 <button class="btn btn-lg btn-primary btn-block button-SignIn-signin" type="submit">확인</button>

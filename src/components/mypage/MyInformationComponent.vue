@@ -34,7 +34,7 @@
                     <input v-model="password" type="password" class="form-control" placeholder="현재 비밀번호" required><br>
                     <div class="div-MemberInfo-delAcc">
                         <!-- 회원탈퇴 클릭 시 회원탈퇴 페이지로 이동 -->
-                        <router-link to="/mypage/deletingAccount" class="router-MemberInfo-delAcc">회원탈퇴</router-link>
+                        <router-link to="/my-page/delete-account" class="router-MemberInfo-delAcc">회원탈퇴</router-link>
                     </div><br>
                 </div>
                 
@@ -58,6 +58,35 @@ export default{
         }
     },
     methods:{
+        // accessToken 재발급 메소드
+        async getAccessToken(){
+            // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
+            // axios의 동기적 동작을 위해 async/await 사용
+            try {
+                // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
+                const getAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
+                    withCredentials: true
+                })
+
+                // 200 => 요청 성공
+                if(getAccessTokenResponse.status === 200){
+                    // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
+                    // 재발급 받은 accessToken 로컬 스토리지에 저장
+                    localStorage.setItem("accessToken", getAccessTokenResponse.data.accessToken);
+
+                    return true; // 성공 => true 리턴
+                }
+            } catch (error) {
+                // 403 => refreshToken 토큰 만료
+                if(error.response.status === 403){
+                    // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
+                    localStorage.removeItem("accessToken");
+                    localStorage.removeItem("role");
+                }
+
+                return false; // 실패 => false 리턴
+            }
+        },
         // 회원정보 요청 메소드
         // 동기적 동작을 위해 async/await 사용
         async getMember(){
@@ -67,49 +96,38 @@ export default{
                     headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                 })
 
-                 // 응답 결과 유효하지 않은 acccessToken인 경우
-                if(getMemberResponse.data === 'invalidAccessToken'){
-                    // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
-                    // axios의 동기적 동작을 위해 async/await 사용
-                    // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                    const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
-                        withCredentials: true
-                    })
+                // 200 => 요청 성공
+                if(getMemberResponse.status === 200){
+                    this.member = getMemberResponse.data; // 회원정보 저장
+                }
+            } catch (error) {
+                // 403 => accessToken 토큰 만료
+                if(error.response.status === 403){
+                    // accessToken 재발급 메소드 호출 => true면 성공
+                    const isNewAccessTokenLoaded = await this.getAccessToken();
+                    
+                    if(isNewAccessTokenLoaded){
+                        try {
+                            // accessToken으로 get 재요청
+                            const reGetMemberResponse = await axios.get('http://localhost:8090/api/member', {
+                                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                            })
 
-                    // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
-                    if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
-                        localStorage.removeItem("accessToken");
-                        localStorage.removeItem("role");
-
+                            // 200 => 재요청 성공
+                            if(reGetMemberResponse.status === 200){
+                                this.member = reGetMemberResponse.data; // 회원정보 저장
+                            }
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    }else{
                         // 로그인 만료 알림
                         alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
 
                         // header 메뉴 갱신을 위해 새로고침
                         this.$router.go(this.$router.currentRoute);
-                    }else{
-                        // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                        // 재발급 받은 accessToken 로컬 스토리지에 저장
-                        localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
-
-                        // accessToken으로 get 재요청
-                        const reGetMemberResponse = await axios.get('http://localhost:8090/api/member', {
-                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                        })
-
-                        // accessToken이 유효한 경우 => 재요청 성공
-                        if(reGetMemberResponse.data !== 'invalidAccessToken'){
-                            // 회원정보 저장
-                            this.member = reGetMemberResponse.data;
-                        }
                     }
-                }else{
-                    // 회원정보 저장
-                    this.member = getMemberResponse.data;
                 }
-            } catch (error) {
-                console.log(error);
             }
         },
         // 비밀번호 변경 요청 메소드
@@ -134,56 +152,8 @@ export default{
                             headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                         })
 
-                        // 응답 결과 유효하지 않은 acccessToken인 경우
-                        if(updatePasswordResponse.data === 'invalidAccessToken'){
-                            // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
-                            // axios의 동기적 동작을 위해 async/await 사용
-                            // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                            const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
-                                withCredentials: true
-                            })
-
-                            // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
-                            if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
-                                localStorage.removeItem("accessToken");
-                                localStorage.removeItem("role");
-
-                                // 로그인 만료 알림
-                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-                                
-                                // header 메뉴 갱신을 위해 새로고침
-                                this.$router.go(this.$router.currentRoute);
-                            }else{
-                                // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                                // 재발급 받은 accessToken 로컬 스토리지에 저장
-                                localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
-
-                                // accessToken + 회원 아이디 + 비밀번호로 put 재요청
-                                const reUpdatePasswordResponse = await axios.put('http://localhost:8090/api/member/pw', {
-                                    memberId: this.member.memberId,
-                                    pw: this.newPassword
-                                },{
-                                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                                })
-
-                                // accessToken이 유효한 경우 => 재요청 성공
-                                if(reUpdatePasswordResponse.data !== 'invalidAccessToken'){
-                                    alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
-                                    
-                                    // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
-                                    localStorage.removeItem("accessToken");
-                                    localStorage.removeItem("role");
-
-                                    // 메인 페이지로 이동
-                                    this.$router.push({path: "/"});
-
-                                    // header 메뉴 갱신을 위해 새로고침
-                                    this.$router.go(this.$router.currentRoute);
-                                }
-                            }
-                        }else{
+                        // 200 => 요청 성공
+                        if(updatePasswordResponse.status === 200){
                             alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
                             
                             // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
@@ -194,7 +164,43 @@ export default{
                             this.$router.go(this.$router.currentRoute);
                         }
                     } catch (error) {
-                        console.log(error);
+                        // 403 => accessToken 토큰 만료
+                        if(error.response.status === 403){
+                            // accessToken 재발급 메소드 호출 => true면 성공
+                            const isNewAccessTokenLoaded = await this.getAccessToken();
+                            
+                            if(isNewAccessTokenLoaded){
+                                try {
+                                    // accessToken + 회원 아이디 + 비밀번호로 put 재요청
+                                    const reUpdatePasswordResponse = await axios.put('http://localhost:8090/api/member/pw', {
+                                        memberId: this.member.memberId,
+                                        pw: this.newPassword
+                                    },{
+                                        headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                                    })
+
+                                    // 200 => 재요청 성공
+                                    if(reUpdatePasswordResponse.status === 200){
+                                        alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
+                            
+                                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
+                                        localStorage.removeItem("accessToken");
+                                        localStorage.removeItem("role");
+
+                                        // header 메뉴 갱신을 위해 새로고침
+                                        this.$router.go(this.$router.currentRoute);
+                                    }
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            }else{
+                                // 로그인 만료 알림
+                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+
+                                // header 메뉴 갱신을 위해 새로고침
+                                this.$router.go(this.$router.currentRoute);
+                            }
+                        }
                     }
                 }else{
                     // 패턴에 부합하지 않고 최소 길이보다 작을 때 false 리턴

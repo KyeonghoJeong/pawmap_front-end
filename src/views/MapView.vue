@@ -161,6 +161,35 @@ export default {
         }
     },
     methods: {
+        // accessToken 재발급 메소드
+        async getAccessToken(){
+            // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
+            // axios의 동기적 동작을 위해 async/await 사용
+            try {
+                // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
+                const getAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
+                    withCredentials: true
+                })
+
+                // 200 => 요청 성공
+                if(getAccessTokenResponse.status === 200){
+                    // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
+                    // 재발급 받은 accessToken 로컬 스토리지에 저장
+                    localStorage.setItem("accessToken", getAccessTokenResponse.data.accessToken);
+
+                    return true; // 성공 => true 리턴
+                }
+            } catch (error) {
+                // 403 => refreshToken 토큰 만료
+                if(error.response.status === 403){
+                    // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
+                    localStorage.removeItem("accessToken");
+                    localStorage.removeItem("role");
+                }
+
+                return false; // 실패 => false 리턴
+            }
+        },
         // 북마크 추가 메소드
         // 시설 id를 매개변수로 받는다
         async addBookmark(facilityId){
@@ -175,55 +204,45 @@ export default {
                             headers:{'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                         });
 
-                        if(addBookmarkResponse.data === 'addedBookmark'){
+                        // 200 => 요청 성공
+                        if(addBookmarkResponse.data === "addedBookmark"){
                             alert("이미 북마크에 등록되어 있는 시설입니다.");
-                        }else if(addBookmarkResponse.data === 'success'){
+                        }else {
                             alert("북마크에 등록했습니다.");
-                        }else if(addBookmarkResponse.data === 'invalidAccessToken'){
-                            // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
-                            // axios의 동기적 동작을 위해 async/await 사용
-                            // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                            const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
-                                withCredentials: true
-                            })
+                        }
+                    } catch (error) {
+                        // 403 => accessToken 토큰 만료
+                        if(error.response.status === 403){
+                            // accessToken 재발급 메소드 호출 => true면 성공
+                            const isNewAccessTokenLoaded = await this.getAccessToken();
+                            
+                            if(isNewAccessTokenLoaded){
+                                try {
+                                    // acccessToken + 시설 id로 post 재요청
+                                    const reAddBookmarkResponse = await axios.post('http://localhost:8090/api/map/bookmark', {
+                                        facilityId: facilityId
+                                    }, {
+                                        headers:{'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                                    });
 
-                            // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
-                            if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
-                                localStorage.removeItem("accessToken");
-                                localStorage.removeItem("role");
-
-                                // 로그인 만료 알림
-                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-                                
-                                // header 메뉴 갱신을 위해 새로고침
-                                this.$router.go(this.$router.currentRoute);
-                            }else {
-                                // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                                // 재발급 받은 accessToken 로컬 스토리지에 저장
-                                localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
-
-                                // acccessToken + 시설 id로 post 재요청
-                                const reAddBookmarkResponse = await axios.post('http://localhost:8090/api/map/bookmark', {
-                                    facilityId: facilityId
-                                }, {
-                                    headers:{'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                                });
-
-                                // accessToken이 유효한 경우 => post 요청 성공
-                                if(reAddBookmarkResponse.data !== 'invalidAccessToken'){
+                                    // 200 => 재요청 성공
                                     if(reAddBookmarkResponse.data === 'addedBookmark'){
                                         alert("이미 북마크에 등록되어 있는 시설입니다.");
-                                    }else if(reAddBookmarkResponse.data === 'success'){
+                                    }else {
                                         alert("북마크에 등록했습니다.");
                                     }
+                                } catch (error) {
+                                    console.log(error);
                                 }
+                            }else{
+                                // 로그인 만료 알림
+                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+
+                                // header 메뉴 갱신을 위해 새로고침
+                                this.$router.go(this.$router.currentRoute);
                             }
                         }
-                } catch(error) {
-                    console.log(error);
-                }
+                    }
                 }
             }else{
                 // 로그인 상태가 아닌 경우 로그인 요청

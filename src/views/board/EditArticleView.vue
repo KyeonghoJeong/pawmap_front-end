@@ -62,10 +62,39 @@ export default {
                 console.log(error);
             })
         },
+        // accessToken 재발급 메소드
+        async getAccessToken(){
+            // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
+            // axios의 동기적 동작을 위해 async/await 사용
+            try {
+                // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
+                const getAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
+                    withCredentials: true
+                })
+
+                // 200 => 요청 성공
+                if(getAccessTokenResponse.status === 200){
+                    // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
+                    // 재발급 받은 accessToken 로컬 스토리지에 저장
+                    localStorage.setItem("accessToken", getAccessTokenResponse.data.accessToken);
+
+                    return true; // 성공 => true 리턴
+                }
+            } catch (error) {
+                // 403 => refreshToken 토큰 만료
+                if(error.response.status === 403){
+                    // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
+                    localStorage.removeItem("accessToken");
+                    localStorage.removeItem("role");
+                }
+
+                return false; // 실패 => false 리턴
+            }
+        },
         // 게시글 수정 메소드
         // 동기적 동작을 위해 async/await 사용
         async updateArticle(){
-            try{
+            try {
                 // accessToken + 게시글 id + 제목 + 내용으로 게시글 수정 put 요청
                 const updateArticleResponse = await axios.put('http://localhost:8090/api/board/article', {
                     articleId: this.articleId,
@@ -75,53 +104,44 @@ export default {
                     headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                 })
 
-                // 응답 결과 유효하지 않은 acccessToken인 경우
-                if(updateArticleResponse.data === 'invalidAccessToken'){
-                    // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
-                    // axios의 동기적 동작을 위해 async/await 사용
-                    // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                    const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
-                        withCredentials: true
-                    })
+                // 200 => 요청 성공
+                if(updateArticleResponse.status === 200){
+                    // 게시글 수정 후 해당 게시글로 이동
+                    this.$router.push({path: '/board/article', query: {articleId: this.articleId}});
+                }
+            } catch (error) {
+                // 403 => accessToken 토큰 만료
+                if(error.response.status === 403){
+                    // accessToken 재발급 메소드 호출 => true면 성공
+                    const isNewAccessTokenLoaded = await this.getAccessToken();
+                    
+                    if(isNewAccessTokenLoaded){
+                        try {
+                            // accessToken + 게시글 id + 제목 + 내용으로 게시글 수정 put 재요청
+                            const reUpdateArticleResponse = await axios.put('http://localhost:8090/api/board/article', {
+                                articleId: this.articleId,
+                                title: this.title, 
+                                writing: this.writing
+                            }, {
+                                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                            })
 
-                    // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
-                    if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
-                        localStorage.removeItem("accessToken");
-                        localStorage.removeItem("role");
-
+                            // 200 => 재요청 성공
+                            if(reUpdateArticleResponse.status === 200){
+                                // 게시글 수정 후 해당 게시글로 이동
+                                this.$router.push({path: '/board/article', query: {articleId: this.articleId}});
+                            }
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    }else{
                         // 로그인 만료 알림
                         alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
 
                         // header 메뉴 갱신을 위해 새로고침
                         this.$router.go(this.$router.currentRoute);
-                    }else{
-                        // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                        // 재발급 받은 accessToken 로컬 스토리지에 저장
-                        localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
-
-                        // accessToken + 게시글 id + 제목 + 내용으로 게시글 수정 put 재요청
-                        const reUpdateArticleResponse = await axios.put('http://localhost:8090/api/board/article', {
-                            articleId: this.articleId,
-                            title: this.title, 
-                            writing: this.writing
-                        }, {
-                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                        })
-
-                        // accessToken이 유효한 경우 => delete 요청 성공
-                        if(reUpdateArticleResponse.data !== 'invalidAccessToken'){
-                            // 게시글 수정 후 해당 게시글로 이동
-                            this.$router.push({path: '/board', query: {articleId: this.articleId}});
-                        }
                     }
-                }else{
-                    // 게시글 수정 후 해당 게시글로 이동
-                    this.$router.push({path: '/board', query: {articleId: this.articleId}});
                 }
-            } catch (error) {
-                console.log(error);
             }
         }
     },

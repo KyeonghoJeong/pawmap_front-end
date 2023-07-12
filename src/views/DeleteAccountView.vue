@@ -28,12 +28,40 @@ import axios from 'axios';
 export default{
     data(){
         return{
-            password: '', // 최종 입력 비밀번호
             password1: '', // 입력 비밀번호 1
             password2: '', // 입력 비밀번호 2
         }
     },
     methods:{
+        // accessToken 재발급 메소드
+        async getAccessToken(){
+            // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
+            // axios의 동기적 동작을 위해 async/await 사용
+            try {
+                // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
+                const getAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
+                    withCredentials: true
+                })
+
+                // 200 => 요청 성공
+                if(getAccessTokenResponse.status === 200){
+                    // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
+                    // 재발급 받은 accessToken 로컬 스토리지에 저장
+                    localStorage.setItem("accessToken", getAccessTokenResponse.data.accessToken);
+
+                    return true; // 성공 => true 리턴
+                }
+            } catch (error) {
+                // 403 => refreshToken 토큰 만료
+                if(error.response.status === 403){
+                    // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
+                    localStorage.removeItem("accessToken");
+                    localStorage.removeItem("role");
+                }
+
+                return false; // 실패 => false 리턴
+            }
+        },
         // 회원탈퇴 요청 메소드
         // 동기적 동작을 위해 async/await 사용
         async deleteAccount(){
@@ -43,58 +71,46 @@ export default{
             }else{
                 // 비밀번호 입력 값과 비밀번호 확인 값이 같을 때
                 if(confirm("정말 회원탈퇴 하시겠습니까?")){
-                    this.password = this.password1;
-
+                    const password = this.password1;
+ 
                     try {
                         // accessToken + 입력 비밀번호로 회원탈퇴 put 요청
                         const deleteAccountResponse = await axios.put('http://localhost:8090/api/member/deletion-date', {
-                            pw: this.password
+                            pw: password
                         },{
                             headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                         })
 
-                        // 응답 결과 유효하지 않은 acccessToken인 경우
-                        if(deleteAccountResponse.data === 'invalidAccessToken'){
-                            // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
-                            // axios의 동기적 동작을 위해 async/await 사용
-                            // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                            const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
-                                withCredentials: true
-                            })
+                        // "incorrectPassword" => 잘못된 비밀번호
+                        if(deleteAccountResponse.data === "incorrectPassword"){
+                            alert("잘못된 비밀번호입니다.");
+                        }else{
+                            alert("회원탈퇴가 완료되었습니다.");
 
-                            // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
-                            if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
-                                localStorage.removeItem("accessToken");
-                                localStorage.removeItem("role");
+                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
+                            localStorage.removeItem("accessToken");
+                            localStorage.removeItem("role");
 
-                                // 로그인 만료 알림
-                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-
-                                // header 메뉴 갱신을 위해 새로고침
-                                this.$router.go(this.$router.currentRoute);
-                            }else{
-                                // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                                // 재발급 받은 accessToken 로컬 스토리지에 저장
-                                localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
-
-                                // accessToken + 입력 비밀번호로 회원탈퇴 put 재요청
-                                const reDeleteAccountResponse = await axios.put('http://localhost:8090/api/member/deletion-date', {
-                                    pw: this.password
-                                },{
-                                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                                })
-
-                                // accessToken이 유효한 경우 => 재요청 성공
-                                if(reDeleteAccountResponse.data !== 'invalidAccessToken'){
-                                    // 이전 과정에서 토큰 인증되었으므로 바로 토큰 검증없이 삭제 요청
-                                    const deleteBookmarksResponse = await axios.delete('http://localhost:8090/api/member/bookmarks', {
+                            this.$router.go(this.$router.currentRoute); // 새로고침
+                        }
+                    } catch (error) {
+                        if(error.response.status === 403){
+                            // accessToken 재발급 메소드 호출 => true면 성공
+                            const isNewAccessTokenLoaded = await this.getAccessToken();
+                            
+                            if(isNewAccessTokenLoaded){
+                                try {
+                                    // accessToken + 입력 비밀번호로 회원탈퇴 put 재요청
+                                    const reDeleteAccountResponse = await axios.put('http://localhost:8090/api/member/deletion-date', {
+                                        pw: password
+                                    },{
                                         headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                                    });
+                                    })
 
-                                    // 요청 및 응답 성공 시
-                                    if(deleteBookmarksResponse.status === 200){
+                                    // "incorrectPassword" => 잘못된 비밀번호
+                                    if(reDeleteAccountResponse.data === "incorrectPassword"){
+                                        alert("잘못된 비밀번호입니다.");
+                                    }else{
                                         alert("회원탈퇴가 완료되었습니다.");
 
                                         // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
@@ -103,30 +119,16 @@ export default{
 
                                         this.$router.go(this.$router.currentRoute); // 새로고침
                                     }
+                                } catch (error) {
+                                    console.log(error);
                                 }
-                            }   
-                        }else{
-                            // 이전 과정에서 토큰 인증되었으므로 바로 토큰 검증없이 삭제 요청
-                            const deleteBookmarksResponse = await axios.delete('http://localhost:8090/api/member/bookmarks', {
-                                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                            });
+                            }else{
+                                // 로그인 만료 알림
+                                alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
 
-                            // 요청 및 응답 성공 시
-                            if(deleteBookmarksResponse.status === 200){
-                                alert("회원탈퇴가 완료되었습니다.");
-
-                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
-                                localStorage.removeItem("accessToken");
-                                localStorage.removeItem("role");
-
-                                this.$router.go(this.$router.currentRoute); // 새로고침
+                                // header 메뉴 갱신을 위해 새로고침
+                                this.$router.go(this.$router.currentRoute);
                             }
-                        }
-                    } catch (error) {
-                        if(error.response.status === 403){
-                            alert("잘못된 비밀번호입니다.");
-                        }else{
-                            console.log(error);
                         }
                     }
                 }

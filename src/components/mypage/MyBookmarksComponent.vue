@@ -78,6 +78,35 @@ export default {
         }
     },
     methods:{
+        // accessToken 재발급 메소드
+        async getAccessToken(){
+            // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
+            // axios의 동기적 동작을 위해 async/await 사용
+            try {
+                // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
+                const getAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
+                    withCredentials: true
+                })
+
+                // 200 => 요청 성공
+                if(getAccessTokenResponse.status === 200){
+                    // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
+                    // 재발급 받은 accessToken 로컬 스토리지에 저장
+                    localStorage.setItem("accessToken", getAccessTokenResponse.data.accessToken);
+
+                    return true; // 성공 => true 리턴
+                }
+            } catch (error) {
+                // 403 => refreshToken 토큰 만료
+                if(error.response.status === 403){
+                    // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
+                    localStorage.removeItem("accessToken");
+                    localStorage.removeItem("role");
+                }
+
+                return false; // 실패 => false 리턴
+            }
+        },
         // 회원이 등록한 북마크 요청 메소드
         // 동기적 동작을 위해 async 지정
         async getBookmarks(page){
@@ -91,128 +120,110 @@ export default {
                     headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                 })
 
-                // 응답 결과 유효하지 않은 acccessToken인 경우
-                if(getBookmarksResponse.data === 'invalidAccessToken'){
-                    // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
-                    // axios의 동기적 동작을 위해 async/await 사용
-                    // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                    const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
-                        withCredentials: true
-                    })
-
-                    // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
-                    if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
-                        localStorage.removeItem("accessToken");
-                        localStorage.removeItem("role");
-
-                        // 로그인 만료 알림
-                        alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
-
-                        // header 메뉴 갱신을 위해 새로고침
-                        this.$router.go(this.$router.currentRoute);
-                    }else{
-                        // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                        // 재발급 받은 accessToken 로컬 스토리지에 저장
-                        localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
-
-                        // accessToken으로 북마크 get 재요청
-                        const reGetBookmarksResponse = await axios.get('http://localhost:8090/api/map/bookmarks', {
-                            params: {page: page, size: 10},
-                            headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                        })
-
-                        // accessToken이 유효한 경우 => post 요청 성공
-                        if(reGetBookmarksResponse.data !== 'invalidAccessToken'){
-                            this.bookmarks = reGetBookmarksResponse.data.content;
-                            this.totalPages = reGetBookmarksResponse.data.totalPages;
-
-                            this.isBookmarksLoaded = true; // 데이터 수신 완료
-                        }
-                    }
-                }else{
+                // 200 => 요청 성공
+                if(getBookmarksResponse.status === 200){
                     this.bookmarks = getBookmarksResponse.data.content;
                     this.totalPages = getBookmarksResponse.data.totalPages;
 
                     this.isBookmarksLoaded = true; // 데이터 수신 완료
                 }
             } catch (error) {
-                console.log(error);
+                // 403 => accessToken 토큰 만료
+                if(error.response.status === 403){
+                    // accessToken 재발급 메소드 호출 => true면 성공
+                    const isNewAccessTokenLoaded = await this.getAccessToken();
+                    
+                    if(isNewAccessTokenLoaded){
+                        try {
+                            // accessToken으로 북마크 get 재요청
+                            const reGetBookmarksResponse = await axios.get('http://localhost:8090/api/map/bookmarks', {
+                                params: {page: page, size: 10},
+                                headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                            })
+
+                            // 200 => 재요청 성공
+                            if(reGetBookmarksResponse.status === 200){
+                                this.bookmarks = reGetBookmarksResponse.data.content;
+                                this.totalPages = reGetBookmarksResponse.data.totalPages;
+
+                                this.isBookmarksLoaded = true; // 데이터 수신 완료
+                            }
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    }else{
+                        // 로그인 만료 알림
+                        alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
+
+                        // header 메뉴 갱신을 위해 새로고침
+                        this.$router.go(this.$router.currentRoute);
+                    }
+                }
             }
         },
         // 회원이 등록한 북마크 삭제 메소드
         // 동기적 동작을 위해 async 지정
         async deleteBookmark(){
-            if(confirm("정말 삭제하시겠습니까?")){
-                // 삭제할 북마크 배열 초기화
-                this.checkedFacilityIds = [];
+            // 삭제할 북마크 배열 초기화
+            this.checkedFacilityIds = [];
 
-                // 현재 북마크 배열에 저장되어 있는 북마크 수 만큼 반복
-                for(let i=0; i<this.bookmarks.length; i++){
-                    if(this.checkedBookmarkIndex[i] === true){
-                        // checkedBookmarkIndex[i]가 true이면 체크박스 체크를 의미
-                        // checkedBookmarkIndex와 bookmarks의 인덱스는 같으므로 checkedFacilityIds에 삭제할 북마크의 시설 id를 push
-                        this.checkedFacilityIds.push(this.bookmarks[i].facilityId);
-                    }
+            // 현재 북마크 배열에 저장되어 있는 북마크 수 만큼 반복
+            for(let i=0; i<this.bookmarks.length; i++){
+                if(this.checkedBookmarkIndex[i] === true){
+                    // checkedBookmarkIndex[i]가 true이면 체크박스 체크를 의미
+                    // checkedBookmarkIndex와 bookmarks의 인덱스는 같으므로 checkedFacilityIds에 삭제할 북마크의 시설 id를 push
+                    this.checkedFacilityIds.push(this.bookmarks[i].facilityId);
                 }
+            }
 
-                if(this.checkedFacilityIds.length === 0){
-                    alert("선택된 북마크가 없습니다.");
-                }else{
+            const checkedFacilityIdsString = this.checkedFacilityIds.join(','); // param으로 전달하기 위해 String으로 만들기
+
+            if(this.checkedFacilityIds.length === 0){
+                alert("선택된 북마크가 없습니다.");
+            }else{
+                if(confirm("정말 삭제하시겠습니까?")){
                     try {
-                        const checkedFacilityIdsString = this.checkedFacilityIds.join(','); // param으로 전달하기 위해 String으로 만들기
-
                         // accessToken + 체크한 시설 id로 delete 요청
                         const deleteBookmarkResponse = await axios.delete('http://localhost:8090/api/map/bookmarks', {
                             params: {facilityIds: checkedFacilityIdsString},
                             headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                         });
 
-                        // 응답 결과 유효하지 않은 acccessToken인 경우
-                        if(deleteBookmarkResponse.data === 'invalidAccessToken'){
-                            // Cookie에 가지고 있는 refreshToken으로 accessToken을 재발급
-                            // axios의 동기적 동작을 위해 async/await 사용
-                            // 서로 다른 도메인 간의 Cookie 송수신을 위해 withCredentials: true 설정
-                            const getNewAccessTokenResponse = await axios.get('http://localhost:8090/api/auth/access-token', {
-                                withCredentials: true
-                            })
+                        // 200 => 요청 성공
+                        if(deleteBookmarkResponse.status === 200){
+                            this.$router.go(this.$router.currentRoute); // 새로고침
+                        }
+                    } catch (error) {
+                        // 403 => accessToken 토큰 만료
+                        if(error.response.status === 403){
+                            // accessToken 재발급 메소드 호출 => true면 성공
+                            const isNewAccessTokenLoaded = await this.getAccessToken();
+                            
+                            if(isNewAccessTokenLoaded){
+                                try {
+                                    // accessToken + 체크한 시설 id로 delete 재요청
+                                    const reDeleteBookmarkResponse = await axios.delete('http://localhost:8090/api/map/bookmarks', {
+                                        params: {facilityIds: checkedFacilityIdsString},
+                                        headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
+                                    });
 
-                            // 백엔드로부터 refreshToken이 유효하지 않다는 응답을 받은 경우
-                            if(getNewAccessTokenResponse.data === 'invalidRefreshToken'){
-                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
-                                localStorage.removeItem("accessToken");
-                                localStorage.removeItem("role");
-
+                                    // 200 => 재요청 성공
+                                    if(reDeleteBookmarkResponse.status === 200){
+                                        this.$router.go(this.$router.currentRoute); // 새로고침
+                                    }
+                                } catch (error) {
+                                    console.log(error);
+                                }
+                            }else{
                                 // 로그인 만료 알림
                                 alert("로그인 시간이 만료되었습니다. 다시 로그인해 주세요.");
 
                                 // header 메뉴 갱신을 위해 새로고침
                                 this.$router.go(this.$router.currentRoute);
-                            }else{
-                                // refreshToken이 유효하여 백엔드로부터 accessToken을 재발급 받은 경우
-
-                                // 재발급 받은 accessToken 로컬 스토리지에 저장
-                                localStorage.setItem("accessToken", getNewAccessTokenResponse.data.accessToken);
-
-                                // accessToken + 체크한 시설 id로 delete 재요청
-                                const reDeleteBookmarkResponse = await axios.delete('http://localhost:8090/api/map/bookmarks', {
-                                    params: {facilityIds: checkedFacilityIdsString},
-                                    headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
-                                });
-
-                                // accessToken이 유효한 경우 => 재요청 성공
-                                if(reDeleteBookmarkResponse.data !== 'invalidAccessToken'){
-                                    this.$router.go(this.$router.currentRoute); // 새로고침
-                                }
                             }
-                        }else{
-                            this.$router.go(this.$router.currentRoute); // 새로고침
                         }
-                    } catch (error) {
-                        console.log(error);
-                    } 
-                }
+                    }
+                }   
             }
         },
         // 이전 버튼 클릭 시 startNum, endNum 재설정을 위한 메소드
