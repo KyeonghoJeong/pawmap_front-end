@@ -48,10 +48,15 @@
         <div class="div-map-list" ref="scrollController" >
             <!-- facilities 리스트에 데이터가 있는 경우만 리스트 출력 -->
             <!-- div-map-card는 card를 반복 출력할 div와 pagination div를 담을 div -->
+            <!-- 지도 메뉴 클릭 시 아무 데이터가 없을 때 pagination 메뉴 출력 방지를 위해 v-if로 facilities 데이터가 있을 때만 출력 -->
             <div class="card div-map-card" v-if="facilities.length > 0">
                 <!-- div-map-card-body는 facilities 리스트에서 들어있는 시설 갯수만큼 반복해서 출력 -->
                 <!-- 이하 자식 div는 facility의 데이터 출력 -->
-                <div class="card-body div-map-card-body" v-for="(facility, index) in facilities" :key="index">
+                <!-- 클릭 시 색 변경 및 오버레이 출력을 위해 클릭 이벤트로 setFacilityCardClicked 메소드 호출 -->
+                <!-- isClickedFacilityCard 메소드는 클릭한 시설 카드와 반복문으로 출력하는 카드 중에서 같은 경우 true 리턴 => 색 변경 -->
+                <div @click="setFacilityCardClicked(facility)" 
+                    :class="['card-body', 'div-map-card-body', {'div-map-card-body-clicked' : isClickedFacilityCard(facility.facilityId)}]" 
+                    v-for="(facility, index) in facilities" :key="index">
                     <div class="div-map-card-body-title">
                         <div class="div-map-card-body-title-facilityname">{{facility.facilityName}}</div>
                         <div class="div-map-card-body-title-cat">&nbsp;&nbsp;{{facility.cat}}</div>
@@ -131,6 +136,7 @@ export default {
             markers: [], // 실제 마커를 담을 배열
             clickedMarker: '', // 현재 선택(클릭)된 마크를 담을 변수
             activatedOverlay: '', // 현재 보여지고 있는 오버레이를 담을 변수
+            clickedFacilityCard: '', // 클릭된 시설 카드의 id를 담는 변수 => 카드 클릭 이벤트로 색 변경
             map: null, // 카카오맵 api 지도 변수
             sidoOptions: [], // 행정구역 '시도'를 담을 배열
             sigunguOptions: [], // 행정구역 '시군구'를 담을 배열
@@ -291,7 +297,7 @@ export default {
                                 `<div style="color:green">${facility.phoneNum}</div>`+
                             '</div>'+
                             '<div style="display: flex; margin-top:1px; font-size: 11px">'+
-                                `<div style="font-weight:bold;" v-if="">홈페이지&nbsp;</div>`+
+                                `<div style="font-weight:bold;">홈페이지&nbsp;</div>`+
                                 `${facility.website === '정보없음' ? '정보없음' : `<a href="${facility.website}" target="_blank">${facility.website}</a>`}` +
                             '</div>'+
                             '<div style="display: flex; margin-top:1px; font-size: 11px">'+
@@ -479,6 +485,20 @@ export default {
         // 화면 왼쪽 시설 리스트와 화면 오른쪽 지도 위의 마커 설정을 위한 메소드
         // 읍면동 검색, select 선택 등 조건이 바뀔 때 시설 정보, 시설 위치 정보를 백엔드에서 받아와서 설정해주기 위한 메소드 
         async setListAndMarker(facilitiesUrl, facilityLocationsUrl, maxLevel, level){
+            // 카테고리, 시도, 시군구, 읍면동 선택 시 이전에 클릭한 마커, 오버레이, 시설 카드는 필요 없으므로 각각 초기화
+            if(this.clickedMarker !== ''){
+                this.clickedMarker = '';
+            }
+
+            if(this.activatedOverlay !== ''){
+                this.activatedOverlay.setMap(null); // 오버레이 해제
+                this.activatedOverlay = ''; // 오버레이 초기화
+            }
+
+            if(this.clickedFacilityCard !== ''){
+                this.clickedFacilityCard = '';
+            }
+
             try {
                 const facilitiesResponse = await axios.get(facilitiesUrl);
 
@@ -844,6 +864,9 @@ export default {
 
                     // 마커 클릭 이벤트 리스너 추가 => 마커 클릭 시 오버레이 출력
                     kakao.maps.event.addListener(marker, 'click', () => {
+                        // 마커 클릭 시 왼쪽 시설 카드의 색 변경을 위해 id 저장
+                        this.clickedFacilityCard = position[0];
+
                         // 맵 위치 클릭한 마커 중심으로 변경
                         this.map.setCenter(new kakao.maps.LatLng(position[2], position[3]));
 
@@ -883,6 +906,11 @@ export default {
                         if(this.activatedOverlay !== ''){
                             this.activatedOverlay.setMap(null); // 오버레이 해제
                             this.activatedOverlay = ''; // 오버레이 초기화
+                        }
+
+                        // 이전에 클릭한 시설 카드가 있으면 초기화
+                        if(this.clickedFacilityCard !== ''){
+                            this.clickedFacilityCard = '';
                         }
 
                         // 클릭한 마커가 있는 경우
@@ -1059,6 +1087,20 @@ export default {
         },
         // 시설 목록 재출력을 위해 다시 시설 정보를 받아오기 위한 메소드 => 페이지 번호 클릭 시, 이전/다음 버튼 클릭 시
         getFacilitiesByPage(i){
+            // 카테고리, 시도, 시군구, 읍면동 선택 시 이전에 클릭한 마커, 오버레이, 시설 카드는 필요 없으므로 각각 초기화
+            if(this.clickedMarker !== ''){
+                this.clickedMarker = '';
+            }
+
+            if(this.activatedOverlay !== ''){
+                this.activatedOverlay.setMap(null); // 오버레이 해제
+                this.activatedOverlay = ''; // 오버레이 초기화
+            }
+
+            if(this.clickedFacilityCard !== ''){
+                this.clickedFacilityCard = '';
+            }
+
             // i는 페이지 번호
             // contentUrl은 동 이름 검색, 카테고리 선택, select 메뉴 선택 등에 의해 현재 출력하고 있는 시설 정보를 가져오는 get 요청 url
             let url = this.contentUrl + `&page=${i}&size=${this.size}`;
@@ -1089,43 +1131,53 @@ export default {
                 console.log(error);
             })
         },
+        setFacilityCardClicked(facility){
+            // 시설 목록에서 카드(시설 하나)를 클릭 시 클릭 상태인 카드에 id를 저장하고 해당 시설의 오버레이를 출력하는 메소드
+            this.clickedFacilityCard = facility.facilityId;
+            
+            this.showDetails(facility);
+        },
+        isClickedFacilityCard(facilityId){
+            // v-for로 출력중인 시설 카드 중에서 클릭 상태인 카드와 일치하면 true를 리턴해서 색을 변경하는데 사용
+            return facilityId === this.clickedFacilityCard;
+        }
     },
     // 값 변경 시 계산
     computed:{
-      // 맨 첫 페이지 이전 버튼 동작 중지를 위해 startNum이 5 이하인 경우 false 리턴
-      isPrevDisabled(){
-        return this.startNum <= 5;
-      },
-      // startNum + 5를 하면 다음 페이지 배열의 시작 페이지 번호인데 총 페이지 수를 넘을 경우 false 리턴
-      isNextDisabled(){
-        if(this.startNum == 0){
-            return this.startNum+6 > this.totalPages;
-        }else{
-            return this.startNum+5 > this.totalPages;
-        }
-      },
-      // 페이지 5개 단위로 출력을 위해 numbers 배열에 5개씩 담아 리턴
-      pageNumbers(){
-        let numbers = []; // 페이지 번호를 담을 배열 초기화
-        let start = this.startNum; // 시작 번호
-        let end = this.endNum; // 마지막 번호
-
-        // startNum이 0이면 맨 처음 페이지 배열에 해당
-        if(this.startNum === 0){
-            start = 1; // 맨 처음 페이지 배열 시작 페이지 번호를 1로 설정
-            end = this.totalPages; // 총 페이지 배열의 수가 하나를 넘지 않는 경우 시작 페이지의 마지막 번호를 총 페이지 수로 설정
-            if(end > 5){ // 총 페이지 배열의 수가 하나 이상인 경우 시작 페이지의 마지막 번호를 첫 번째 페이지 배열의 마지막 번호인 5로 설정
-                end = 5;
+        // 맨 첫 페이지 이전 버튼 동작 중지를 위해 startNum이 5 이하인 경우 false 리턴
+        isPrevDisabled(){
+            return this.startNum <= 5;
+        },
+        // startNum + 5를 하면 다음 페이지 배열의 시작 페이지 번호인데 총 페이지 수를 넘을 경우 false 리턴
+        isNextDisabled(){
+            if(this.startNum == 0){
+                return this.startNum+6 > this.totalPages;
+            }else{
+                return this.startNum+5 > this.totalPages;
             }
-        }
+        },
+        // 페이지 5개 단위로 출력을 위해 numbers 배열에 5개씩 담아 리턴
+        pageNumbers(){
+            let numbers = []; // 페이지 번호를 담을 배열 초기화
+            let start = this.startNum; // 시작 번호
+            let end = this.endNum; // 마지막 번호
 
-        // 시작 번호 ~ 마지막 번호까지 1씩 증가시켜서 numbers 배열에 넣기 (ex: 1, 2, 3, 4, 5 / 6, 7, 8, 9, 10)
-        for(let i=start; i<=end; i++){
-            numbers.push(i);
-        }
+            // startNum이 0이면 맨 처음 페이지 배열에 해당
+            if(this.startNum === 0){
+                start = 1; // 맨 처음 페이지 배열 시작 페이지 번호를 1로 설정
+                end = this.totalPages; // 총 페이지 배열의 수가 하나를 넘지 않는 경우 시작 페이지의 마지막 번호를 총 페이지 수로 설정
+                if(end > 5){ // 총 페이지 배열의 수가 하나 이상인 경우 시작 페이지의 마지막 번호를 첫 번째 페이지 배열의 마지막 번호인 5로 설정
+                    end = 5;
+                }
+            }
 
-        return numbers; // numbers 리턴
-      }
+            // 시작 번호 ~ 마지막 번호까지 1씩 증가시켜서 numbers 배열에 넣기 (ex: 1, 2, 3, 4, 5 / 6, 7, 8, 9, 10)
+            for(let i=start; i<=end; i++){
+                numbers.push(i);
+            }
+
+            return numbers; // numbers 리턴
+        }
     },
     // 특정 변수 값 변경 추적
     watch:{
@@ -1237,6 +1289,12 @@ export default {
     .div-map-card-body{ /* 카드 컴포넌트 div */
         border-bottom: 1px solid rgb(219, 219, 219); /* 하단 테두리 추가 */
     }
+    .div-map-card-body:hover{ /* 카드 마우스오버 시 색 변경 */
+        background-color: rgb(239, 247, 255);
+    }
+    .div-map-card-body-clicked{ /* 카드 마우스오버 시 색 변경 */
+        background-color: rgb(239, 247, 255);
+    }
     /* 아래부터는 카드 컴포넌트 내부 요소 디테일에 관한 스타일 */
     .div-map-card-body-title{
         display: flex; 
@@ -1283,15 +1341,15 @@ export default {
         justify-content: flex-end;
     }
     .button-map-card-body-detail{ /* 카드 컴포넌트 내부 상세보기 버튼 */
-        background:white; /* 버튼 배경색 지정 */
-        color:blue; /* 버튼 내부 글자색 지정 */
+        background: transparent; /* 버튼 배경색 지정 */
+        color: blue; /* 버튼 내부 글자색 지정 */
         border: none; /* 버튼 테두리 제거 */
         padding: 0px; /* 패딩 제거 */
         font-size: 12px; /* 폰트 크기 지정 */
         margin-right: 15px; /* 북마크 버튼과의 간격 지정 */
     }
     .button-map-card-body-bookmark{ /* 카드 컴포넌트 내부 북마크 버튼 */
-        background:white; /* 버튼 배경색 지정 */
+        background: transparent; /* 버튼 배경색 지정 */
         color:blue; /* 버튼 내부 글자색 지정 */
         border: none; /* 버튼 테두리 제거 */
         padding: 0px; /* 패딩 제거 */
