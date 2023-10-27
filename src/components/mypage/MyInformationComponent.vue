@@ -142,26 +142,31 @@ export default{
 
                 if(pattern.test(this.newPassword) && this.newPassword.length >= minLength){
                     // 패턴에 부합하고 최소 길이보다 길 때 비밀번호 수정 put 요청
-
                     try {
                         // accessToken + 회원 아이디 + 비밀번호로 put 요청
                         const updatePasswordResponse = await axios.put('http://localhost:8090/api/member/pw', {
-                            memberId: this.member.memberId,
-                            pw: this.newPassword
+                            pw: this.password,
+                            newPw: this.newPassword
                         },{
                             headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                         })
 
                         // 200 => 요청 성공
                         if(updatePasswordResponse.status === 200){
-                            alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
-                            
-                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
-                            localStorage.removeItem("accessToken");
-                            localStorage.removeItem("role");
+                            if(updatePasswordResponse.data === true){
+                                // true => 입력한 현재 비밀번호가 일치하는 경우
+                                alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
+                                
+                                // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
+                                localStorage.removeItem("accessToken");
+                                localStorage.removeItem("role");
 
-                            // header 메뉴 갱신을 위해 새로고침
-                            this.$router.go(this.$router.currentRoute);
+                                // header 메뉴 갱신을 위해 새로고침
+                                this.$router.go(this.$router.currentRoute);
+                            }else{
+                                // false => 입력한 현재 비밀번호가 일치하지 않는 경우
+                                alert("현재 비밀번호가 잘못되었습니다.");
+                            }
                         }
                     } catch (error) {
                         // 403 => accessToken 토큰 만료
@@ -173,22 +178,28 @@ export default{
                                 try {
                                     // accessToken + 회원 아이디 + 비밀번호로 put 재요청
                                     const reUpdatePasswordResponse = await axios.put('http://localhost:8090/api/member/pw', {
-                                        memberId: this.member.memberId,
-                                        pw: this.newPassword
+                                        pw: this.password,
+                                        newPw: this.newPassword
                                     },{
                                         headers: {'Authorization': `Bearer ${localStorage.getItem("accessToken")}`}
                                     })
 
                                     // 200 => 재요청 성공
                                     if(reUpdatePasswordResponse.status === 200){
-                                        alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
+                                        if(reUpdatePasswordResponse.data === true){
+                                            // true => 입력한 현재 비밀번호가 일치하는 경우
+                                            alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
                             
-                                        // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
-                                        localStorage.removeItem("accessToken");
-                                        localStorage.removeItem("role");
+                                            // 기존에 로컬 스토리지에 저장되어 있던 accessToken, role 삭제
+                                            localStorage.removeItem("accessToken");
+                                            localStorage.removeItem("role");
 
-                                        // header 메뉴 갱신을 위해 새로고침
-                                        this.$router.go(this.$router.currentRoute);
+                                            // header 메뉴 갱신을 위해 새로고침
+                                            this.$router.go(this.$router.currentRoute);
+                                        }else{
+                                            // false => 입력한 현재 비밀번호가 일치하지 않는 경우
+                                            alert("현재 비밀번호가 잘못되었습니다.");
+                                        }
                                     }
                                 } catch (error) {
                                     console.log(error);
@@ -213,6 +224,9 @@ export default{
             }else{
                 // 두 입력 비밀번호가 다른 경우
                 alert("신규 비밀번호와 비밀번호 확인의 내용이 다릅니다.");
+
+                // false => 실제 현재 비밀번호와 입력한 현재 비밀번호가 일치하지 않는 경우
+                //alert("현재 비밀번호가 잘못되었습니다.");
             }
         }
     },

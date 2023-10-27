@@ -150,8 +150,8 @@ export default ({
         // 이메일 유효성 확인 메소드
         // 동기적 동작을 위해 async/await 사용
         async checkEmail(){
-            // 이메일 패턴은 영어 알파벳 소문자, 영어 알파벳 대문자, 숫자만 포함
-            const pattern = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/;
+            // 이메일 패턴은 영어 알파벳 소문자, 영어 알파벳 대문자, 숫자, 점만 포함
+            const pattern = /^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/;
 
             if(pattern.test(this.email)){
                 // 입력 이메일이 패턴에 부합하는 경우
