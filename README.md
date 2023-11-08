@@ -247,7 +247,7 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 > 회원탈퇴
 
-<img src=""/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/39516589-5703-400f-ac43-f02c024aee75"/><p>
 
 ---
 
