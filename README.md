@@ -29,8 +29,27 @@
 
 - Front-end
 
-> HTML, CSS, JavaScript, Vue, Bootstrap, 
+> HTML, CSS, JavaScript, Vue, Bootstrap
 
 - Version Control
 
 > Git, Github
+
+## 3. 프로젝트 구조
+
+- 프로젝트 구성도
+
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/d326d64f-0066-42a4-a82a-e4677615c5f6" width="500"><p>
+
+---
+
+- ERD
+
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/64cf559b-0285-4ad5-a3d1-9045a415a8a1" width="800"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/ffd40d6c-466e-4c33-8f38-f865aae83f2c" width="800"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/30383a2e-4f77-4cbb-a172-8b0803af9aa0" width="800"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/e66d88b1-0881-4b17-a1ef-3e1bfd925cd2" width="800"/><p>
+
+공공데이터포털의 한국문화정보원 전국 반려동물 동반 가능 문화시설 위치 데이터를 활용하였음<p>
+
+프론트단의 요구에 맞는 데이터만을 효율적으로 보내기 위해 공공데이터포털 API를 이용하는 것이 아니라 CSV 파일을 받아 수정 후 임포트 하여 DB를 구성하였음
