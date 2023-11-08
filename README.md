@@ -185,9 +185,9 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 - 부트스트랩을 활용한 반응형 웹 디자인
 
-<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/a1a9afc4-dfd3-4ced-b0b4-078849babde8" width="210"/>
-<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/ce140f83-bdaf-4f9b-a5dd-3488d6d717dc" width="210"/>
-<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/49e318cf-ea60-49f8-9d0f-41c2eb96175a" width="210"/>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/9cac85a7-1c63-4b3e-8b0a-472545a1ed0f" width="210"/>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/2d14b722-4418-4610-9a0d-dc7fb9a22387" width="210"/>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/385ed585-c12c-42e3-bb15-0d1acb757fe8" width="210"/>
 
 ## 5. 데모 영상
 
@@ -264,3 +264,7 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/880bb5d6-381f-4093-80d6-85c1e4fda664"/><p>
 
 ---
+
+- 부트스트랩을 활용한 반응형 웹 디자인
+
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/6314381d-0c1f-4743-bace-f7593f692034"/>
