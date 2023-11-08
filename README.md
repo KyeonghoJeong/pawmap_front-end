@@ -122,7 +122,8 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 - 회원가입 페이지 주요 기능
 
-<img src="" width="640"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/55565c61-8d69-4752-a704-616fc833fc86" width="640"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/14009366-ffef-49b1-82e3-91d917bce160" width="640"/><p>
 
 회원가입 페이지에서는 아이디, 비밀번호, 닉네임, 이메일을 입력하여 회원가입을 할 수 있음<p>
 
