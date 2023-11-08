@@ -230,3 +230,19 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/c27edd3c-b77f-4046-93ef-40871c0944da"/><p>
 
 ---
+
+- 마이페이지
+
+> 북마크 탭
+
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/211ed7f8-6ce1-4701-b062-77320e8100a1"/><p>
+
+> 내 게시글 탭
+
+<img src=""/><p>
+
+> 회원정보 탭
+
+<img src=""/><p>
+
+---
