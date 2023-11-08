@@ -268,3 +268,5 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 - 부트스트랩을 활용한 반응형 웹 디자인
 
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/2639eb7b-6223-4d4a-b52e-d2d65e3df1bd"/>
+
+---
