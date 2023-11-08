@@ -193,11 +193,11 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/e5b18f7c-08ca-48b7-a312-0de953180e61"/><p>
 
-> 동 이름 검색
+동 이름 검색
 
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/dfe5465b-6a26-4611-839a-0f5b27c5f139"/><p>
 
-> 카테고리 버튼 클릭
+카테고리 버튼 클릭
 
 ---
 
