@@ -221,7 +221,7 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 - 게시판 페이지
 
-> 조회
+> 게시글 및 댓글 조회
 
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/62b34470-a58d-4f87-b6dc-9b6e81aa378d"/><p>
 
