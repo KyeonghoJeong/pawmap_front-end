@@ -23,3 +23,14 @@
 
 ## 2. 기술 스택
 
+- Back-end
+
+> Java, Spring Boot, MySQL, Oracle
+
+- Front-end
+
+> HTML, CSS, JavaScript, Vue, Bootstrap, 
+
+- Version Control
+
+> Git, Github
