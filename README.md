@@ -215,6 +215,6 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 - 지도 페이지
 
-<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/e7d20749-2992-4d1c-811c-2e7cf19d1c34"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/7250c8f9-7cab-4da3-8eaa-6acc64b33c1c"/><p>
 
 ---
