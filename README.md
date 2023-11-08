@@ -60,4 +60,24 @@
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/30383a2e-4f77-4cbb-a172-8b0803af9aa0" width="640"/><p>
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/e66d88b1-0881-4b17-a1ef-3e1bfd925cd2" width="640"/>
 
+## 4. 주요 기능
 
+- 번호판 및 차량 번호 인식
+
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/1ec5108e-ddbf-4469-bd07-b043fd74aa98" width="640"/><p>
+
+동 이름을 검색 시 지도 페이지로 이동하여 해당하는 읍면동에 있는 반려동물 동반 가능 시설을 지도와 마커, 목록으로 확인할 수 있음<p>
+
+하단의 카테고리 버튼 클릭 시 지도 페이지로 이동하여 접속 중인 기기의 현재 위치를 기준으로 주변에 있는 해당 카테고리의 반려동물 동반 가능 시설을 확인할 수 있음<p>
+
+상단의 pawmap 클릭 시 메인 페이지로 이동<p>
+
+상단의 지도 메뉴 클릭 시 지도 페이지로 이동하여 현재 위치를 중심으로 지도를 확인하고 여러 옵션으로 반려동물 동반 가능 시설을 찾을 수 있음<p>
+
+상단의 게시판 메뉴 클릭 시 다른 회원들과 의사소통할 수 있는 게시판을 이용할 수 있음<p>
+
+상단의 로그인 메뉴 선택 시 로그인 페이지로 이동하여 로그인할 수 있음<p>
+
+상단의 회원가입 메뉴 선택 시 회원가입 페이지로 이동하여 회원가입할 수 있음
+
+---
