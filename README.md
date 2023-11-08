@@ -201,6 +201,12 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 ---
 
+- 회원가입 페이지
+
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/faaa924f-980f-46ec-bb0f-539d584ef68b"/><p>
+
+---
+
 - 지도 페이지
 
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/e7d20749-2992-4d1c-811c-2e7cf19d1c34"/><p>
