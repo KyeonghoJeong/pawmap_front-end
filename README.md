@@ -137,7 +137,7 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 - 마이페이지 북마크 탭 주요 기능
 
-<img src="" width="640"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/8d8487be-73dd-49ba-8790-d3fffd28281d" width="640"/><p>
 
 마이페이지의 북마크 탭에서는 로그인 중인 유저가 지도 메뉴에서 추가한 시설 북마크를 확인 및 삭제할 수 있음
 
@@ -145,7 +145,7 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 - 마이페이지 내 게시글 탭 주요 기능
 
-<img src="" width="640"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/d3353994-5cd0-482d-b39b-e85d6baf6e7c" width="640"/><p>
 
 마이페이지의 내 게시글 탭에서는 로그인 중인 유저가 본인이 작성한 게시글을 모두 확인할 수 있으며 제목+내용, 제목, 내용 중 하나를 선택하여 원하는 게시글을 검색할 수 있고 체크박스를 이용하여 한번에 여러 게시글을 삭제할 수 있음
 
@@ -153,7 +153,7 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 - 마이페이지 회원정보 탭 주요 기능
 
-<img src="" width="640"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/8c38d496-0ef5-4c79-89e8-2682145cecc5" width="640"/><p>
 
 마이페이지의 회원정보 탭에서는 로그인 중인 유저가 본인의 아이디, 닉네임, 이메일을 확인할 수 있으며 비밀번호를 변경할 수 있음 
 
@@ -161,7 +161,7 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 - 회원탈퇴 페이지 주요 기능
 
-<img src="" width="640"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/e652520d-e20d-4415-abae-9c5131a0a01d" width="640"/><p>
 
 마이페이지의 회원정보 탭에서 회원 탈퇴 페이지로 이동할 수 있으며 비밀번호 입력을 통해 회원 탈퇴 할 수 있음 
 
@@ -169,7 +169,8 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 - 관리페이지 게시글 관리 탭 주요 기능
 
-<img src="" width="640"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/858340fa-3db2-45b3-8f36-976087ce34dc" width="640"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/7fe4548d-02d7-4f41-a39f-ef2391a7fd10" width="640"/><p>
 
 관리자 메뉴는 관리자 계정으로 로그인 했을 때만 이용할 수 있으며 관리페이지의 게시글 관리 탭에서는 관리자가 게시판의 전체 게시글을 조회, 검색, 삭제 할 수 있음
 
@@ -177,7 +178,8 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 - 관리페이지 회원 관리 탭 주요 기능
 
-<img src="" width="640"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/588639f5-6e07-4aa5-8a0a-37612b3630e9" width="640"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/260f41e0-b097-4540-a20d-bb8d80d2d129" width="640"/><p>
 
 관리자 메뉴는 관리자 계정으로 로그인 했을 때만 이용할 수 있으며 관리페이지의 회원 관리 탭에서는 관리자가 전체 회원의 정보를 조회, 검색, 차단 할 수 있음
 
