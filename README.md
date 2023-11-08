@@ -250,3 +250,15 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 <img src=""/><p>
 
 ---
+
+- 관리페이지
+
+> 게시글 관리 탭
+
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/6e66ee30-ff93-4e6b-93cf-cf15cb72d77e"/><p>
+
+> 회원 관리 탭
+
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/880bb5d6-381f-4093-80d6-85c1e4fda664"/><p>
+
+---
