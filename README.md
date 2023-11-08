@@ -170,7 +170,6 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 - 관리페이지 게시글 관리 탭 주요 기능
 
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/858340fa-3db2-45b3-8f36-976087ce34dc" width="640"/><p>
-<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/7fe4548d-02d7-4f41-a39f-ef2391a7fd10" width="640"/><p>
 
 관리자 메뉴는 관리자 계정으로 로그인 했을 때만 이용할 수 있으며 관리페이지의 게시글 관리 탭에서는 관리자가 게시판의 전체 게시글을 조회, 검색, 삭제 할 수 있음
 
@@ -179,7 +178,6 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 - 관리페이지 회원 관리 탭 주요 기능
 
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/588639f5-6e07-4aa5-8a0a-37612b3630e9" width="640"/><p>
-<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/260f41e0-b097-4540-a20d-bb8d80d2d129" width="640"/><p>
 
 관리자 메뉴는 관리자 계정으로 로그인 했을 때만 이용할 수 있으며 관리페이지의 회원 관리 탭에서는 관리자가 전체 회원의 정보를 조회, 검색, 차단 할 수 있음
 
