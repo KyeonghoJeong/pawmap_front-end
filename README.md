@@ -239,9 +239,13 @@ select 메뉴를 통해 카테고리, 시도, 시군구, 읍면동을 조합하�
 
 > 내 게시글 탭
 
-<img src=""/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/7e080ec9-689b-418d-8c34-deab4b13fb77"/><p>
 
 > 회원정보 탭
+
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/817339c2-f40c-4269-bd52-4642698a8d1a"/><p>
+
+> 회원탈퇴
 
 <img src=""/><p>
 
