@@ -67,7 +67,7 @@
 
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/30383a2e-4f77-4cbb-a172-8b0803af9aa0" width="640"/><br>
 
-> 회원정보 관련
+> 회원 관련
 
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/e66d88b1-0881-4b17-a1ef-3e1bfd925cd2" width="640"/>
 
