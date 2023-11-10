@@ -56,15 +56,19 @@
 - REST API
 
 > 지도 페이지 관련
+
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/64cf559b-0285-4ad5-a3d1-9045a415a8a1" width="640"/><br>
 
 > 게시판 페이지 관련
+
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/ffd40d6c-466e-4c33-8f38-f865aae83f2c" width="640"/><br>
 
 > 인증과 인가 관련
+
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/30383a2e-4f77-4cbb-a172-8b0803af9aa0" width="640"/><br>
 
 > 회원정보 관련
+
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/e66d88b1-0881-4b17-a1ef-3e1bfd925cd2" width="640"/>
 
 ## 4. 주요 기능
