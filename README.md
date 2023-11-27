@@ -28,33 +28,33 @@
 
 - #### Back-end
  
-    Spring Framework 학습
-    Spring Boot Back-end 프로젝트 구조 이해 및 구현
-    REST API 설계
-    Oracle DB 설계
-    Spring Security 동작 원리 이해 및 구현
-    JWT 인증과 인가 구현
-    YAML을 사용한 프로젝트 설정
-    Gradle을 사용한 프로젝트 빌드
+    Spring Framework 학습<br>
+    Spring Boot Back-end 프로젝트 구조 이해 및 구현<br>
+    REST API 설계<br>
+    Oracle DB 설계<br>
+    Spring Security 동작 원리 이해 및 구현<br>
+    JWT 인증과 인가 구현<br>
+    YAML을 사용한 프로젝트 설정<br>
+    Gradle을 사용한 프로젝트 빌드<br>
     회원가입 시 이메일 인증 구현
 
 - #### Front-end
 
-    HTML, CSS, JavaScript 학습
-    Vue.js를 통한 Front-end 프레임워크 이해 및 화면 구현
-    HTTP Method를 사용하여 Back-end 서버에 리소스 처리 요청
-    Bootstrap을 통한 반응형 웹 구현과 이해
+    HTML, CSS, JavaScript 학습<br>
+    Vue.js를 통한 Front-end 프레임워크 이해 및 화면 구현<br>
+    HTTP Method를 사용하여 Back-end 서버에 리소스 처리 요청<br>
+    Bootstrap을 통한 반응형 웹 구현과 이해<br>
     카카오맵 API 적용
 
 ## 3. 담당 역할
 
-- Back-end 프로젝트 구조 설계
-- REST API 설계
-- Service 계층 로직 구현
-- Spring Security 구현
-- JWT 인증과 인가 구현
-- DB 설계
-- Front-end 화면 디자인
+- Back-end 프로젝트 구조 설계<br>
+- REST API 설계<br>
+- Service 계층 로직 구현<br>
+- Spring Security 구현<br>
+- JWT 인증과 인가 구현<br>
+- DB 설계<br>
+- Front-end 화면 디자인<br>
 - Front-end UI 및 동작 구현
 
 ## 4. 기술 스택
