@@ -1,4 +1,4 @@
-<h2><img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/477d5789-f58e-41ef-ad66-854f22bc8575" width="20"/> 반려동물 동반 가능 시설을 쉽게 찾을 수 있는 웹사이트 포맵</h2>
+<h1><img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/477d5789-f58e-41ef-ad66-854f22bc8575" width="20"/> 반려동물 동반 가능 시설을 쉽게 찾을 수 있는 웹사이트 포맵</h1>
 
 목차
 ----
@@ -337,6 +337,8 @@ Front-end View 단의 요구에 맞는 데이터만을 효율적으로 보내기
 ## 8. 회고
 
 ### Back-end
+
+## JWT
 
 JWT를 생성할 때 사용되는 Key 인스턴스는 생성 시 비밀 키(Secret Key)를 사용하는데 이 비밀 키를 단순히 클래스 내의 필드에서 String 변수로 선언하여 사용한 것이 아쉬운 점으로 남아있음. 누군가가 이 비밀 키를 알아낸다면 JWT를 생성하여 악용할 수 있기 때문인데 application.yml 파일에서 비밀 키를 설정하여 사용하려고 시도하였으나 Gradle에서 JWT 관련 의존성 주입이 이루어졌음에도 불구하고 application.yml에서 jwt 속성 자체를 인식하지 못하는 문제가 있었음
 
