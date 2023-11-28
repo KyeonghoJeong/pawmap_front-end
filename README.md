@@ -78,10 +78,12 @@
 > 프로젝트 구성도
 
 ### Gradle
-Gradle은 Maven과 비교하여 빌드 속도가 빠르고 동적이며 설정 주입 방식으로 재사용에 용이함. 또한 Groovy 언어를 사용해 구조적이고 가독성이 좋기 때문에 빌드 도구로 Gradle를 사용하여 프로젝트를 빌드 하였고 필요한 라이브러리와 의존성을 관리하였음.
+Gradle은 Maven과 비교하여 빌드 속도가 빠르고 동적이며 설정 주입 방식으로 재사용에 용이하고 Groovy 언어를 사용해 구조적이고 가독성이 좋음.<p><p>
+빌드 도구로 Gradle를 사용하여 프로젝트를 빌드 하였고 필요한 라이브러리와 의존성을 관리하였음.
 
 ### YAML
-YAML 타입은 계층 구조로 가독성이 좋기 때문에 application.yml 파일로 PORT 설정, Oracle DB 연동 설정, SMTP 관련 설정을 하였음.
+YAML 타입은 계층 구조로 가독성이 좋은 장점이 있음<p><p>
+application.yml 파일로 PORT 설정, Oracle DB 연동 설정, SMTP 관련 설정을 하였음.
 
 ### Spring Boot
 Java에 기반하고 있고 Spring Security를 통해 보안 설정, 인증과 인가, JWT를 쉽게 처리할 수 있기 때문에 Back-end 개발 프레임워크로 Spring을 선택하였음.<p><p>
