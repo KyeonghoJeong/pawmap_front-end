@@ -78,30 +78,25 @@
 > 프로젝트 구성도
 
 ### Gradle
-Gradle은 Maven과 비교하여 빌드 속도가 빠르고 동적이며 설정 주입 방식으로 재사용에 용이함. 또한 Groovy 언어를 사용해 구조적이고 가독성이 좋은 장점이 있어 Gradle로 프로젝트를 빌드하고 필요한 라이브러리와 의존성을 관리하였음.<p><p>
+Gradle은 Maven과 비교하여 빌드 속도가 빠르고 동적이며 설정 주입 방식으로 재사용에 용이함. 또한 Groovy 언어를 사용해 구조적이고 가독성이 좋기 때문에 빌드 도구로 Gradle를 사용하여 프로젝트를 빌드 하였고 필요한 라이브러리와 의존성을 관리하였음.
+
 ### YAML
-YAML 타입은 계층 구조로 가독성이 좋은 장점이 있어 application.yml 파일로 PORT 설정, Oracle DB 연동 설정, SMTP 관련 설정을 하였음.<p><p>
-### Spring 프레임워크
-Spring 프레임워크는 기존에 사용 경험이 있던 Java에 기반하고 있고 보안 설정, 인증과 인가, JWT를 쉽게 처리할 수 있도록 해주는 Spring Security를 제공함. 이러한 이유로 Spring 프레임워크 사용하기로 하였고 더 나아가 Spring 프레임워크 설정을 편리하게 할 수 있게 해주는 Spring Boot로 Back-end 서버를 개발하였음.<p><p>
+YAML 타입은 계층 구조로 가독성이 좋기 때문에 application.yml 파일로 PORT 설정, Oracle DB 연동 설정, SMTP 관련 설정을 하였음.
+
 ### Spring Boot
-Spring Boot 프로젝트는 Front-end의 View 단마다 Controller, Service, DAO, Repository의 계층 구조로 대응하도록 구성하였음. Service, DAO, Repository는 인터페이스로 구현하고 Anotation을 사용하여 DI 하였음. View 단과 데이터를 송수신할 때는 DTO 클래스를 사용하였으며 직접 DB의 데이터를 처리할 때는 Entity 클래스와 JpaRepository 인터페이스를 사용하였음.<p><p>
-### Spring Security
-Spring Security 설정 클래스를 생성하고 Front-end의 HTTP 메서드 요청에 대한 권한 설정 내용과 JWT 필터를 추가한 SecurityFilterChain 인스턴스를 Bean으로 등록하였음. 또한 CORS 관련 설정을 특정 URL에 적용하는 UrlBasedCorsConfigurationSource 인스턴스, 회원 비밀번호 암호화 및 일치 여부 확인을 위해 사용되는 PasswordEncoder 인스턴스, 인증과 인가를 처리할 AuthenticationManager 인스턴스와 CustomAuthenticationProvider 인스턴스를 모두 Bean으로 등록하였음.<p><p>
-### JWT
-JwtTokenProvider 클래스는 Access Token 생성 메서드, Refresh Token을 생성 메서드, 토큰 유효성 검사 메서드, JWT 인증을 완료한 Authentication 인스턴스를 리턴하는 메서드로 구성되어 있으며 JwtAuthenticationFilter 클래스에서는 이를 이용하여 JWT의 유효성을 검사하고 SecurityContextHolder에 인증된 회원의 Authentication 객체를 설정함. 이후 AuthenticationManager에서 CustomAuthenticationProvider로 회원 인증 절차를 위임하고 authenticate 메서드로 회원에 대한 인증 절차를 처리함.<p><p>
-### 이메일 인증
-회원가입 시 전송되는 이메일 인증 코드는 난수로 생성하며 MimeMessageHelper로 MimeMessage 인스턴스의 속성과 이메일 주소, 제목, 내용 등을 설정한 뒤 JavaMailSender 인터페이스를 통해 사용자의 이메일로 전송함.
+Java에 기반하고 있고 Spring Security를 통해 보안 설정, 인증과 인가, JWT를 쉽게 처리할 수 있기 때문에 Back-end 개발 프레임워크로 Spring을 선택하였음.<p><p>
+Spring 프레임워크 설정을 편리하게 할 수 있게 해주는 Spring Boot로 Back-end 서버를 개발하였음.
 
 ### Vue.js
-Vue.js 프레임워크는 JavaScript 기반으로 문법이 간단하고 직관적이어서 첫 Front-end 프레임워크 학습에 용이하다고 판단하여서 선택하였고 Vue.js 프레임워크와 HTML, CSS, JavaScript를 활용하여 Front-end 화면을 개발하였음.<p><p>
+Vue.js 프레임워크는 JavaScript 기반으로 문법이 간단하고 직관적임. 사이즈가 가볍고 이번 프로젝트의 규모에 적합하다고 판단하여 Front-end 개발 프레임워크로 Vue.js를 선택하였음.<p><p>
+Vue.js 프레임워크와 HTML, CSS, JavaScript를 활용하여 Front-end 화면을 개발하였음.
+
 ### Bootstrap
-Bootstrap을 통해 Front-end 화면을 반응형 웹으로 개발하였음.<p><p>
-### HTTP 메서드
-Axios를 사용하여 HTTP 메서드로 Back-end 서버에 리소스 처리를 요청함.<p><p>
-### JWT
-로컬 스토리지와 Cookie를 사용하여 JWT를 처리하고 저장함.<p><p>
+Bootstrap을 통해 Front-end 화면을 반응형 웹으로 개발하였음.
+
 ### 카카오맵 API
-반려동물 동반 가능 시설을 지도에 표시하기 위해 지도 API를 사용하였음. 구글 Maps API는 대한민국 지도의 경우 정확도가 떨어지는 문제가 있었고 API 활용과 관련한 정보를 네이버 지도 API보다 더 많이 쉽게 구할 수 있는 카카오맵 API를 활용하였음.
+반려동물 동반 가능 시설을 지도에 표시하기 위해 지도 API를 사용하였음.<p><p>
+구글 Maps API는 대한민국 지도의 경우 정확도가 떨어지는 문제가 있었고 API 활용과 관련한 정보를 네이버 지도 API보다 더 많이 쉽게 구할 수 있는 카카오맵 API를 활용하였음.
 
 ---
 
