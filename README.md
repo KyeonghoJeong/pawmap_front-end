@@ -320,9 +320,9 @@ Bootstrap을 활용해 Front-end 화면을 반응형 웹으로 개발하였음.
 
 ---
 
-- 부트스트랩을 활용한 반응형 웹 디자인
-
 <img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/2639eb7b-6223-4d4a-b52e-d2d65e3df1bd"/>
+
+> 부트스트랩을 활용한 반응형 웹 디자인
 
 ---
 
