@@ -42,7 +42,7 @@
 
     HTML, CSS, JavaScript 학습<br>
     Vue.js를 통한 Front-end 프레임워크 이해 및 화면 구현<br>
-    HTTP 메서드를 사용하여 Back-end 서버에 리소스 처리 요청<br>
+    HTTP 메서드 사용 (Back-end 서버에 리소스 처리 요청)<br>
     Bootstrap을 활용한 반응형 웹 구현<br>
     카카오맵 API 활용
 
