@@ -81,10 +81,10 @@
 Gradle은 Maven과 비교하여 빌드 속도가 빠르고 동적이며 설정 주입 방식으로 재사용에 용이하고 Groovy 언어를 사용하여 구조적이고 가독성이 좋음. Gradle를 사용하여 프로젝트를 빌드 하였고 필요한 라이브러리와 의존성을 관리하였음.
 
 ### YAML
-YAML 타입은 계층 구조로 가독성이 좋음. application.yml 파일로 PORT 설정, Oracle DB 연동 설정, SMTP 관련 설정을 하였음.
+YAML 타입은 계층 구조로 가독성이 좋은 장점이 있어 application.yml 파일로 PORT 설정, Oracle DB 연동 설정, SMTP 관련 설정을 하였음.
 
 ### Spring Boot
-Spring 프레임워크는 Java에 기반하고 Spring Security를 통해 보안 설정, 인증과 인가, JWT를 쉽게 처리할 수 있게 해줌. Spring 프레임워크 설정을 편리하게 할 수 있게 해주는 Spring Boot로 Back-end 서버를 개발하였음.
+Spring 프레임워크는 Java에 기반하고 Spring Security를 통해 보안 설정, 인증과 인가, JWT를 쉽게 처리할 수 있음. Spring 프레임워크 설정을 편리하게 할 수 있는 Spring Boot로 Back-end 서버를 개발하였음.
 
 ### Oracle
 공공데이터포털의 한국문화정보원 전국 반려동물 동반 가능 문화시설 위치 데이터를 활용하였으며 View 단의 요구에 맞는 데이터만을 효율적으로 보내기 위해 API가 아닌 CSV 파일을 받아 수정 후 임포트 하여 DB를 구성하였음.
