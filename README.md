@@ -84,19 +84,19 @@ Gradle은 Maven과 비교하여 빌드 속도가 빠르고 동적이며 설정 �
 YAML 타입은 계층 구조로 가독성이 좋음. application.yml 파일로 PORT 설정, Oracle DB 연동 설정, SMTP 관련 설정을 하였음.
 
 ### Spring Boot
-Java에 기반하고 있고 Spring Security를 통해 보안 설정, 인증과 인가, JWT를 쉽게 처리할 수 있기 때문에 Back-end 개발 프레임워크로 Spring을 선택하였음. Spring 프레임워크 설정을 편리하게 할 수 있게 해주는 Spring Boot로 Back-end 서버를 개발하였음.
+Spring 프레임워크는 Java에 기반하고 Spring Security를 통해 보안 설정, 인증과 인가, JWT를 쉽게 처리할 수 있게 해줌. Spring 프레임워크 설정을 편리하게 할 수 있게 해주는 Spring Boot로 Back-end 서버를 개발하였음.
 
 ### Oracle
-공공데이터포털의 한국문화정보원 전국 반려동물 동반 가능 문화시설 위치 데이터를 활용하였으며 Front-end View 단의 요구에 맞는 데이터만을 효율적으로 보내기 위해 공공데이터포털에서 API가 아닌 CSV 파일을 받아 수정 후 임포트 하여 DB를 구성하였음.
+공공데이터포털의 한국문화정보원 전국 반려동물 동반 가능 문화시설 위치 데이터를 활용하였으며 View 단의 요구에 맞는 데이터만을 효율적으로 보내기 위해 API가 아닌 CSV 파일을 받아 수정 후 임포트 하여 DB를 구성하였음.
 
 ### Vue.js
-Vue.js 프레임워크는 JavaScript 기반으로 문법이 간단하고 직관적임. 사이즈가 가벼워서 이번 프로젝트 규모에 적합하다고 판단하였고 Front-end 개발 프레임워크로 Vue.js를 선택하였음. Axios를 사용하여 HTTP 요청 메서드로 Back-end 서버에 리소스 처리를 요청함.
+Vue.js 프레임워크는 사이즈가 가볍고 JavaScript 기반으로 문법이 간단하고 직관적임. Vue.js 프레임워크로 Front-end를 개발하였음.
 
 ### Bootstrap
 Bootstrap을 활용해 Front-end 화면을 반응형 웹으로 개발하였음.
 
 ### 카카오맵 API
-반려동물 동반 가능 시설을 지도에 표시하기 위해 지도 API를 사용하였음. 구글 Maps API는 대한민국 지도의 경우 정확도가 떨어지는 문제가 있었고 네이버 지도 API는 활용과 관련한 정보가 부족했기 때문에 카카오맵 API를 활용하였음.
+반려동물 동반 가능 시설을 지도에 표시하기 위해 지도 API를 사용하였음. 구글 Maps API는 대한민국 지도를 표시할 때 정확도가 떨어지는 문제가 있었고 네이버 지도 API는 활용과 관련한 정보가 부족했기 때문에 카카오맵 API를 활용하였음.
 
 ---
 
