@@ -48,11 +48,11 @@
 
 ## 3. 담당 역할
 
-- Back-end 프로젝트 구조 설계<br>
-- REST API 설계<br>
-- Service 계층 로직 구현<br>
+- Spring Boot 프로젝트 구조 설계<br>
 - Spring Security 구현<br>
 - JWT 인증과 인가 구현<br>
+- REST API 설계<br>
+- Service 계층 로직 구현<br>
 - DB 설계<br>
 - Front-end 화면 디자인<br>
 - Front-end UI 및 동작 구현
