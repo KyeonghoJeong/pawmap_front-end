@@ -42,7 +42,7 @@
 
     HTML, CSS, JavaScript 학습<br>
     Vue.js를 통한 Front-end 프레임워크 이해 및 화면 구현<br>
-    HTTP 메서드 사용 (Back-end 서버에 리소스 처리 요청)<br>
+    HTTP 요청 메서드 사용 (Back-end 서버에 리소스 처리 요청)<br>
     Bootstrap을 활용한 반응형 웹 구현<br>
     카카오맵 API 활용
 
@@ -97,7 +97,7 @@ Front-end View 단의 요구에 맞는 데이터만을 효율적으로 보내기
 ### Vue.js
 Vue.js 프레임워크는 JavaScript 기반으로 문법이 간단하고 직관적임. 사이즈가 가볍고 이번 프로젝트의 규모에 적합하다고 판단하여 Front-end 개발 프레임워크로 Vue.js를 선택하였음.<p><p>
 Vue.js 프레임워크와 HTML, CSS, JavaScript를 활용하여 Front-end 화면을 개발하였음.<p><p>
-Axios를 사용하여 HTTP 메서드로 Back-end 서버에 리소스 처리를 요청함.
+Axios를 사용하여 HTTP 요청 메서드로 Back-end 서버에 리소스 처리를 요청함.
 
 ### Bootstrap
 Bootstrap을 활용해 Front-end 화면을 반응형 웹으로 개발하였음.
@@ -341,13 +341,13 @@ Bootstrap을 활용해 Front-end 화면을 반응형 웹으로 개발하였음.
 Spring Boot 프로젝트는 Controller, Service, DAO, Repository의 계층 구조로 구성하였으며 Service, DAO, Repository는 인터페이스로 구현하였고 Annotation을 사용하여 DI 하였음. View 단과 리소스를 주고받을 때는 DTO 클래스를 사용하였으며 직접 DB의 데이터를 처리할 때는 Entity 클래스와 JpaRepository 인터페이스를 사용하였음.
 
 #### Spring Security
-Spring Security 설정 클래스를 생성하고 HTTP 메서드 요청에 대한 권한 설정 및 JWT 필터를 추가한 SecurityFilterChain 인스턴스를 Bean으로 등록하였음. 또한 CORS 관련 설정을 특정 URL에 적용하는 UrlBasedCorsConfigurationSource 인스턴스, 회원 비밀번호 암호화 및 일치 여부를 확인하는 PasswordEncoder 인스턴스, 인증과 인가를 처리할 AuthenticationManager 인스턴스와 CustomAuthenticationProvider 인스턴스를 모두 Bean으로 등록하였음.
+Spring Security 설정 클래스를 생성하고 HTTP 요청 메서드에 대한 권한 설정 및 JWT 필터를 추가한 SecurityFilterChain 인스턴스를 Bean으로 등록하였음. 또한 CORS 관련 설정을 특정 URL에 적용하는 UrlBasedCorsConfigurationSource 인스턴스, 회원 비밀번호 암호화 및 일치 여부를 확인하는 PasswordEncoder 인스턴스, 인증과 인가를 처리할 AuthenticationManager 인스턴스와 CustomAuthenticationProvider 인스턴스를 모두 Bean으로 등록하였음.
 
 #### JWT
 JwtTokenProvider 클래스를 생성하여 Access Token 생성 메서드, Refresh Token 생성 메서드, JWT 유효성 검사 메서드, JWT 인증을 완료한 Authentication 인스턴스를 반환하는 메서드를 구현하였음.<p><p>
 
 #### 인증과 인가
-JwtAuthenticationFilter 클래스는 JwtTokenProvider 클래스를 이용하여 HTTP 메서드 요청 Header에 포함된 JWT의 유효성을 검사하고 유효한 토큰인 경우 해당 토큰의 정보를 사용하여 Authenticaiton 인스턴스를 생성하고 인증된 사용자의 정보(아이디, 권한)를 SecurityContextHolder에 저장하도록 하였음.
+JwtAuthenticationFilter 클래스는 JwtTokenProvider 클래스를 이용하여 HTTP 요청 메서드 Header에 포함된 JWT의 유효성을 검사하고 유효한 토큰인 경우 해당 토큰의 정보를 사용하여 Authenticaiton 인스턴스를 생성하고 인증된 사용자의 정보(아이디, 권한)를 SecurityContextHolder에 저장하도록 하였음.
 
 #### 이메일 인증
 회원가입 시 전송되는 이메일 인증 코드는 난수로 생성하며 MimeMessageHelper로 MimeMessage 인스턴스의 속성과 이메일 주소, 제목, 내용 등을 설정한 뒤 JavaMailSender 인터페이스를 통해 사용자의 이메일로 전송하도록 하였음.
