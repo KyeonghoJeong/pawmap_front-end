@@ -72,7 +72,7 @@
 
 ## 5. 프로젝트 구조
 
-<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/d326d64f-0066-42a4-a82a-e4677615c5f6" width="500"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/d326d64f-0066-42a4-a82a-e4677615c5f6" width="640"/><p>
 
 > 프로젝트 구성도
 
@@ -99,7 +99,7 @@ Bootstrap을 활용해 Front-end 화면을 반응형 웹으로 개발하였음.
 
 ---
 
-<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/62e327d2-c078-4ff3-8ce2-3c462169da7d" width="800"/><p>
+<img src="https://github.com/KyeonghoJeong/pawmap_front-end/assets/128965451/62e327d2-c078-4ff3-8ce2-3c462169da7d" width="640"/><p>
 
 > ERD
 
